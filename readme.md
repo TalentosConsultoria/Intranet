@@ -1,7 +1,7 @@
 Talentos Wiki — Versão com Funcionalidades Expandidas
 Esta é a versão melhorada da Talentos Wiki. A aplicação agora inclui persistência de dados para descrições, um sistema de versionamento de conteúdo e funcionalidades dinâmicas para a gestão de Procedimentos Operacionais Padrão (POPs), tudo integrado com Firebase.
 
-🚀 Como Usar
+Como Usar
 Instalação e Execução
 Abra o ficheiro index.html em um navegador moderno.
 
@@ -18,12 +18,12 @@ Adicionar POP: Clique no botão "Adicionar Novo POP" para expandir o formulário
 
 Versionamento de Descrição: Na página de Documentação, pode escrever e salvar descrições. Cada salvamento cria uma nova versão na base de dados, permitindo que visualize o histórico e restaure versões anteriores.
 
-📁 Estrutura do Projeto
+Estrutura do Projeto
 /
 ├── index.html          # O ficheiro principal que contém todo o código HTML, CSS e JavaScript
 └── README.md           # Este ficheiro de documentação
 
-🛠️ Personalização e Extensão
+Personalização e Extensão
 Adicionar Novos POPs
 Na página de POPs, use o botão "Adicionar Novo POP" e preencha o formulário. Pode adicionar a um setor existente ou criar um novo setor.
 
