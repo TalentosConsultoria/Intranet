@@ -1,7 +1,7 @@
 Talentos Wiki — Versão com Funcionalidades Expandidas
 Esta é a versão melhorada da Talentos Wiki. A aplicação agora inclui persistência de dados para descrições, um sistema de versionamento de conteúdo e funcionalidades dinâmicas para a gestão de Procedimentos Operacionais Padrão (POPs), tudo integrado com Firebase.
 
-Como Usar
+Como Usar:
 Instalação e Execução
 Abra o ficheiro index.html em um navegador moderno.
 
