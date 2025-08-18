@@ -1,85 +1,40 @@
-# Talentos Wiki — Versão Completa com Seção POP
+Talentos Wiki — Versão com Funcionalidades Expandidas
+Esta é a versão melhorada da Talentos Wiki. A aplicação agora inclui persistência de dados para descrições, um sistema de versionamento de conteúdo e funcionalidades dinâmicas para a gestão de Procedimentos Operacionais Padrão (POPs), tudo integrado com Firebase.
 
-Esta é a versão completa da Talentos Wiki, incluindo a nova seção **Procedimentos Operacionais Padrão (POP)**. A aplicação é **puramente estática** e mantém os dados apenas **em memória** enquanto a página está aberta.
+🚀 Como Usar
+Instalação e Execução
+Abra o ficheiro index.html em um navegador moderno.
 
-## 🆕 Nova Seção: Procedimentos Operacionais Padrão (POP)
+A aplicação será inicializada automaticamente e conectada a uma base de dados temporária do Firebase Firestore.
 
-### Características da Seção POP:
-- **Organização por Setores**: Recursos Humanos, Tecnologia da Informação, Financeiro
-- **Sistema de Filtros**: Navegação por setor ou visualização completa
-- **Busca Específica**: Campo de pesquisa para localizar POPs por código ou nome
-- **Download de Modelo**: Botão para baixar template base de POP
-- **Ações por Documento**: Visualizar e baixar cada procedimento
-- **Design Responsivo**: Totalmente adaptado para mobile
+Funcionalidades
+Navegação: Use o menu superior para navegar entre as páginas.
 
-### Setores Implementados:
-1. **📁 Recursos Humanos (RH)**
-   - POP-RH-001: Procedimento de Admissão de Colaboradores
-   - POP-RH-002: Processo de Avaliação de Desempenho
-   - POP-RH-003: Gestão de Férias e Licenças
+Busca: Use o campo de pesquisa no cabeçalho para encontrar conteúdo em todas as seções.
 
-2. **💻 Tecnologia da Informação (TI)**
-   - POP-TI-001: Backup e Recuperação de Dados
-   - POP-TI-002: Configuração de Novas Estações de Trabalho
-   - POP-TI-003: Gerenciamento de Incidentes de Segurança
+POPs: Na página de POPs, pode usar os botões de filtro para ver os procedimentos por setor.
 
-3. **💰 Financeiro**
-   - POP-FIN-001: Processo de Contas a Pagar
-   - POP-FIN-002: Conciliação Bancária
-   - POP-FIN-003: Elaboração de Relatórios Financeiros
+Adicionar POP: Clique no botão "Adicionar Novo POP" para expandir o formulário e criar um novo procedimento, inclusive novas categorias de setores.
 
-## 📁 Estrutura de Arquivos
+Versionamento de Descrição: Na página de Documentação, pode escrever e salvar descrições. Cada salvamento cria uma nova versão na base de dados, permitindo que visualize o histórico e restaure versões anteriores.
 
-```
-talentos-wiki/
-├── index.html          # Página principal com todas as seções
-├── styles.css          # Estilos CSS incluindo nova seção POP
-├── script.js           # JavaScript com funcionalidades POP
-└── README.md           # Este arquivo de documentação
-```
+📁 Estrutura do Projeto
+/
+├── index.html          # O ficheiro principal que contém todo o código HTML, CSS e JavaScript
+└── README.md           # Este ficheiro de documentação
 
-## 🚀 Como Usar
+🛠️ Personalização e Extensão
+Adicionar Novos POPs
+Na página de POPs, use o botão "Adicionar Novo POP" e preencha o formulário. Pode adicionar a um setor existente ou criar um novo setor.
 
-1. **Instalação**: 
-   - Baixe todos os arquivos para uma pasta
-   - Abra `index.html` em um navegador moderno
+Configurar o Firebase
+A aplicação está configurada para usar um ambiente de trabalho temporário. Se quiser usar a sua própria base de dados Firebase, substitua os valores de __firebase_config, __app_id e __initial_auth_token no script pelas suas próprias credenciais.
 
-2. **Navegação**:
-   - Use o menu superior para acessar "POPs"
-   - Ou clique no quick-link "POPs" na página inicial
+Funcionalidades Futuras
+A arquitetura do projeto já está pronta para expansão. As próximas etapas poderiam incluir:
 
-3. **Funcionalidades POP**:
-   - **Filtrar por Setor**: Use os botões de filtro para ver apenas um setor
-   - **Buscar POP**: Digite código ou nome no campo de pesquisa
-   - **Download Modelo**: Clique em "📥 Baixar Modelo de POP"
-   - **Visualizar/Baixar**: Use os botões "👁️ Ver" e "⬇️ Baixar" em cada POP
+Adicionar upload de arquivos PDF para o Firebase Storage.
 
-## 🛠️ Personalização
+Implementar a persistência de dados para as seções de FAQ, Tutoriais e Recursos usando o Firestore.
 
-### Adicionar Novos POPs:
-No arquivo `script.js`, adicione novos itens ao array `wikiData.pops`:
-
-```javascript
-{ 
-  codigo: "POP-XX-000", 
-  nome: "Nome do Procedimento", 
-  setor: "setor", 
-  dataAtualizacao: "DD/MM/AAAA" 
-}
-```
-
-### Adicionar Novos Setores:
-1. **HTML**: Adicione nova seção em `index.html` seguindo o padrão existente
-2. **CSS**: Os estilos já são genéricos e funcionarão automaticamente
-3. **JavaScript**: Adicione botão de filtro correspondente
-
-### Estrutura de Pastas Recomendada (para versão com backend):
-```
-docs/
-├── pop/
-│   ├── modelo-pop.docx
-│   ├── rh/
-│   │   ├── POP-RH-001.pdf
-│   │   ├── POP-RH-002.pdf
-│   │   └── POP-RH-003.pdf
-│   
+Permitir a edição e exclusão de POPs e outros itens.

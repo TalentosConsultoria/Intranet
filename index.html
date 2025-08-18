@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wiki - Base de Conhecimento</title>
-    <!-- Estilos CSS (do arquivo styles.css original) -->
+    <!-- Firebase SDK -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <style>
         * {
             margin: 0;
@@ -889,6 +892,13 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
+        
+        .pop-header-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+        }
 
         .btn-download-modelo {
             font-size: 1.1rem;
@@ -1063,6 +1073,50 @@
             display: flex;
             gap: 0.5rem;
         }
+        
+        .pop-form-wrapper {
+            margin-top: 2rem;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .pop-form-wrapper.expanded {
+            animation: expandForm 0.4s ease-out forwards;
+        }
+
+        .pop-form-wrapper.collapsed {
+            animation: collapseForm 0.4s ease-out forwards;
+        }
+        
+        @keyframes expandForm {
+            0% { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+            100% { max-height: 500px; opacity: 1; padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        }
+        
+        @keyframes collapseForm {
+            0% { max-height: 500px; opacity: 1; padding-top: 1.5rem; padding-bottom: 1.5rem; }
+            100% { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+        }
+
+        .pop-form-container .faq-form {
+            padding: 0;
+            border: none;
+            background: transparent;
+            margin-top: 0;
+        }
+
+        .pop-form-controls {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .pop-form-controls input, .pop-form-controls select {
+            flex-grow: 1;
+        }
 
         /* Animations */
         @keyframes fadeInUp {
@@ -1141,6 +1195,20 @@
                 padding: 0.3rem 0.6rem;
                 font-size: 0.8rem;
             }
+        }
+        
+        .history-list {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .history-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 1.5rem;
         }
     </style>
 </head>
@@ -1290,6 +1358,24 @@
                     </div>
 
                     <div class="page-content">
+                        <!-- Controls for description versioning -->
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                            <button class="btn btn-primary" onclick="saveDescription()">Salvar Descrição</button>
+                            <button class="btn btn-secondary" onclick="showHistory()">Ver Histórico</button>
+                        </div>
+
+                        <!-- Main document description field -->
+                        <div class="content-section">
+                            <h2>Descrição Principal do Documento</h2>
+                            <textarea id="mainDescription" style="width: 100%; height: 200px; padding: 1rem; border-radius: 8px; border: 1px solid #dee2e6; font-size: 1rem;"></textarea>
+                        </div>
+                        
+                        <!-- History view -->
+                        <div id="historyView" style="display: none;">
+                            <h2>Histórico de Versões</h2>
+                            <div id="historyList" class="history-list"></div>
+                        </div>
+
                         <!-- Upload controls -->
                         <div class="upload-controls">
                             <input type="file" id="pdfUploadInput" accept=".pdf" style="display: none;">
@@ -1452,151 +1538,95 @@
                         </div>
 
                         <!-- Filtros por Setor -->
-                        <div class="pop-filters">
+                        <div class="pop-filters" id="popFilters">
                             <h3>Filtrar por Setor:</h3>
-                            <div class="filter-buttons">
+                            <div class="filter-buttons" id="filterButtons">
                                 <button class="filter-btn active" onclick="filterPOPs('todos')">Todos</button>
-                                <button class="filter-btn" onclick="filterPOPs('rh')">Recursos Humanos</button>
-                                <button class="filter-btn" onclick="filterPOPs('ti')">Tecnologia da Informação</button>
-                                <button class="filter-btn" onclick="filterPOPs('financeiro')">Financeiro</button>
+                                <!-- Buttons will be rendered here dynamically -->
+                            </div>
+                        </div>
+                        
+                        <!-- Botão e Formulário para Adicionar POP -->
+                        <button class="btn btn-primary" id="togglePopFormBtn" onclick="togglePopForm()">Adicionar Novo POP</button>
+                        <div class="pop-form-wrapper" id="popForm">
+                            <div class="faq-form pop-form">
+                                <h4>Detalhes do Novo POP</h4>
+                                <input type="text" id="popCodigoInput" placeholder="Código do POP (ex: POP-RH-004)">
+                                <input type="text" id="popNomeInput" placeholder="Nome do Procedimento">
+                                <input type="text" id="popDataInput" placeholder="Data de Atualização (ex: DD/MM/AAAA)">
+                                <div class="pop-form-controls">
+                                    <input type="text" id="popSetorInput" placeholder="Novo Setor (opcional)">
+                                    <select id="popSetorSelect">
+                                        <option value="">-- Selecione um setor existente --</option>
+                                        <option value="rh">Recursos Humanos</option>
+                                        <option value="ti">Tecnologia da Informação</option>
+                                        <option value="financeiro">Financeiro</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="addPOP()">Salvar POP</button>
                             </div>
                         </div>
 
-                        <!-- Setor: Recursos Humanos -->
-                        <div class="pop-section" data-setor="rh">
-                            <h2 class="setor-title">Recursos Humanos (RH)</h2>
-                            <div class="pop-table-container">
-                                <table class="pop-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Código</th>
-                                            <th>Nome do POP</th>
-                                            <th>Última Atualização</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong>POP-RH-001</strong></td>
-                                            <td>Procedimento de Admissão de Colaboradores</td>
-                                            <td>10/07/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-RH-001')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-RH-001')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>POP-RH-002</strong></td>
-                                            <td>Processo de Avaliação de Desempenho</td>
-                                            <td>25/06/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-RH-002')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-RH-002')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>POP-RH-003</strong></td>
-                                            <td>Gestão de Férias e Licenças</td>
-                                            <td>15/05/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-RH-003')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-RH-003')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <!-- Seções de POPs -->
+                        <div id="popSectionsContainer">
+                            <!-- Setor: Recursos Humanos -->
+                            <div class="pop-section" data-setor="rh">
+                                <h2 class="setor-title">Recursos Humanos (RH)</h2>
+                                <div class="pop-table-container">
+                                    <table class="pop-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Nome do POP</th>
+                                                <th>Última Atualização</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pop-table-rh">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Setor: Tecnologia da Informação -->
-                        <div class="pop-section" data-setor="ti">
-                            <h2 class="setor-title">Tecnologia da Informação (TI)</h2>
-                            <div class="pop-table-container">
-                                <table class="pop-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Código</th>
-                                            <th>Nome do POP</th>
-                                            <th>Última Atualização</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong>POP-TI-001</strong></td>
-                                            <td>Backup e Recuperação de Dados</td>
-                                            <td>02/08/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-TI-001')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-TI-001')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>POP-TI-002</strong></td>
-                                            <td>Configuração de Novas Estações de Trabalho</td>
-                                            <td>20/07/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-TI-002')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-TI-002')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>POP-TI-003</strong></td>
-                                            <td>Gerenciamento de Incidentes de Segurança</td>
-                                            <td>18/06/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-TI-003')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-TI-003')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <!-- Setor: Tecnologia da Informação -->
+                            <div class="pop-section" data-setor="ti">
+                                <h2 class="setor-title">Tecnologia da Informação (TI)</h2>
+                                <div class="pop-table-container">
+                                    <table class="pop-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Nome do POP</th>
+                                                <th>Última Atualização</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pop-table-ti">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Setor: Financeiro -->
-                        <div class="pop-section" data-setor="financeiro">
-                            <h2 class="setor-title">Financeiro</h2>
-                            <div class="pop-table-container">
-                                <table class="pop-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Código</th>
-                                            <th>Nome do POP</th>
-                                            <th>Última Atualização</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong>POP-FIN-001</strong></td>
-                                            <td>Processo de Contas a Pagar</td>
-                                            <td>05/08/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-FIN-001')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-FIN-001')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>POP-FIN-002</strong></td>
-                                            <td>Conciliação Bancária</td>
-                                            <td>28/07/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-FIN-002')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-FIN-002')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>POP-FIN-003</strong></td>
-                                            <td>Elaboração de Relatórios Financeiros</td>
-                                            <td>12/06/2025</td>
-                                            <td>
-                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-FIN-003')">Ver</button>
-                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-FIN-003')">Baixar</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <!-- Setor: Financeiro -->
+                            <div class="pop-section" data-setor="financeiro">
+                                <h2 class="setor-title">Financeiro</h2>
+                                <div class="pop-table-container">
+                                    <table class="pop-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Nome do POP</th>
+                                                <th>Última Atualização</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pop-table-financeiro">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -1638,129 +1668,282 @@
     <!-- Message Box for alerts -->
     <div id="messageBox"></div>
 
-    <!-- Código JavaScript (do arquivo script.js original) -->
-    <script>
-        // script.js — Versão SEM Firebase e SEM banco de dados.
-        // Mantém a UI funcionando (navegação, busca, documentação local) apenas no navegador.
+    <!-- Código JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, getDocs, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const $ = (id) => document.getElementById(id);
         const showMsg = (t) => {
-        const box = $("messageBox"); if (!box) return;
-        box.textContent = t; box.style.display = "block"; box.style.opacity = 1;
-        setTimeout(() => { box.style.opacity = 0; setTimeout(() => { box.style.display = "none"; }, 400); }, 2500);
+            const box = $("messageBox"); if (!box) return;
+            box.textContent = t; box.style.display = "block"; box.style.opacity = 1;
+            setTimeout(() => { box.style.opacity = 0; setTimeout(() => { box.style.display = "none"; }, 400); }, 2500);
+        };
+        
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
+
+        let docs = [];
+        let selectedDocFile = null;
+        let wikiData = {
+            pages: [
+                { id: "home", title: "Página Inicial", content: "Bem-vindo à wiki", keywords: ["início", "home", "principal"], type: "page" },
+                { id: "documentation", title: "Documentação", content: "Documentação completa", keywords: ["docs", "documentação", "manual", "guia"], type: "page" },
+                { id: "tutorials", title: "Tutoriais", content: "Tutoriais passo a passo", keywords: ["tutorial", "aprender", "passo", "guia"], type: "page" },
+                { id: "faq", title: "FAQ", content: "Perguntas frequentes", keywords: ["faq", "perguntas", "dúvidas", "ajuda"], type: "page" },
+                { id: "resources", title: "Recursos", content: "Recursos úteis", keywords: ["recursos", "ferramentas", "templates"], type: "page" },
+                { id: "pop", title: "POPs", content: "Procedimentos Operacionais", keywords: ["pop", "procedimentos", "padrão", "operacional"], type: "page" }
+            ],
+            faqs: [
+                { question: "Como crio uma página?", answer: "Na aba Documentação, informe título, selecione um PDF e clique em Criar Página." }
+            ],
+            tutorials: [],
+            resources: [],
+            pops: [
+                { codigo: "POP-RH-001", nome: "Procedimento de Admissão de Colaboradores", setor: "rh", dataAtualizacao: "10/07/2025" },
+                { codigo: "POP-RH-002", nome: "Processo de Avaliação de Desempenho", setor: "rh", dataAtualizacao: "25/06/2025" },
+                { codigo: "POP-RH-003", nome: "Gestão de Férias e Licenças", setor: "rh", dataAtualizacao: "15/05/2025" },
+                { codigo: "POP-TI-001", nome: "Backup e Recuperação de Dados", setor: "ti", dataAtualizacao: "02/08/2025" },
+                { codigo: "POP-TI-002", nome: "Configuração de Novas Estações de Trabalho", setor: "ti", dataAtualizacao: "20/07/2025" },
+                { codigo: "POP-TI-003", nome: "Gerenciamento de Incidentes de Segurança", setor: "ti", dataAtualizacao: "18/06/2025" },
+                { codigo: "POP-FIN-001", nome: "Processo de Contas a Pagar", setor: "financeiro", dataAtualizacao: "05/08/2025" },
+                { codigo: "POP-FIN-002", nome: "Conciliação Bancária", setor: "financeiro", dataAtualizacao: "28/07/2025" },
+                { codigo: "POP-FIN-003", nome: "Elaboração de Relatórios Financeiros", setor: "financeiro", dataAtualizacao: "12/06/2025" }
+            ]
         };
 
-        // ---- Estado em memória (sem backend) ----
-        let docs = [];                 // páginas de documentação (cada item contém URL local do PDF)
-        let selectedDocFile = null;    // arquivo PDF selecionado
-
-        const wikiData = {
-        pages: [
-            { id: "home",          title: "Página Inicial",  content: "Bem-vindo à wiki",           keywords: ["início","home","principal"],         type: "page" },
-            { id: "documentation", title: "Documentação",    content: "Documentação completa",      keywords: ["docs","documentação","manual","guia"], type: "page" },
-            { id: "tutorials",     title: "Tutoriais",       content: "Tutoriais passo a passo",    keywords: ["tutorial","aprender","passo","guia"], type: "page" },
-            { id: "faq",           title: "FAQ",             content: "Perguntas frequentes",       keywords: ["faq","perguntas","dúvidas","ajuda"],  type: "page" },
-            { id: "resources",     title: "Recursos",        content: "Recursos úteis",             keywords: ["recursos","ferramentas","templates"], type: "page" },
-            { id: "pop",           title: "POPs",            content: "Procedimentos Operacionais", keywords: ["pop","procedimentos","padrão","operacional"], type: "page" }
-        ],
-        faqs: [
-            { question: "Como crio uma página?",  answer: "Na aba Documentação, informe título, selecione um PDF e clique em Criar Página." }
-        ],
-        tutorials: [],
-        resources: [],
-        pops: [
-            // Recursos Humanos
-            { codigo: "POP-RH-001", nome: "Procedimento de Admissão de Colaboradores", setor: "rh", dataAtualizacao: "10/07/2025" },
-            { codigo: "POP-RH-002", nome: "Processo de Avaliação de Desempenho", setor: "rh", dataAtualizacao: "25/06/2025" },
-            { codigo: "POP-RH-003", nome: "Gestão de Férias e Licenças", setor: "rh", dataAtualizacao: "15/05/2025" },
-            // Tecnologia da Informação
-            { codigo: "POP-TI-001", nome: "Backup e Recuperação de Dados", setor: "ti", dataAtualizacao: "02/08/2025" },
-            { codigo: "POP-TI-002", nome: "Configuração de Novas Estações de Trabalho", setor: "ti", dataAtualizacao: "20/07/2025" },
-            { codigo: "POP-TI-003", nome: "Gerenciamento de Incidentes de Segurança", setor: "ti", dataAtualizacao: "18/06/2025" },
-            // Financeiro
-            { codigo: "POP-FIN-001", nome: "Processo de Contas a Pagar", setor: "financeiro", dataAtualizacao: "05/08/2025" },
-            { codigo: "POP-FIN-002", nome: "Conciliação Bancária", setor: "financeiro", dataAtualizacao: "28/07/2025" },
-            { codigo: "POP-FIN-003", nome: "Elaboração de Relatórios Financeiros", setor: "financeiro", dataAtualizacao: "12/06/2025" }
-        ]
+        const popSectors = {
+            'todos': 'Todos',
+            'rh': 'Recursos Humanos',
+            'ti': 'Tecnologia da Informação',
+            'financeiro': 'Financeiro'
         };
+
+        // Initialize Firebase and set up auth state listener
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Usuário autenticado:", userId);
+                    } else {
+                        console.log("Nenhum usuário autenticado.");
+                    }
+                });
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase:", error);
+            }
+        }
+        
+        // ---- Firestore functions for description versioning ----
+        async function saveDescription() {
+            if (!userId) {
+                showMsg("Autenticação pendente. Tente novamente em instantes.");
+                return;
+            }
+
+            const description = $('mainDescription').value;
+            if (!description.trim()) {
+                showMsg("A descrição não pode estar vazia.");
+                return;
+            }
+
+            try {
+                // Save the new version
+                const versionRef = doc(collection(db, `artifacts/${appId}/users/${userId}/descriptions`));
+                await setDoc(versionRef, {
+                    content: description,
+                    timestamp: serverTimestamp()
+                });
+                showMsg("Descrição salva com sucesso!");
+                loadDescription(); // Load the new version
+            } catch (e) {
+                console.error("Erro ao salvar a descrição: ", e);
+                showMsg("Erro ao salvar a descrição.");
+            }
+        }
+
+        async function loadDescription() {
+            if (!userId) {
+                setTimeout(loadDescription, 500);
+                return;
+            }
+            try {
+                const q = query(collection(db, `artifacts/${appId}/users/${userId}/descriptions`), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const latestDoc = querySnapshot.docs[0];
+                    $('mainDescription').value = latestDoc.data().content;
+                } else {
+                    $('mainDescription').value = "Adicione uma descrição para o seu documento aqui.";
+                }
+            } catch (e) {
+                console.error("Erro ao carregar a descrição: ", e);
+                showMsg("Erro ao carregar a descrição.");
+            }
+        }
+
+        async function showHistory() {
+            if (!userId) {
+                showMsg("Autenticação pendente. Tente novamente em instantes.");
+                return;
+            }
+            try {
+                const historyList = $('historyList');
+                const historyView = $('historyView');
+                if (!historyList || !historyView) return;
+
+                const q = query(collection(db, `artifacts/${appId}/users/${userId}/descriptions`), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                historyList.innerHTML = '';
+                historyView.style.display = 'block';
+
+                if (querySnapshot.empty) {
+                    historyList.innerHTML = '<p>Nenhum histórico de versão encontrado.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Data desconhecida';
+                    item.innerHTML = `
+                        <h4>Versão de ${date}</h4>
+                        <p>${data.content.substring(0, 150)}...</p>
+                        <button class="btn btn-secondary btn-small" onclick="restoreVersion('${doc.id}')">Restaurar</button>
+                    `;
+                    historyList.appendChild(item);
+                });
+
+            } catch (e) {
+                console.error("Erro ao mostrar histórico: ", e);
+                showMsg("Erro ao carregar o histórico.");
+            }
+        }
+        
+        async function restoreVersion(docId) {
+             if (!userId) {
+                showMsg("Autenticação pendente. Tente novamente em instantes.");
+                return;
+            }
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/descriptions/${docId}`);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    $('mainDescription').value = docSnap.data().content;
+                    showMsg("Versão restaurada com sucesso! Clique em 'Salvar Descrição' para guardar permanentemente.");
+                    $('historyView').style.display = 'none';
+                } else {
+                    showMsg("Versão não encontrada.");
+                }
+            } catch (e) {
+                console.error("Erro ao restaurar versão: ", e);
+                showMsg("Erro ao restaurar a versão.");
+            }
+        }
 
         // ---- Navegação ----
         function showPage(pageId) {
-        document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-        const el = document.querySelector(`#page-${pageId}`); if (el) el.style.display = "block";
-        document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
-        const link = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`); if (link) link.classList.add("active");
+            document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+            const el = document.querySelector(`#page-${pageId}`);
+            if (el) el.style.display = "block";
+            document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+            const link = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`);
+            if (link) link.classList.add("active");
 
-        if (pageId === "documentation") renderDocs();
-        if (pageId === "tutorials") renderTutorials();
-        if (pageId === "resources") renderResources();
-        if (pageId === "faq") renderFAQs();
-        if (pageId === "pop") initPOPPage();
+            if (pageId === "documentation") {
+                renderDocs();
+                loadDescription();
+            }
+            if (pageId === "tutorials") renderTutorials();
+            if (pageId === "resources") renderResources();
+            if (pageId === "faq") renderFAQs();
+            if (pageId === "pop") initPOPPage();
         }
 
         function renderFAQs() {
-        const list = $("faqList"); if (!list) return;
-        list.innerHTML = "";
-        wikiData.faqs.forEach(f => {
-            const wrap = document.createElement("div");
-            wrap.className = "faq-item";
-            wrap.innerHTML = `<h4>${f.question}</h4><div class="faq-answer"><p>${f.answer}</p></div>`;
-            const h = wrap.querySelector("h4");
-            const a = wrap.querySelector(".faq-answer");
-            h.addEventListener("click", ()=> a.style.display = (a.style.display==="none"?"block":"none"));
-            list.appendChild(wrap);
-        });
+            const list = $("faqList");
+            if (!list) return;
+            list.innerHTML = "";
+            wikiData.faqs.forEach(f => {
+                const wrap = document.createElement("div");
+                wrap.className = "faq-item";
+                wrap.innerHTML = `<h4>${f.question}</h4><div class="faq-answer"><p>${f.answer}</p></div>`;
+                const h = wrap.querySelector("h4");
+                const a = wrap.querySelector(".faq-answer");
+                h.addEventListener("click", () => a.style.display = (a.style.display === "none" ? "block" : "none"));
+                list.appendChild(wrap);
+            });
         }
 
         // ---- Busca ----
         function performSearch() {
-        const input = $("searchInput"); if (!input) return;
-        const term = input.value.toLowerCase();
-        const results = [
-            ...wikiData.pages,
-            ...docs,
-            ...wikiData.faqs,
-            ...wikiData.tutorials,
-            ...wikiData.resources
-        ].filter(item =>
-            item.title?.toLowerCase().includes(term) ||
-            item.question?.toLowerCase().includes(term) ||
-            (item.description && item.description.toLowerCase().includes(term)) ||
-            (item.content && item.content.toLowerCase().includes(term))
-        );
+            const input = $("searchInput");
+            if (!input) return;
+            const term = input.value.toLowerCase();
+            const results = [
+                ...wikiData.pages,
+                ...docs,
+                ...wikiData.faqs,
+                ...wikiData.tutorials,
+                ...wikiData.resources
+            ].filter(item =>
+                item.title?.toLowerCase().includes(term) ||
+                item.question?.toLowerCase().includes(term) ||
+                (item.description && item.description.toLowerCase().includes(term)) ||
+                (item.content && item.content.toLowerCase().includes(term))
+            );
 
-        const list = $("searchResultsList"), title = $("searchResultsTitle");
-        if (title) title.textContent = `Resultados para "${input.value}"`;
-        if (list) {
-            list.innerHTML = "";
-            results.forEach(r => {
-            const div = document.createElement("div");
-            div.className = "search-result-full-item";
-            div.innerHTML = `<h4>${r.title || r.question}</h4><p>${r.description || r.content || ""}</p>`;
-            div.addEventListener("click", () => {
-                if (r.type === "page") showPage(r.id);
-                if (r.type === "document") openPDF(r.pdfUrl, r.title);
-                if (r.type === "tutorial") showPage('tutorials');
-                if (r.type === "faq") showPage('faq');
-                if (r.type === "resource") showPage('resources');
-            });
-            list.appendChild(div);
-            });
-        }
-        showPage("search-results");
+            const list = $("searchResultsList"),
+                title = $("searchResultsTitle");
+            if (title) title.textContent = `Resultados para "${input.value}"`;
+            if (list) {
+                list.innerHTML = "";
+                results.forEach(r => {
+                    const div = document.createElement("div");
+                    div.className = "search-result-full-item";
+                    div.innerHTML = `<h4>${r.title || r.question}</h4><p>${r.description || r.content || ""}</p>`;
+                    div.addEventListener("click", () => {
+                        if (r.type === "page") showPage(r.id);
+                        if (r.type === "document") openPDF(r.pdfUrl, r.title);
+                        if (r.type === "tutorial") showPage('tutorials');
+                        if (r.type === "faq") showPage('faq');
+                        if (r.type === "resource") showPage('resources');
+                    });
+                    list.appendChild(div);
+                });
+            }
+            showPage("search-results");
         }
 
         // ---- Documentação (local-only) ----
         function triggerDocUpload() { $("pdfUploadInput")?.click(); }
 
         document.addEventListener("change", (ev) => {
-        const t = ev.target;
-        if (!(t instanceof HTMLInputElement)) return;
-        if (t.id !== "pdfUploadInput") return;
-        selectedDocFile = t.files?.[0] || null;
-        if (selectedDocFile) {
-            showMsg("Arquivo de documento selecionado: " + selectedDocFile.name);
-        }
+            const t = ev.target;
+            if (!(t instanceof HTMLInputElement)) return;
+            if (t.id !== "pdfUploadInput") return;
+            selectedDocFile = t.files?.[0] || null;
+            if (selectedDocFile) {
+                showMsg("Arquivo de documento selecionado: " + selectedDocFile.name);
+            }
         });
 
         function renderDocs() {
@@ -1793,13 +1976,19 @@
         
         // ---- PDF Modal ----
         function openPDF(url, title) {
-        const t = $("pdfTitle"); if (t) t.textContent = title || "PDF";
-        const v = $("pdfViewer"); if (v) v.src = url;
-        const m = $("pdfModal");  if (m) m.style.display = "flex";
+            const t = $("pdfTitle");
+            if (t) t.textContent = title || "PDF";
+            const v = $("pdfViewer");
+            if (v) v.src = url;
+            const m = $("pdfModal");
+            if (m) m.style.display = "flex";
         }
+
         function closePDF() {
-        const m = $("pdfModal");  if (m) m.style.display = "none";
-        const v = $("pdfViewer"); if (v) v.src = "";
+            const m = $("pdfModal");
+            if (m) m.style.display = "none";
+            const v = $("pdfViewer");
+            if (v) v.src = "";
         }
 
         // ---- Funções para Tutoriais ----
@@ -1824,6 +2013,7 @@
                 list.appendChild(item);
             });
         }
+
         function addTutorial() {
             const title = $("tutorialTitleInput")?.value.trim();
             const description = $("tutorialDescriptionInput")?.value.trim();
@@ -1887,6 +2077,7 @@
                 list.appendChild(item);
             });
         }
+
         function addResource() {
             const title = $("resourceTitleInput")?.value.trim();
             const description = $("resourceDescriptionInput")?.value.trim();
@@ -1918,102 +2109,255 @@
         function showDocDetails() { showMsg("Mostrando detalhes do documento (simulação)."); }
         function openDescriptionModal() { showMsg("Abrindo modal de descrição (simulação)."); }
         function closeDescriptionModal() { showMsg("Fechando modal de descrição (simulação)."); }
-        function saveDescription() { showMsg("Salvando descrição (simulação)."); }
+        
+        // A função saveDescription e showHistory foram movidas e reescritas para usar o Firebase.
         function toggleEditMode() { showMsg("Modo de edição ativado/desativado (simulação)."); }
 
 
         // ---- Funções POP ----
         function initPOPPage() {
-        // Inicializar página POP - mostrar todos os setores por padrão
-        filterPOPs('todos');
+            renderPOPFilters();
+            renderPOPs();
+            filterPOPs('todos');
+        }
+
+        function renderPOPFilters() {
+            const filterButtonsContainer = $('filterButtons');
+            if (!filterButtonsContainer) return;
+            filterButtonsContainer.innerHTML = '';
+
+            const allButton = document.createElement('button');
+            allButton.className = 'filter-btn active';
+            allButton.textContent = 'Todos';
+            allButton.onclick = () => filterPOPs('todos');
+            filterButtonsContainer.appendChild(allButton);
+
+            const uniqueSectors = [...new Set(wikiData.pops.map(pop => pop.setor))];
+            uniqueSectors.forEach(setor => {
+                if (popSectors[setor]) {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    btn.textContent = popSectors[setor];
+                    btn.onclick = () => filterPOPs(setor);
+                    filterButtonsContainer.appendChild(btn);
+                }
+            });
+
+            // Update the selector with new options
+            const setorSelect = $('popSetorSelect');
+            if (setorSelect) {
+                setorSelect.innerHTML = '<option value="">-- Selecione um setor existente --</option>';
+                Object.entries(popSectors).forEach(([key, value]) => {
+                    if (key !== 'todos') {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = value;
+                        setorSelect.appendChild(option);
+                    }
+                });
+            }
+        }
+
+        function renderPOPs() {
+            const sectionsContainer = $('popSectionsContainer');
+            if (!sectionsContainer) return;
+
+            // Clear existing content except for the new POP form
+            sectionsContainer.innerHTML = '';
+            
+            const uniqueSectors = [...new Set(wikiData.pops.map(pop => pop.setor))].sort();
+
+            uniqueSectors.forEach(setor => {
+                const section = document.createElement('div');
+                section.className = 'pop-section';
+                section.dataset.setor = setor;
+                section.innerHTML = `
+                    <h2 class="setor-title">${popSectors[setor] || setor.toUpperCase()}</h2>
+                    <div class="pop-table-container">
+                        <table class="pop-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nome do POP</th>
+                                    <th>Última Atualização</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pop-table-${setor}"></tbody>
+                        </table>
+                    </div>
+                `;
+                sectionsContainer.appendChild(section);
+            });
+
+            const sortedPops = wikiData.pops.sort((a,b) => a.codigo.localeCompare(b.codigo));
+
+            sortedPops.forEach(pop => {
+                const tableBody = $(`pop-table-${pop.setor}`);
+                if (tableBody) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${pop.codigo}</strong></td>
+                        <td>${pop.nome}</td>
+                        <td>${pop.dataAtualizacao}</td>
+                        <td>
+                            <button class="btn btn-secondary btn-small" onclick="viewPOP('${pop.codigo}')">Ver</button>
+                            <button class="btn btn-primary btn-small" onclick="downloadPOP('${pop.codigo}')">Baixar</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            });
         }
 
         function filterPOPs(setor) {
-        const sections = document.querySelectorAll('.pop-section');
-        const buttons = document.querySelectorAll('.filter-btn');
-        const searchResults = $('popSearchResults');
-        
-        // Ocultar resultados de busca
-        if (searchResults) searchResults.style.display = 'none';
-        
-        // Atualizar botões ativos
-        buttons.forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector(`.filter-btn[onclick="filterPOPs('${setor}')"]`);
-        if (activeBtn) activeBtn.classList.add('active');
-        
-        // Mostrar/ocultar seções
-        sections.forEach(section => {
-            if (setor === 'todos') {
-            section.style.display = 'block';
-            } else {
-            section.style.display = section.dataset.setor === setor ? 'block' : 'none';
-            }
-        });
+            const sections = document.querySelectorAll('.pop-section');
+            const buttons = document.querySelectorAll('.filter-btn');
+            const searchResults = $('popSearchResults');
+
+            if (searchResults) searchResults.style.display = 'none';
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector(`.filter-btn[onclick="filterPOPs('${setor}')"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            sections.forEach(section => {
+                if (setor === 'todos') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = section.dataset.setor === setor ? 'block' : 'none';
+                }
+            });
         }
 
         function searchPOPs() {
-        const input = $('popSearchInput');
-        if (!input) return;
-        
-        const term = input.value.toLowerCase().trim();
-        if (!term) {
-            showMsg('Digite um termo para buscar.');
-            return;
+            const input = $('popSearchInput');
+            if (!input) return;
+
+            const term = input.value.toLowerCase().trim();
+            if (!term) {
+                showMsg('Digite um termo para buscar.');
+                return;
+            }
+
+            const results = wikiData.pops.filter(pop =>
+                pop.codigo.toLowerCase().includes(term) ||
+                pop.nome.toLowerCase().includes(term)
+            );
+
+            const resultsContainer = $('popSearchResults');
+            const resultsList = $('popSearchResultsList');
+
+            if (!resultsContainer || !resultsList) return;
+
+            document.querySelectorAll('.pop-section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            resultsContainer.style.display = 'block';
+            resultsList.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsList.innerHTML = '<p>Nenhum POP encontrado para o termo pesquisado.</p>';
+                return;
+            }
+
+            results.forEach(pop => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                <h4>${pop.codigo}</h4>
+                <p>${pop.nome}</p>
+                <small>Última atualização: ${pop.dataAtualizacao}</small>
+                <div class="search-result-actions">
+                    <button class="btn btn-secondary btn-small" onclick="viewPOP('${pop.codigo}')">Ver</button>
+                    <button class="btn btn-primary btn-small" onclick="downloadPOP('${pop.codigo}')">Baixar</button>
+                </div>
+                `;
+                resultsList.appendChild(item);
+            });
         }
-        
-        const results = wikiData.pops.filter(pop => 
-            pop.codigo.toLowerCase().includes(term) || 
-            pop.nome.toLowerCase().includes(term)
-        );
-        
-        const resultsContainer = $('popSearchResults');
-        const resultsList = $('popSearchResultsList');
-        
-        if (!resultsContainer || !resultsList) return;
-        
-        // Ocultar seções de setores
-        document.querySelectorAll('.pop-section').forEach(section => {
-            section.style.display = 'none';
-        });
-        
-        // Mostrar resultados
-        resultsContainer.style.display = 'block';
-        resultsList.innerHTML = '';
-        
-        if (results.length === 0) {
-            resultsList.innerHTML = '<p>Nenhum POP encontrado para o termo pesquisado.</p>';
-            return;
+
+        function addPOP() {
+            const codigo = $('popCodigoInput').value.trim();
+            const nome = $('popNomeInput').value.trim();
+            const dataAtualizacao = $('popDataInput').value.trim();
+            const novoSetor = $('popSetorInput').value.trim().toLowerCase();
+            const setorExistente = $('popSetorSelect').value;
+
+            let setor = '';
+            let setorNome = '';
+
+            if (novoSetor) {
+                setor = novoSetor.replace(/ /g, '-').toLowerCase();
+                setorNome = novoSetor.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                popSectors[setor] = setorNome;
+            } else if (setorExistente) {
+                setor = setorExistente;
+                setorNome = popSectors[setor];
+            } else {
+                showMsg("Por favor, preencha o campo 'Novo Setor' ou selecione um setor existente.");
+                return;
+            }
+
+            if (!codigo || !nome || !dataAtualizacao) {
+                showMsg("Por favor, preencha todos os campos obrigatórios para o POP.");
+                return;
+            }
+
+            // Check if POP code already exists
+            if (wikiData.pops.some(p => p.codigo === codigo)) {
+                showMsg(`O POP com o código "${codigo}" já existe. Por favor, use um código único.`);
+                return;
+            }
+
+            const newPOP = {
+                codigo: codigo,
+                nome: nome,
+                setor: setor,
+                dataAtualizacao: dataAtualizacao
+            };
+
+            wikiData.pops.push(newPOP);
+
+            $('popCodigoInput').value = '';
+            $('popNomeInput').value = '';
+            $('popDataInput').value = '';
+            $('popSetorInput').value = '';
+            $('popSetorSelect').value = '';
+
+            initPOPPage();
+            togglePopForm(); // Collapse the form after adding a new POP
+            showMsg(`POP "${codigo}" adicionado com sucesso ao setor "${setorNome}"!`);
         }
-        
-        results.forEach(pop => {
-            const item = document.createElement('div');
-            item.className = 'search-result-item';
-            item.innerHTML = `
-            <h4>${pop.codigo}</h4>
-            <p>${pop.nome}</p>
-            <small>Última atualização: ${pop.dataAtualizacao}</small>
-            <div class="search-result-actions">
-                <button class="btn btn-secondary btn-small" onclick="viewPOP('${pop.codigo}')">Ver</button>
-                <button class="btn btn-primary btn-small" onclick="downloadPOP('${pop.codigo}')">Baixar</button>
-            </div>
-            `;
-            resultsList.appendChild(item);
-        });
+
+        function togglePopForm() {
+            const form = $('popForm');
+            if (!form) return;
+
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.classList.remove('collapsed');
+                form.style.display = 'block';
+                form.classList.add('expanded');
+            } else {
+                form.classList.remove('expanded');
+                form.classList.add('collapsed');
+                setTimeout(() => {
+                    form.style.display = 'none';
+                }, 400); // Match animation duration
+            }
         }
 
         function downloadModelo() {
-        // Simular download do modelo de POP
-        showMsg('Download do modelo de POP iniciado. (Simulação - arquivo não disponível nesta versão demo)');
+            showMsg('Download do modelo de POP iniciado. (Simulação - arquivo não disponível nesta versão demo)');
         }
 
         function viewPOP(codigo) {
-        // Simular visualização do POP
-        showMsg(`Abrindo visualização do ${codigo}. (Simulação - arquivo não disponível nesta versão demo)`);
+            showMsg(`Abrindo visualização do ${codigo}. (Simulação - arquivo não disponível nesta versão demo)`);
         }
 
         function downloadPOP(codigo) {
-        // Simular download do POP
-        showMsg(`Download do ${codigo} iniciado. (Simulação - arquivo não disponível nesta versão demo)`);
+            showMsg(`Download do ${codigo} iniciado. (Simulação - arquivo não disponível nesta versão demo)`);
         }
 
         // ---- Inicialização ----
@@ -2033,7 +2377,7 @@
             }
         });
 
-        // Página inicial
+        initializeFirebase();
         showPage("home");
         });
 
@@ -2043,9 +2387,14 @@
         window.triggerDocUpload = triggerDocUpload;
         window.openPDF = openPDF;
         window.closePDF = closePDF;
+        window.saveDescription = saveDescription;
+        window.showHistory = showHistory;
+        window.restoreVersion = restoreVersion;
         window.initPOPPage = initPOPPage;
         window.filterPOPs = filterPOPs;
         window.searchPOPs = searchPOPs;
+        window.addPOP = addPOP;
+        window.togglePopForm = togglePopForm;
         window.downloadModelo = downloadModelo;
         window.viewPOP = viewPOP;
         window.downloadPOP = downloadPOP;
@@ -2059,7 +2408,6 @@
         window.triggerTutorialFileUpload = () => { showMsg("Anexar PDF a tutorial (simulação)."); };
         window.toggleEditMode = toggleEditMode;
         window.closeDescriptionModal = closeDescriptionModal;
-        window.saveDescription = saveDescription;
     </script>
 </body>
 </html>
