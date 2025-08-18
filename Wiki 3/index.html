@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki - Base de Conhecimento</title>
+    <!-- Estilos CSS (do arquivo styles.css original) -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #780000 0%, #5a0000 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #780000, #5a0000);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .logo-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo-t {
+            color: #780000;
+            font-size: 24px;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-dot {
+            position: absolute;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            background: #ff8c00;
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .logo-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+        }
+
+        .search-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            padding-right: 3rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            color: #780000;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .search-icon svg {
+            color: #780000;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Navigation */
+        .nav {
+            background: linear-gradient(135deg, #780000, #5a0000);
+            padding: 0;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 0;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #780000;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: #ff8c00;
+            transition: left 0.3s ease;
+        }
+
+        .nav-link:hover::before {
+            left: 0;
+        }
+
+        /* Main Content */
+        .main {
+            display: flex;
+            min-height: calc(100vh - 120px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 2rem 1rem;
+        }
+
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            color: #6c757d;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background: #e9ecef;
+            color: #2c3e50;
+            transform: translateX(5px);
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+        }
+        
+        .page-content-wrapper {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .document-main-content {
+            flex-grow: 1;
+        }
+
+        .document-details-sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .document-details-sidebar h4 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .document-details-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .document-details-sidebar a {
+            display: block;
+            padding: 0.5rem;
+            color: #6c757d;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .document-details-sidebar a:hover {
+            color: #780000;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #780000, #5a0000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border-left: 4px solid #780000;
+        }
+
+        .meta-item {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .page-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .search-results-list {
+            margin-top: 2rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .search-result-full-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .search-result-full-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .search-result-full-item h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-result-full-item p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+
+
+        .content-section {
+            margin-bottom: 2rem;
+        }
+
+        .content-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #780000;
+        }
+
+        .content-section h3 {
+            color: #34495e;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        .content-section p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+        
+        .faq-item, .tutorial-item, .resource-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .resource-item a {
+            text-decoration: none;
+        }
+        
+        .resource-item h4 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .resource-item p {
+            color: #6c757d;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .faq-item h4, .tutorial-item h4 {
+            margin: 0;
+            color: #2c3e50;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-item .faq-answer, .tutorial-item .tutorial-content {
+            margin-top: 1rem;
+            padding-left: 1rem;
+            border-left: 3px solid #780000;
+            color: #6c757d;
+            display: none;
+        }
+        
+        .faq-form, .tutorial-form, .resource-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .faq-form input, .faq-form textarea, .tutorial-form input, .tutorial-form textarea, .resource-form input {
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            font-size: 1rem;
+        }
+        
+        .tutorial-upload-controls, .document-details-actions, .document-topics-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .document-details-actions {
+            justify-content: flex-end;
+        }
+
+        .document-topics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .document-topic {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .document-topic h4 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        
+        .document-topic-content {
+            padding-left: 1rem;
+            border-left: 3px solid #780000;
+            color: #6c757d;
+        }
+        
+        .comments-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .comments-section h4 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .comment {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .comment p {
+            margin: 0;
+        }
+        
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* PDF Attachments */
+        .attachments {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            margin-top: 2rem;
+        }
+
+        .attachments h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .attachment-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .attachment-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-color: #780000;
+        }
+
+        .attachment-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .attachment-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #780000, #5a0000);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .attachment-details h4 {
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+
+        .attachment-details p {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .attachment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .upload-controls .btn-primary {
+            width: auto;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #780000, #5a0000);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(120, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-edit {
+            background: #ff8c00;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #e67e22;
+        }
+
+        /* Styles for the new upload section */
+        .upload-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-controls input {
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            flex-grow: 1;
+            font-size: 0.9rem;
+        }
+
+        /* PDF Viewer Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            margin: 2% auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .description-modal-content {
+            width: 500px;
+            height: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .tutorial-upload-modal-content {
+            width: 500px;
+            height: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #780000, #5a0000);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: white;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: calc(100% - 60px);
+            border: none;
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+        }
+
+        .card p {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        /* Home page specific styles */
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #780000, #5a0000);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .quick-link {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #2c3e50;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .quick-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #780000;
+        }
+
+        .quick-link-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Message Box */
+        #messageBox {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: #780000;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 3000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* POP Styles */
+        .hero-description {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #780000;
+            margin-bottom: 2rem;
+        }
+
+        .hero-description p {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .pop-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-download-modelo {
+            font-size: 1.1rem;
+            padding: 0.75rem 1.5rem;
+            white-space: nowrap;
+        }
+
+        .pop-search {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 0.75rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 300px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #780000;
+            box-shadow: 0 0 0 2px rgba(120, 0, 0, 0.1);
+        }
+
+        .pop-filters {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 2rem;
+        }
+
+        .pop-filters h3 {
+            margin: 0 0 1rem 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #6c757d;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: #e9ecef;
+            color: #2c3e50;
+        }
+
+        .filter-btn.active {
+            background: #780000;
+            color: white;
+            border-color: #780000;
+        }
+
+        .pop-section {
+            margin-bottom: 3rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .setor-title {
+            background: linear-gradient(135deg, #780000, #5a0000);
+            color: white;
+            margin: 0;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pop-table-container {
+            padding: 1.5rem;
+        }
+
+        .pop-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .pop-table th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .pop-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .pop-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .pop-table td strong {
+            color: #780000;
+            font-weight: 600;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-right: 0.25rem;
+        }
+
+        .pop-search-results {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .pop-search-results h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #780000;
+        }
+
+        .search-result-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-result-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-result-item h4 {
+            margin: 0 0 0.5rem 0;
+            color: #780000;
+        }
+
+        .search-result-item p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        .search-result-item .search-result-actions {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-content, .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .search-container {
+                margin: 0;
+                max-width: none;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+            }
+
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pop-header-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+
+            .pop-table-container {
+                overflow-x: auto;
+                padding: 1rem;
+            }
+
+            .pop-table {
+                min-width: 600px;
+            }
+
+            .btn-small {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-container">
+                        <div class="logo-image">
+                            <div class="logo-icon">
+                                <div class="logo-dot"></div>
+                                <div class="logo-t">T</div>
+                            </div>
+                        </div>
+                        <div class="logo-text">
+                            <div class="logo-title">Talentos Wiki</div>
+                            <div class="logo-subtitle">Talentos Consultoria</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="search-container">
+                    <div class="search-wrapper">
+                        <input type="text" class="search-box" placeholder="Pesquisar na wiki..." id="searchInput">
+                        <span class="search-icon" onclick="performSearch()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-content">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" onclick="showPage('home')">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showPage('documentation')">Documentação</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showPage('tutorials')">Tutoriais</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showPage('faq')">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showPage('resources')">Recursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showPage('pop')">POPs</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <h3>Navegação</h3>
+                <ul class="sidebar-menu" id="sidebarMenu">
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="showPage('home')">Página Inicial</a>
+                    </li>
+                    
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="showPage('api-docs')">API Reference</a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="showPage('pop')">Procedimentos (POP)</a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Home Page -->
+                <div id="page-home" class="page">
+                    <div class="hero-section">
+                        <h1>Bem-vindo à Talentos Wiki</h1>
+                        <p>Sua base de conhecimento completa da Talentos Consultoria com documentação, tutoriais e recursos essenciais</p>
+                    </div>
+
+                    <div class="quick-links">
+                        <a href="#" class="quick-link" onclick="showPage('documentation')">
+                            <span class="quick-link-icon"></span>
+                            <h3>Documentação</h3>
+                            <p>Guias completos e referências</p>
+                        </a>
+                        <a href="#" class="quick-link" onclick="showPage('tutorials')">
+                            <span class="quick-link-icon"></span>
+                            <h3>Tutoriais</h3>
+                            <p>Aprenda passo a passo</p>
+                        </a>
+                        <a href="#" class="quick-link" onclick="showPage('faq')">
+                            <span class="quick-link-icon"></span>
+                            <h3>FAQ</h3>
+                            <p>Perguntas frequentes</p>
+                        </a>
+                        <a href="#" class="quick-link" onclick="showPage('resources')">
+                            <span class="quick-link-icon"></span>
+                            <h3>Recursos</h3>
+                            <p>Ferramentas e materiais</p>
+                        </a>
+                        <a href="#" class="quick-link" onclick="showPage('pop')">
+                            <span class="quick-link-icon"></span>
+                            <h3>POPs</h3>
+                            <p>Procedimentos Operacionais Padrão</p>
+                        </a>
+                    </div>
+
+                    <div class="cards-grid">
+                        <div class="card">
+                            <h3>Artigos Recentes</h3>
+                            <p>Confira as últimas adições à nossa base de conhecimento</p>
+                            <a href="#" class="btn btn-primary">Ver todos</a>
+                        </div>
+                        <div class="card">
+                            <h3>Mais Populares</h3>
+                            <p>Os artigos mais acessados pelos usuários</p>
+                            <a href="#" class="btn btn-primary">Explorar</a>
+                        </div>
+                        <div class="card">
+                            <h3>Dicas Rápidas</h3>
+                            <p>Soluções práticas para problemas comuns</p>
+                            <a href="#" class="btn btn-primary">Ver dicas</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documentation Page -->
+                <div id="page-documentation" class="page" style="display: none;">
+                    <h1 class="page-title">Documentação</h1>
+                    
+                    <div class="page-meta">
+                        <div class="meta-item">Atualizado: 11/08/2025</div>
+                        <div class="meta-item">Autor: Equipe Wiki</div>
+                        <div class="meta-item">Tempo de leitura: 15 min</div>
+                    </div>
+
+                    <div class="page-content">
+                        <!-- Upload controls -->
+                        <div class="upload-controls">
+                            <input type="file" id="pdfUploadInput" accept=".pdf" style="display: none;">
+                            <button class="btn btn-primary" onclick="triggerDocUpload()">
+                                <span>+ Upload de Documento</span>
+                            </button>
+                        </div>
+
+                        <!-- PDF Attachments Section -->
+                        <div class="attachments">
+                            <h3>Documentos Anexos</h3>
+                            <div class="attachment-list" id="attachmentList">
+                                <p id="loadingAttachments">Carregando documentos...</p>
+                                <!-- Attachments will be rendered here dynamically from Firestore -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search Results Page -->
+                <div id="page-search-results" class="page" style="display: none;">
+                    <h1 class="page-title">Resultados da Pesquisa</h1>
+                    <div class="page-content">
+                        <h3 id="searchResultsTitle"></h3>
+                        <div class="search-results-list" id="searchResultsList">
+                            <!-- Search results will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Details Page -->
+                <div id="page-document-details" class="page" style="display: none;">
+                    <div class="page-content-wrapper">
+                        <div class="document-main-content">
+                            <h1 class="page-title" id="docDetailsTitle"></h1>
+                            <div class="document-details-actions">
+                                <button class="btn btn-primary" id="docDownloadBtn">Download do Arquivo</button>
+                            </div>
+                            
+                            <div class="content-section">
+                                <h2 id="docDetailsDescriptionTitle">Descrição Geral</h2>
+                                <p id="docDetailsDescription"></p>
+                            </div>
+
+                            <div class="content-section">
+                                <h2>Tópicos e Seções</h2>
+                                <div id="docTopicsList"></div>
+                                <div class="faq-form document-topics-form">
+                                    <h4>Adicionar novo tópico</h4>
+                                    <input type="text" id="topicTitleInput" placeholder="Título do tópico...">
+                                    <textarea id="topicContentInput" placeholder="Conteúdo do tópico..."></textarea>
+                                    <button class="btn btn-primary" onclick="addTopic()">Adicionar Tópico</button>
+                                </div>
+                            </div>
+                            
+                            <div class="comments-section">
+                                <h4>Comentários</h4>
+                                <div id="docCommentsList"></div>
+                                <div class="comment-form">
+                                    <textarea id="commentInput" placeholder="Adicionar um comentário..."></textarea>
+                                    <button class="btn btn-primary" onclick="addComment()">Comentar</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <aside class="document-details-sidebar">
+                            <h4>Navegação</h4>
+                            <ul id="documentTopicsSidebar">
+                                <!-- Topics will be rendered here dynamically -->
+                            </ul>
+                        </aside>
+                    </div>
+                </div>
+
+                <!-- Other Pages (Templates) -->
+                <div id="page-tutorials" class="page" style="display: none;">
+                    <h1 class="page-title">Tutoriais</h1>
+                    <div class="page-content">
+                        <p>Aqui você pode adicionar e visualizar tutoriais.</p>
+
+                        <div class="tutorial-form">
+                            <h4>Adicionar novo tutorial</h4>
+                            <input type="text" id="tutorialTitleInput" placeholder="Título do tutorial...">
+                            <textarea id="tutorialDescriptionInput" placeholder="Descrição do tutorial..."></textarea>
+                            <input type="file" id="tutorialPDFInput" accept=".pdf" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span id="tutorialFileName">Nenhum arquivo selecionado</span>
+                                <button class="btn btn-primary" onclick="triggerTutorialFileUpload()">Anexar PDF</button>
+                            </div>
+                            <button class="btn btn-primary" onclick="addTutorial()">Adicionar Tutorial</button>
+                        </div>
+
+                        <div id="tutorialList" class="tutorial-list">
+                            <!-- Tutorial items will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-faq" class="page" style="display: none;">
+                    <h1 class="page-title">Perguntas Frequentes</h1>
+                    <div class="page-content">
+                        <p>Aqui você pode ver e adicionar perguntas frequentes.</p>
+                        
+                        <div class="faq-form">
+                            <h4>Adicionar nova pergunta</h4>
+                            <input type="text" id="faqQuestionInput" placeholder="Digite sua pergunta...">
+                            <textarea id="faqAnswerInput" placeholder="Digite a resposta..."></textarea>
+                            <button class="btn btn-primary" onclick="addFAQ()">Adicionar Pergunta</button>
+                        </div>
+
+                        <div id="faqList" class="faq-list">
+                            <!-- FAQ items will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-resources" class="page" style="display: none;">
+                    <h1 class="page-title">Recursos</h1>
+                    <div class="page-content">
+                        <p>Aqui você pode adicionar e visualizar recursos úteis.</p>
+
+                        <div class="resource-form">
+                            <h4>Adicionar novo recurso</h4>
+                            <input type="text" id="resourceTitleInput" placeholder="Título do recurso...">
+                            <input type="text" id="resourceDescriptionInput" placeholder="Descrição do recurso...">
+                            <input type="url" id="resourceLinkInput" placeholder="Link (URL) do recurso...">
+                            <button class="btn btn-primary" onclick="addResource()">Adicionar Recurso</button>
+                        </div>
+                        
+                        <div id="resourceList" class="resource-list">
+                            <!-- Resource items will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POP Page -->
+                <div id="page-pop" class="page" style="display: none;">
+                    <h1 class="page-title">Procedimentos Operacionais Padrão (POP)</h1>
+                    
+                    <div class="page-meta">
+                        <div class="meta-item">Atualizado: 14/08/2025</div>
+                        <div class="meta-item">Autor: Equipe Wiki</div>
+                        <div class="meta-item">Tempo de leitura: 5 min</div>
+                    </div>
+
+                    <div class="page-content">
+                        <div class="hero-description">
+                            <p>Esta seção centraliza os Procedimentos Operacionais Padrão (POPs) da Talentos Consultoria. Os documentos estão organizados por setor e disponíveis para visualização e download. Utilize esta página para consultar processos atualizados e manter a padronização das atividades internas.</p>
+                        </div>
+
+                        <!-- Download do Modelo -->
+                        <div class="pop-header-actions">
+                            <button class="btn btn-primary btn-download-modelo" onclick="downloadModelo()">
+                                Baixar Modelo de POP
+                            </button>
+                            <div class="pop-search">
+                                <input type="text" id="popSearchInput" placeholder="Pesquisar POP por código ou nome..." class="search-input">
+                                <button class="btn btn-secondary" onclick="searchPOPs()">Buscar</button>
+                            </div>
+                        </div>
+
+                        <!-- Filtros por Setor -->
+                        <div class="pop-filters">
+                            <h3>Filtrar por Setor:</h3>
+                            <div class="filter-buttons">
+                                <button class="filter-btn active" onclick="filterPOPs('todos')">Todos</button>
+                                <button class="filter-btn" onclick="filterPOPs('rh')">Recursos Humanos</button>
+                                <button class="filter-btn" onclick="filterPOPs('ti')">Tecnologia da Informação</button>
+                                <button class="filter-btn" onclick="filterPOPs('financeiro')">Financeiro</button>
+                            </div>
+                        </div>
+
+                        <!-- Setor: Recursos Humanos -->
+                        <div class="pop-section" data-setor="rh">
+                            <h2 class="setor-title">Recursos Humanos (RH)</h2>
+                            <div class="pop-table-container">
+                                <table class="pop-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Nome do POP</th>
+                                            <th>Última Atualização</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>POP-RH-001</strong></td>
+                                            <td>Procedimento de Admissão de Colaboradores</td>
+                                            <td>10/07/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-RH-001')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-RH-001')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>POP-RH-002</strong></td>
+                                            <td>Processo de Avaliação de Desempenho</td>
+                                            <td>25/06/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-RH-002')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-RH-002')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>POP-RH-003</strong></td>
+                                            <td>Gestão de Férias e Licenças</td>
+                                            <td>15/05/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-RH-003')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-RH-003')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Setor: Tecnologia da Informação -->
+                        <div class="pop-section" data-setor="ti">
+                            <h2 class="setor-title">Tecnologia da Informação (TI)</h2>
+                            <div class="pop-table-container">
+                                <table class="pop-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Nome do POP</th>
+                                            <th>Última Atualização</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>POP-TI-001</strong></td>
+                                            <td>Backup e Recuperação de Dados</td>
+                                            <td>02/08/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-TI-001')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-TI-001')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>POP-TI-002</strong></td>
+                                            <td>Configuração de Novas Estações de Trabalho</td>
+                                            <td>20/07/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-TI-002')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-TI-002')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>POP-TI-003</strong></td>
+                                            <td>Gerenciamento de Incidentes de Segurança</td>
+                                            <td>18/06/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-TI-003')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-TI-003')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Setor: Financeiro -->
+                        <div class="pop-section" data-setor="financeiro">
+                            <h2 class="setor-title">Financeiro</h2>
+                            <div class="pop-table-container">
+                                <table class="pop-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Nome do POP</th>
+                                            <th>Última Atualização</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>POP-FIN-001</strong></td>
+                                            <td>Processo de Contas a Pagar</td>
+                                            <td>05/08/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-FIN-001')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-FIN-001')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>POP-FIN-002</strong></td>
+                                            <td>Conciliação Bancária</td>
+                                            <td>28/07/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-FIN-002')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-FIN-002')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>POP-FIN-003</strong></td>
+                                            <td>Elaboração de Relatórios Financeiros</td>
+                                            <td>12/06/2025</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="viewPOP('POP-FIN-003')">Ver</button>
+                                                <button class="btn btn-primary btn-small" onclick="downloadPOP('POP-FIN-003')">Baixar</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Resultados da Busca -->
+                        <div id="popSearchResults" class="pop-search-results" style="display: none;">
+                            <h3>Resultados da Pesquisa</h3>
+                            <div id="popSearchResultsList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdfModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="pdfTitle">Visualizar PDF</h3>
+                <button class="modal-close" onclick="closePDF()">Fechar</button>
+            </div>
+            <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
+        </div>
+    </div>
+    
+    <!-- New Modal for Description -->
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content description-modal-content">
+            <div class="modal-header">
+                <h3>Adicionar / Editar Descrição</h3>
+                <button class="modal-close" onclick="closeDescriptionModal()">Fechar</button>
+            </div>
+            <p>Por favor, insira uma descrição para o documento:</p>
+            <input type="text" id="editDescriptionInput" placeholder="Descrição do documento...">
+            <button class="btn btn-primary" onclick="saveDescription()">Salvar</button>
+        </div>
+    </div>
+
+    <!-- Message Box for alerts -->
+    <div id="messageBox"></div>
+
+    <!-- Código JavaScript (do arquivo script.js original) -->
+    <script>
+        // script.js — Versão SEM Firebase e SEM banco de dados.
+        // Mantém a UI funcionando (navegação, busca, documentação local) apenas no navegador.
+
+        const $ = (id) => document.getElementById(id);
+        const showMsg = (t) => {
+        const box = $("messageBox"); if (!box) return;
+        box.textContent = t; box.style.display = "block"; box.style.opacity = 1;
+        setTimeout(() => { box.style.opacity = 0; setTimeout(() => { box.style.display = "none"; }, 400); }, 2500);
+        };
+
+        // ---- Estado em memória (sem backend) ----
+        let docs = [];                 // páginas de documentação (cada item contém URL local do PDF)
+        let selectedDocFile = null;    // arquivo PDF selecionado
+
+        const wikiData = {
+        pages: [
+            { id: "home",          title: "Página Inicial",  content: "Bem-vindo à wiki",           keywords: ["início","home","principal"],         type: "page" },
+            { id: "documentation", title: "Documentação",    content: "Documentação completa",      keywords: ["docs","documentação","manual","guia"], type: "page" },
+            { id: "tutorials",     title: "Tutoriais",       content: "Tutoriais passo a passo",    keywords: ["tutorial","aprender","passo","guia"], type: "page" },
+            { id: "faq",           title: "FAQ",             content: "Perguntas frequentes",       keywords: ["faq","perguntas","dúvidas","ajuda"],  type: "page" },
+            { id: "resources",     title: "Recursos",        content: "Recursos úteis",             keywords: ["recursos","ferramentas","templates"], type: "page" },
+            { id: "pop",           title: "POPs",            content: "Procedimentos Operacionais", keywords: ["pop","procedimentos","padrão","operacional"], type: "page" }
+        ],
+        faqs: [
+            { question: "Como crio uma página?",  answer: "Na aba Documentação, informe título, selecione um PDF e clique em Criar Página." }
+        ],
+        tutorials: [],
+        resources: [],
+        pops: [
+            // Recursos Humanos
+            { codigo: "POP-RH-001", nome: "Procedimento de Admissão de Colaboradores", setor: "rh", dataAtualizacao: "10/07/2025" },
+            { codigo: "POP-RH-002", nome: "Processo de Avaliação de Desempenho", setor: "rh", dataAtualizacao: "25/06/2025" },
+            { codigo: "POP-RH-003", nome: "Gestão de Férias e Licenças", setor: "rh", dataAtualizacao: "15/05/2025" },
+            // Tecnologia da Informação
+            { codigo: "POP-TI-001", nome: "Backup e Recuperação de Dados", setor: "ti", dataAtualizacao: "02/08/2025" },
+            { codigo: "POP-TI-002", nome: "Configuração de Novas Estações de Trabalho", setor: "ti", dataAtualizacao: "20/07/2025" },
+            { codigo: "POP-TI-003", nome: "Gerenciamento de Incidentes de Segurança", setor: "ti", dataAtualizacao: "18/06/2025" },
+            // Financeiro
+            { codigo: "POP-FIN-001", nome: "Processo de Contas a Pagar", setor: "financeiro", dataAtualizacao: "05/08/2025" },
+            { codigo: "POP-FIN-002", nome: "Conciliação Bancária", setor: "financeiro", dataAtualizacao: "28/07/2025" },
+            { codigo: "POP-FIN-003", nome: "Elaboração de Relatórios Financeiros", setor: "financeiro", dataAtualizacao: "12/06/2025" }
+        ]
+        };
+
+        // ---- Navegação ----
+        function showPage(pageId) {
+        document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+        const el = document.querySelector(`#page-${pageId}`); if (el) el.style.display = "block";
+        document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+        const link = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`); if (link) link.classList.add("active");
+
+        if (pageId === "documentation") renderDocs();
+        if (pageId === "tutorials") renderTutorials();
+        if (pageId === "resources") renderResources();
+        if (pageId === "faq") renderFAQs();
+        if (pageId === "pop") initPOPPage();
+        }
+
+        function renderFAQs() {
+        const list = $("faqList"); if (!list) return;
+        list.innerHTML = "";
+        wikiData.faqs.forEach(f => {
+            const wrap = document.createElement("div");
+            wrap.className = "faq-item";
+            wrap.innerHTML = `<h4>${f.question}</h4><div class="faq-answer"><p>${f.answer}</p></div>`;
+            const h = wrap.querySelector("h4");
+            const a = wrap.querySelector(".faq-answer");
+            h.addEventListener("click", ()=> a.style.display = (a.style.display==="none"?"block":"none"));
+            list.appendChild(wrap);
+        });
+        }
+
+        // ---- Busca ----
+        function performSearch() {
+        const input = $("searchInput"); if (!input) return;
+        const term = input.value.toLowerCase();
+        const results = [
+            ...wikiData.pages,
+            ...docs,
+            ...wikiData.faqs,
+            ...wikiData.tutorials,
+            ...wikiData.resources
+        ].filter(item =>
+            item.title?.toLowerCase().includes(term) ||
+            item.question?.toLowerCase().includes(term) ||
+            (item.description && item.description.toLowerCase().includes(term)) ||
+            (item.content && item.content.toLowerCase().includes(term))
+        );
+
+        const list = $("searchResultsList"), title = $("searchResultsTitle");
+        if (title) title.textContent = `Resultados para "${input.value}"`;
+        if (list) {
+            list.innerHTML = "";
+            results.forEach(r => {
+            const div = document.createElement("div");
+            div.className = "search-result-full-item";
+            div.innerHTML = `<h4>${r.title || r.question}</h4><p>${r.description || r.content || ""}</p>`;
+            div.addEventListener("click", () => {
+                if (r.type === "page") showPage(r.id);
+                if (r.type === "document") openPDF(r.pdfUrl, r.title);
+                if (r.type === "tutorial") showPage('tutorials');
+                if (r.type === "faq") showPage('faq');
+                if (r.type === "resource") showPage('resources');
+            });
+            list.appendChild(div);
+            });
+        }
+        showPage("search-results");
+        }
+
+        // ---- Documentação (local-only) ----
+        function triggerDocUpload() { $("pdfUploadInput")?.click(); }
+
+        document.addEventListener("change", (ev) => {
+        const t = ev.target;
+        if (!(t instanceof HTMLInputElement)) return;
+        if (t.id !== "pdfUploadInput") return;
+        selectedDocFile = t.files?.[0] || null;
+        if (selectedDocFile) {
+            showMsg("Arquivo de documento selecionado: " + selectedDocFile.name);
+        }
+        });
+
+        function renderDocs() {
+            const list = $("attachmentList");
+            if (!list) return;
+            list.innerHTML = "";
+            if (docs.length === 0) {
+                list.innerHTML = '<p id="loadingAttachments">Nenhum documento disponível. Clique em "Upload de Documento" para adicionar um.</p>';
+                return;
+            }
+            docs.forEach(d => {
+                const item = document.createElement("div");
+                item.className = "attachment-item";
+                item.innerHTML = `
+                    <div class="attachment-info">
+                        <div class="attachment-icon">PDF</div>
+                        <div class="attachment-details">
+                            <h4>${d.title}</h4>
+                            <p>${d.description || "Sem descrição"}</p>
+                        </div>
+                    </div>
+                    <div class="attachment-actions">
+                        <a class="btn btn-secondary" href="${d.pdfUrl}" download="${d.title}.pdf">Download</a>
+                        <button class="btn btn-primary">Ler</button>
+                    </div>`;
+                item.querySelector(".btn.btn-primary")?.addEventListener("click", () => openPDF(d.pdfUrl, d.title));
+                list.appendChild(item);
+            });
+        }
+        
+        // ---- PDF Modal ----
+        function openPDF(url, title) {
+        const t = $("pdfTitle"); if (t) t.textContent = title || "PDF";
+        const v = $("pdfViewer"); if (v) v.src = url;
+        const m = $("pdfModal");  if (m) m.style.display = "flex";
+        }
+        function closePDF() {
+        const m = $("pdfModal");  if (m) m.style.display = "none";
+        const v = $("pdfViewer"); if (v) v.src = "";
+        }
+
+        // ---- Funções para Tutoriais ----
+        function renderTutorials() {
+            const list = $("tutorialList");
+            if (!list) return;
+            list.innerHTML = "";
+            if (wikiData.tutorials.length === 0) {
+                list.innerHTML = '<p>Nenhum tutorial disponível.</p>';
+                return;
+            }
+            wikiData.tutorials.forEach(t => {
+                const item = document.createElement("div");
+                item.className = "tutorial-item";
+                item.innerHTML = `
+                    <h4>${t.title}</h4>
+                    <div class="tutorial-content"><p>${t.description}</p></div>
+                `;
+                const h = item.querySelector("h4");
+                const c = item.querySelector(".tutorial-content");
+                h.addEventListener("click", () => c.style.display = (c.style.display === "none" ? "block" : "none"));
+                list.appendChild(item);
+            });
+        }
+        function addTutorial() {
+            const title = $("tutorialTitleInput")?.value.trim();
+            const description = $("tutorialDescriptionInput")?.value.trim();
+            if (!title || !description) {
+                showMsg("Por favor, preencha o título e a descrição do tutorial.");
+                return;
+            }
+            const newTutorial = {
+                id: (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now())),
+                title,
+                description,
+                type: "tutorial"
+            };
+            wikiData.tutorials.unshift(newTutorial);
+            $("tutorialTitleInput").value = "";
+            $("tutorialDescriptionInput").value = "";
+            renderTutorials();
+            showMsg("Tutorial adicionado com sucesso!");
+        }
+
+        // ---- Funções para FAQ ----
+        function addFAQ() {
+            const question = $("faqQuestionInput")?.value.trim();
+            const answer = $("faqAnswerInput")?.value.trim();
+            if (!question || !answer) {
+                showMsg("Por favor, preencha a pergunta e a resposta do FAQ.");
+                return;
+            }
+            const newFAQ = {
+                id: (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now())),
+                question,
+                answer,
+                type: "faq"
+            };
+            wikiData.faqs.unshift(newFAQ);
+            $("faqQuestionInput").value = "";
+            $("faqAnswerInput").value = "";
+            renderFAQs();
+            showMsg("FAQ adicionado com sucesso!");
+        }
+
+        // ---- Funções para Recursos ----
+        function renderResources() {
+            const list = $("resourceList");
+            if (!list) return;
+            list.innerHTML = "";
+            if (wikiData.resources.length === 0) {
+                list.innerHTML = '<p>Nenhum recurso disponível.</p>';
+                return;
+            }
+            wikiData.resources.forEach(r => {
+                const item = document.createElement("div");
+                item.className = "resource-item";
+                item.innerHTML = `
+                    <div>
+                        <h4>${r.title}</h4>
+                        <p>${r.description}</p>
+                    </div>
+                    <a href="${r.link}" target="_blank" class="btn btn-primary">Acessar</a>
+                `;
+                list.appendChild(item);
+            });
+        }
+        function addResource() {
+            const title = $("resourceTitleInput")?.value.trim();
+            const description = $("resourceDescriptionInput")?.value.trim();
+            const link = $("resourceLinkInput")?.value.trim();
+            if (!title || !description || !link) {
+                showMsg("Por favor, preencha todos os campos do recurso.");
+                return;
+            }
+            const newResource = {
+                id: (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now())),
+                title,
+                description,
+                link,
+                type: "resource"
+            };
+            wikiData.resources.unshift(newResource);
+            $("resourceTitleInput").value = "";
+            $("resourceDescriptionInput").value = "";
+            $("resourceLinkInput").value = "";
+            renderResources();
+            showMsg("Recurso adicionado com sucesso!");
+        }
+        
+        // ---- Funções de Detalhes do Documento (simulação) ----
+        // Estas funções são apenas simulações, a funcionalidade completa de
+        // tópicos e comentários requereria um backend e um banco de dados
+        function addTopic() { showMsg("Adicionar tópico (simulação)."); }
+        function addComment() { showMsg("Adicionar comentário (simulação)."); }
+        function showDocDetails() { showMsg("Mostrando detalhes do documento (simulação)."); }
+        function openDescriptionModal() { showMsg("Abrindo modal de descrição (simulação)."); }
+        function closeDescriptionModal() { showMsg("Fechando modal de descrição (simulação)."); }
+        function saveDescription() { showMsg("Salvando descrição (simulação)."); }
+        function toggleEditMode() { showMsg("Modo de edição ativado/desativado (simulação)."); }
+
+
+        // ---- Funções POP ----
+        function initPOPPage() {
+        // Inicializar página POP - mostrar todos os setores por padrão
+        filterPOPs('todos');
+        }
+
+        function filterPOPs(setor) {
+        const sections = document.querySelectorAll('.pop-section');
+        const buttons = document.querySelectorAll('.filter-btn');
+        const searchResults = $('popSearchResults');
+        
+        // Ocultar resultados de busca
+        if (searchResults) searchResults.style.display = 'none';
+        
+        // Atualizar botões ativos
+        buttons.forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`.filter-btn[onclick="filterPOPs('${setor}')"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        // Mostrar/ocultar seções
+        sections.forEach(section => {
+            if (setor === 'todos') {
+            section.style.display = 'block';
+            } else {
+            section.style.display = section.dataset.setor === setor ? 'block' : 'none';
+            }
+        });
+        }
+
+        function searchPOPs() {
+        const input = $('popSearchInput');
+        if (!input) return;
+        
+        const term = input.value.toLowerCase().trim();
+        if (!term) {
+            showMsg('Digite um termo para buscar.');
+            return;
+        }
+        
+        const results = wikiData.pops.filter(pop => 
+            pop.codigo.toLowerCase().includes(term) || 
+            pop.nome.toLowerCase().includes(term)
+        );
+        
+        const resultsContainer = $('popSearchResults');
+        const resultsList = $('popSearchResultsList');
+        
+        if (!resultsContainer || !resultsList) return;
+        
+        // Ocultar seções de setores
+        document.querySelectorAll('.pop-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        // Mostrar resultados
+        resultsContainer.style.display = 'block';
+        resultsList.innerHTML = '';
+        
+        if (results.length === 0) {
+            resultsList.innerHTML = '<p>Nenhum POP encontrado para o termo pesquisado.</p>';
+            return;
+        }
+        
+        results.forEach(pop => {
+            const item = document.createElement('div');
+            item.className = 'search-result-item';
+            item.innerHTML = `
+            <h4>${pop.codigo}</h4>
+            <p>${pop.nome}</p>
+            <small>Última atualização: ${pop.dataAtualizacao}</small>
+            <div class="search-result-actions">
+                <button class="btn btn-secondary btn-small" onclick="viewPOP('${pop.codigo}')">Ver</button>
+                <button class="btn btn-primary btn-small" onclick="downloadPOP('${pop.codigo}')">Baixar</button>
+            </div>
+            `;
+            resultsList.appendChild(item);
+        });
+        }
+
+        function downloadModelo() {
+        // Simular download do modelo de POP
+        showMsg('Download do modelo de POP iniciado. (Simulação - arquivo não disponível nesta versão demo)');
+        }
+
+        function viewPOP(codigo) {
+        // Simular visualização do POP
+        showMsg(`Abrindo visualização do ${codigo}. (Simulação - arquivo não disponível nesta versão demo)`);
+        }
+
+        function downloadPOP(codigo) {
+        // Simular download do POP
+        showMsg(`Download do ${codigo} iniciado. (Simulação - arquivo não disponível nesta versão demo)`);
+        }
+
+        // ---- Inicialização ----
+        document.addEventListener("DOMContentLoaded", () => {
+        // Busca com Enter
+        $("searchInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") performSearch(); });
+        
+        // Busca POP com Enter
+        $("popSearchInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") searchPOPs(); });
+
+        // Click-outside para dropdown de busca (se houver)
+        document.addEventListener("click", (ev) => {
+            const container = document.querySelector(".search-container");
+            const dropdown  = $("searchResults");
+            if (container && dropdown && !container.contains(ev.target)) {
+            dropdown.style.display = "none";
+            }
+        });
+
+        // Página inicial
+        showPage("home");
+        });
+
+        // Expor todas as funções para o contexto global
+        window.showPage = showPage;
+        window.performSearch = performSearch;
+        window.triggerDocUpload = triggerDocUpload;
+        window.openPDF = openPDF;
+        window.closePDF = closePDF;
+        window.initPOPPage = initPOPPage;
+        window.filterPOPs = filterPOPs;
+        window.searchPOPs = searchPOPs;
+        window.downloadModelo = downloadModelo;
+        window.viewPOP = viewPOP;
+        window.downloadPOP = downloadPOP;
+        window.renderTutorials = renderTutorials;
+        window.addTutorial = addTutorial;
+        window.addFAQ = addFAQ;
+        window.renderResources = renderResources;
+        window.addResource = addResource;
+        window.addTopic = addTopic;
+        window.addComment = addComment;
+        window.triggerTutorialFileUpload = () => { showMsg("Anexar PDF a tutorial (simulação)."); };
+        window.toggleEditMode = toggleEditMode;
+        window.closeDescriptionModal = closeDescriptionModal;
+        window.saveDescription = saveDescription;
+    </script>
+</body>
+</html>
