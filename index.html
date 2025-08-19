@@ -323,7 +323,7 @@
             padding: 0;
         }
         
-        .document-details-sidebar a {
+.document-details-sidebar a {
             display: block;
             padding: 0.5rem;
             color: #6c757d;
@@ -1210,6 +1210,76 @@
             border-radius: 12px;
             padding: 1.5rem;
         }
+        
+        .manage-pop-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .manage-pop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .manage-pop-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #780000;
+        }
+
+        .manage-pop-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .manage-pop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .manage-pop-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .manage-pop-info h4 {
+            margin: 0;
+        }
+
+        .manage-pop-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .manage-pop-form-wrapper {
+            margin-bottom: 2rem;
+        }
+        
+        .manage-pop-form-wrapper h4 {
+            margin-bottom: 1rem;
+        }
+        
+        .manage-pop-form-wrapper input, .manage-pop-form-wrapper select {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .pop-form-upload-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -1521,7 +1591,7 @@
                         <div class="meta-item">Tempo de leitura: 5 min</div>
                     </div>
 
-                    <div class="page-content">
+                    <div class="page-content" id="mainPopPageContent">
                         <div class="hero-description">
                             <p>Esta seção centraliza os Procedimentos Operacionais Padrão (POPs) da Talentos Consultoria. Os documentos estão organizados por setor e disponíveis para visualização e download. Utilize esta página para consultar processos atualizados e manter a padronização das atividades internas.</p>
                         </div>
@@ -1546,26 +1616,8 @@
                             </div>
                         </div>
                         
-                        <!-- Botão e Formulário para Adicionar POP -->
-                        <button class="btn btn-primary" id="togglePopFormBtn" onclick="togglePopForm()">Adicionar Novo POP</button>
-                        <div class="pop-form-wrapper" id="popForm">
-                            <div class="faq-form pop-form">
-                                <h4>Detalhes do Novo POP</h4>
-                                <input type="text" id="popCodigoInput" placeholder="Código do POP (ex: POP-RH-004)">
-                                <input type="text" id="popNomeInput" placeholder="Nome do Procedimento">
-                                <input type="text" id="popDataInput" placeholder="Data de Atualização (ex: DD/MM/AAAA)">
-                                <div class="pop-form-controls">
-                                    <input type="text" id="popSetorInput" placeholder="Novo Setor (opcional)">
-                                    <select id="popSetorSelect">
-                                        <option value="">-- Selecione um setor existente --</option>
-                                        <option value="rh">Recursos Humanos</option>
-                                        <option value="ti">Tecnologia da Informação</option>
-                                        <option value="financeiro">Financeiro</option>
-                                    </select>
-                                </div>
-                                <button class="btn btn-primary" onclick="addPOP()">Salvar POP</button>
-                            </div>
-                        </div>
+                        <!-- Botão Gerenciar POPs -->
+                        <button class="btn btn-primary" id="toggleManagePOPsBtn" onclick="toggleManagePOPs()">Gerenciar POPs</button>
 
                         <!-- Seções de POPs -->
                         <div id="popSectionsContainer">
@@ -1636,6 +1688,43 @@
                             <div id="popSearchResultsList"></div>
                         </div>
                     </div>
+                    
+                    <!-- Seção para Gerenciar POPs (Adicionar/Editar/Remover) -->
+                    <div id="managePopPage" class="manage-pop-section" style="display: none;">
+                        <div class="manage-pop-header">
+                            <h2>Gerenciar POPs</h2>
+                            <button class="btn btn-secondary" onclick="toggleManagePOPs()">Voltar</button>
+                        </div>
+                        
+                        <!-- Formulário para Adicionar ou Editar POP -->
+                        <div class="manage-pop-form-wrapper">
+                            <h4 id="popFormTitle">Adicionar Novo POP</h4>
+                            <input type="text" id="popCodigoInput" placeholder="Código do POP (ex: POP-RH-004)">
+                            <input type="text" id="popNomeInput" placeholder="Nome do Procedimento">
+                            <input type="text" id="popDataInput" placeholder="Data de Atualização (ex: DD/MM/AAAA)">
+                            <div class="pop-form-controls">
+                                <input type="text" id="popSetorInput" placeholder="Novo Setor (opcional)">
+                                <select id="popSetorSelect">
+                                    <option value="">-- Selecione um setor existente --</option>
+                                </select>
+                            </div>
+                            <!-- File upload for the POP -->
+                            <div class="pop-form-upload-controls">
+                                <input type="file" id="popPdfInput" accept=".pdf" style="display: none;" onchange="handlePopFileSelection(event)">
+                                <span id="popFileName">Nenhum arquivo selecionado</span>
+                                <button class="btn btn-primary" onclick="triggerPopFileUpload()">Anexar PDF</button>
+                            </div>
+                            <button class="btn btn-primary" id="savePopBtn" onclick="addPOP()">Salvar POP</button>
+                        </div>
+
+                        <!-- Lista de POPs para Edição/Remoção -->
+                        <div class="manage-pop-list-wrapper">
+                            <h4>POPs Existentes</h4>
+                            <div id="managePopList" class="manage-pop-list">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -1672,7 +1761,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, getDocs, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, getDocs, serverTimestamp, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const $ = (id) => document.getElementById(id);
         const showMsg = (t) => {
@@ -1689,6 +1778,9 @@
 
         let docs = [];
         let selectedDocFile = null;
+        
+        let selectedPopFile = null;
+
         let wikiData = {
             pages: [
                 { id: "home", title: "Página Inicial", content: "Bem-vindo à wiki", keywords: ["início", "home", "principal"], type: "page" },
@@ -1704,15 +1796,15 @@
             tutorials: [],
             resources: [],
             pops: [
-                { codigo: "POP-RH-001", nome: "Procedimento de Admissão de Colaboradores", setor: "rh", dataAtualizacao: "10/07/2025" },
-                { codigo: "POP-RH-002", nome: "Processo de Avaliação de Desempenho", setor: "rh", dataAtualizacao: "25/06/2025" },
-                { codigo: "POP-RH-003", nome: "Gestão de Férias e Licenças", setor: "rh", dataAtualizacao: "15/05/2025" },
-                { codigo: "POP-TI-001", nome: "Backup e Recuperação de Dados", setor: "ti", dataAtualizacao: "02/08/2025" },
-                { codigo: "POP-TI-002", nome: "Configuração de Novas Estações de Trabalho", setor: "ti", dataAtualizacao: "20/07/2025" },
-                { codigo: "POP-TI-003", nome: "Gerenciamento de Incidentes de Segurança", setor: "ti", dataAtualizacao: "18/06/2025" },
-                { codigo: "POP-FIN-001", nome: "Processo de Contas a Pagar", setor: "financeiro", dataAtualizacao: "05/08/2025" },
-                { codigo: "POP-FIN-002", nome: "Conciliação Bancária", setor: "financeiro", dataAtualizacao: "28/07/2025" },
-                { codigo: "POP-FIN-003", nome: "Elaboração de Relatórios Financeiros", setor: "financeiro", dataAtualizacao: "12/06/2025" }
+                { codigo: "POP-RH-001", nome: "Procedimento de Admissão de Colaboradores", setor: "rh", dataAtualizacao: "10/07/2025", fileUrl: null },
+                { codigo: "POP-RH-002", nome: "Processo de Avaliação de Desempenho", setor: "rh", dataAtualizacao: "25/06/2025", fileUrl: null },
+                { codigo: "POP-RH-003", nome: "Gestão de Férias e Licenças", setor: "rh", dataAtualizacao: "15/05/2025", fileUrl: null },
+                { codigo: "POP-TI-001", nome: "Backup e Recuperação de Dados", setor: "ti", dataAtualizacao: "02/08/2025", fileUrl: null },
+                { codigo: "POP-TI-002", nome: "Configuração de Novas Estações de Trabalho", setor: "ti", dataAtualizacao: "20/07/2025", fileUrl: null },
+                { codigo: "POP-TI-003", nome: "Gerenciamento de Incidentes de Segurança", setor: "ti", dataAtualizacao: "18/06/2025", fileUrl: null },
+                { codigo: "POP-FIN-001", nome: "Processo de Contas a Pagar", setor: "financeiro", dataAtualizacao: "05/08/2025", fileUrl: null },
+                { codigo: "POP-FIN-002", nome: "Conciliação Bancária", setor: "financeiro", dataAtualizacao: "28/07/2025", fileUrl: null },
+                { codigo: "POP-FIN-003", nome: "Elaboração de Relatórios Financeiros", setor: "financeiro", dataAtualizacao: "12/06/2025", fileUrl: null }
             ]
         };
 
@@ -1722,6 +1814,8 @@
             'ti': 'Tecnologia da Informação',
             'financeiro': 'Financeiro'
         };
+
+        let editingPop = null;
 
         // Initialize Firebase and set up auth state listener
         async function initializeFirebase() {
@@ -2116,6 +2210,10 @@
 
         // ---- Funções POP ----
         function initPOPPage() {
+            // Esconde a página de gerenciamento ao inicializar a página principal de POPs
+            $('managePopPage').style.display = 'none';
+            // Mostra o conteúdo principal da página de POPs
+            $('mainPopPageContent').style.display = 'block';
             renderPOPFilters();
             renderPOPs();
             filterPOPs('todos');
@@ -2162,7 +2260,6 @@
             const sectionsContainer = $('popSectionsContainer');
             if (!sectionsContainer) return;
 
-            // Clear existing content except for the new POP form
             sectionsContainer.innerHTML = '';
             
             const uniqueSectors = [...new Set(wikiData.pops.map(pop => pop.setor))].sort();
@@ -2207,6 +2304,28 @@
                     `;
                     tableBody.appendChild(row);
                 }
+            });
+        }
+        
+        function renderManagePOPs() {
+            const managePopList = $('managePopList');
+            if (!managePopList) return;
+            managePopList.innerHTML = '';
+            
+            wikiData.pops.forEach(pop => {
+                const item = document.createElement('div');
+                item.className = 'manage-pop-item';
+                item.innerHTML = `
+                    <div class="manage-pop-info">
+                        <h4>${pop.codigo} - ${pop.nome}</h4>
+                        <small>Setor: ${popSectors[pop.setor] || pop.setor.toUpperCase()}</small>
+                    </div>
+                    <div class="manage-pop-actions">
+                        <button class="btn btn-edit btn-small" onclick="editPOP('${pop.codigo}')">Editar</button>
+                        <button class="btn btn-secondary btn-small" onclick="removePOP('${pop.codigo}')">Remover</button>
+                    </div>
+                `;
+                managePopList.appendChild(item);
             });
         }
 
@@ -2277,7 +2396,51 @@
                 resultsList.appendChild(item);
             });
         }
+        
+        function toggleManagePOPs() {
+            const managePage = $('managePopPage');
+            const mainPopPageContent = $('mainPopPageContent');
+            if (!managePage || !mainPopPageContent) return;
 
+            if (managePage.style.display === 'none' || managePage.style.display === '') {
+                mainPopPageContent.style.display = 'none';
+                managePage.style.display = 'block';
+                renderManagePOPs();
+            } else {
+                managePage.style.display = 'none';
+                mainPopPageContent.style.display = 'block';
+                initPOPPage();
+            }
+            // Limpa o formulário de edição/adição ao sair ou entrar
+            $('popFormTitle').textContent = 'Adicionar Novo POP';
+            $('popCodigoInput').value = '';
+            $('popNomeInput').value = '';
+            $('popDataInput').value = '';
+            $('popSetorInput').value = '';
+            $('popSetorSelect').value = '';
+            $('popFileName').textContent = 'Nenhum arquivo selecionado';
+            selectedPopFile = null;
+            $('savePopBtn').textContent = 'Salvar POP';
+            $('savePopBtn').onclick = addPOP;
+            editingPop = null;
+        }
+
+        function triggerPopFileUpload() {
+            $('popPdfInput').click();
+        }
+
+        function handlePopFileSelection(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedPopFile = file;
+                $('popFileName').textContent = file.name;
+                showMsg(`Arquivo "${file.name}" selecionado.`);
+            } else {
+                selectedPopFile = null;
+                $('popFileName').textContent = 'Nenhum arquivo selecionado';
+            }
+        }
+        
         function addPOP() {
             const codigo = $('popCodigoInput').value.trim();
             const nome = $('popNomeInput').value.trim();
@@ -2315,7 +2478,8 @@
                 codigo: codigo,
                 nome: nome,
                 setor: setor,
-                dataAtualizacao: dataAtualizacao
+                dataAtualizacao: dataAtualizacao,
+                fileUrl: selectedPopFile ? URL.createObjectURL(selectedPopFile) : null
             };
 
             wikiData.pops.push(newPOP);
@@ -2325,26 +2489,74 @@
             $('popDataInput').value = '';
             $('popSetorInput').value = '';
             $('popSetorSelect').value = '';
-
+            $('popFileName').textContent = 'Nenhum arquivo selecionado';
+            selectedPopFile = null;
+            
+            renderManagePOPs();
             initPOPPage();
-            togglePopForm(); // Collapse the form after adding a new POP
             showMsg(`POP "${codigo}" adicionado com sucesso ao setor "${setorNome}"!`);
         }
 
-        function togglePopForm() {
-            const form = $('popForm');
-            if (!form) return;
+        function editPOP(codigo) {
+            editingPop = wikiData.pops.find(pop => pop.codigo === codigo);
+            if (!editingPop) return;
 
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.classList.remove('collapsed');
-                form.style.display = 'block';
-                form.classList.add('expanded');
-            } else {
-                form.classList.remove('expanded');
-                form.classList.add('collapsed');
-                setTimeout(() => {
-                    form.style.display = 'none';
-                }, 400); // Match animation duration
+            $('popFormTitle').textContent = `Editar POP: ${codigo}`;
+            $('popCodigoInput').value = editingPop.codigo;
+            $('popNomeInput').value = editingPop.nome;
+            $('popDataInput').value = editingPop.dataAtualizacao;
+            $('popSetorSelect').value = editingPop.setor;
+            $('savePopBtn').textContent = 'Salvar Edição';
+            $('savePopBtn').onclick = () => saveEditedPOP(codigo);
+        }
+
+        function saveEditedPOP(originalCodigo) {
+            const newCodigo = $('popCodigoInput').value.trim();
+            const newNome = $('popNomeInput').value.trim();
+            const newDataAtualizacao = $('popDataInput').value.trim();
+            const newSetor = $('popSetorSelect').value;
+
+            if (!newCodigo || !newNome || !newDataAtualizacao || !newSetor) {
+                showMsg("Por favor, preencha todos os campos para editar o POP.");
+                return;
+            }
+
+            const popIndex = wikiData.pops.findIndex(pop => pop.codigo === originalCodigo);
+            if (popIndex !== -1) {
+                wikiData.pops[popIndex] = {
+                    codigo: newCodigo,
+                    nome: newNome,
+                    setor: newSetor,
+                    dataAtualizacao: newDataAtualizacao,
+                    fileUrl: selectedPopFile ? URL.createObjectURL(selectedPopFile) : wikiData.pops[popIndex].fileUrl
+                };
+            }
+
+            // Reset form
+            $('popFormTitle').textContent = 'Adicionar Novo POP';
+            $('popCodigoInput').value = '';
+            $('popNomeInput').value = '';
+            $('popDataInput').value = '';
+            $('popSetorInput').value = '';
+            $('popSetorSelect').value = '';
+            $('popFileName').textContent = 'Nenhum arquivo selecionado';
+            selectedPopFile = null;
+            $('savePopBtn').textContent = 'Salvar POP';
+            $('savePopBtn').onclick = addPOP;
+            editingPop = null;
+
+            renderManagePOPs();
+            initPOPPage();
+            showMsg(`POP "${newCodigo}" editado com sucesso!`);
+        }
+        
+        function removePOP(codigo) {
+            const popIndex = wikiData.pops.findIndex(pop => pop.codigo === codigo);
+            if (popIndex !== -1) {
+                wikiData.pops.splice(popIndex, 1);
+                renderManagePOPs();
+                initPOPPage();
+                showMsg(`POP "${codigo}" removido com sucesso.`);
             }
         }
 
@@ -2353,11 +2565,27 @@
         }
 
         function viewPOP(codigo) {
-            showMsg(`Abrindo visualização do ${codigo}. (Simulação - arquivo não disponível nesta versão demo)`);
+            const pop = wikiData.pops.find(p => p.codigo === codigo);
+            if (pop && pop.fileUrl) {
+                openPDF(pop.fileUrl, pop.nome);
+            } else {
+                showMsg(`O POP "${codigo}" não tem um arquivo anexado para visualização.`);
+            }
         }
 
         function downloadPOP(codigo) {
-            showMsg(`Download do ${codigo} iniciado. (Simulação - arquivo não disponível nesta versão demo)`);
+            const pop = wikiData.pops.find(p => p.codigo === codigo);
+            if (pop && pop.fileUrl) {
+                const a = document.createElement('a');
+                a.href = pop.fileUrl;
+                a.download = pop.nome + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showMsg(`Download do POP "${codigo}" iniciado.`);
+            } else {
+                showMsg(`O POP "${codigo}" não tem um arquivo anexado para download.`);
+            }
         }
 
         // ---- Inicialização ----
@@ -2394,7 +2622,6 @@
         window.filterPOPs = filterPOPs;
         window.searchPOPs = searchPOPs;
         window.addPOP = addPOP;
-        window.togglePopForm = togglePopForm;
         window.downloadModelo = downloadModelo;
         window.viewPOP = viewPOP;
         window.downloadPOP = downloadPOP;
@@ -2408,6 +2635,12 @@
         window.triggerTutorialFileUpload = () => { showMsg("Anexar PDF a tutorial (simulação)."); };
         window.toggleEditMode = toggleEditMode;
         window.closeDescriptionModal = closeDescriptionModal;
+        window.toggleManagePOPs = toggleManagePOPs;
+        window.editPOP = editPOP;
+        window.removePOP = removePOP;
+        window.saveEditedPOP = saveEditedPOP;
+        window.triggerPopFileUpload = triggerPopFileUpload;
+        window.handlePopFileSelection = handlePopFileSelection;
     </script>
 </body>
 </html>
