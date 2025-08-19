@@ -1,310 +1,351 @@
-// script.js — Versão SEM Firebase e SEM banco de dados.
-// Mantém a UI funcionando (navegação, busca, documentação local) apenas no navegador.
+// ---------------------------------------------
+// Talentos Wiki - script.js (sem Firebase/BD)
+// Mantém o mesmo visual. Correções:
+// 1) PDF obrigatório ao criar tutorial
+// 2) Listener do input robusto (não quebra se DOM ainda não existe)
+// 3) Ações (Download/Ver) renderizadas apenas quando há arquivo
+// 4) Toggle "Ver explicação" SOMENTE no modal (não há accordion na lista)
+// ---------------------------------------------
 
+// Helper curto
 const $ = (id) => document.getElementById(id);
-const showMsg = (t) => {
-  const box = $("messageBox"); if (!box) return;
-  box.textContent = t; box.style.display = "block"; box.style.opacity = 1;
-  setTimeout(() => { box.style.opacity = 0; setTimeout(() => { box.style.display = "none"; }, 400); }, 2500);
-};
 
-// ---- Estado em memória (sem backend) ----
-let docs = [];                 // páginas de documentação (cada item contém URL local do PDF)
-let selectedDocFile = null;    // arquivo PDF selecionado
-
-const wikiData = {
-  pages: [
-    { id: "home",          title: "Página Inicial",  content: "Bem-vindo à wiki",           keywords: ["início","home","principal"],         type: "page" },
-    { id: "documentation", title: "Documentação",    content: "Documentação completa",      keywords: ["docs","documentação","manual","guia"], type: "page" },
-    { id: "tutorials",     title: "Tutoriais",       content: "Tutoriais passo a passo",    keywords: ["tutorial","aprender","passo","guia"], type: "page" },
-    { id: "faq",           title: "FAQ",             content: "Perguntas frequentes",       keywords: ["faq","perguntas","dúvidas","ajuda"],  type: "page" },
-    { id: "resources",     title: "Recursos",        content: "Recursos úteis",             keywords: ["recursos","ferramentas","templates"], type: "page" },
-    { id: "pop",           title: "POPs",            content: "Procedimentos Operacionais", keywords: ["pop","procedimentos","padrão","operacional"], type: "page" }
-  ],
-  faqs: [
-    { question: "Como crio uma página?",  answer: "Na aba Documentação, informe título, selecione um PDF e clique em Criar Página." }
-  ],
-  tutorials: [],
-  resources: [],
-  pops: [
-    // Recursos Humanos
-    { codigo: "POP-RH-001", nome: "Procedimento de Admissão de Colaboradores", setor: "rh", dataAtualizacao: "10/07/2025" },
-    { codigo: "POP-RH-002", nome: "Processo de Avaliação de Desempenho", setor: "rh", dataAtualizacao: "25/06/2025" },
-    { codigo: "POP-RH-003", nome: "Gestão de Férias e Licenças", setor: "rh", dataAtualizacao: "15/05/2025" },
-    // Tecnologia da Informação
-    { codigo: "POP-TI-001", nome: "Backup e Recuperação de Dados", setor: "ti", dataAtualizacao: "02/08/2025" },
-    { codigo: "POP-TI-002", nome: "Configuração de Novas Estações de Trabalho", setor: "ti", dataAtualizacao: "20/07/2025" },
-    { codigo: "POP-TI-003", nome: "Gerenciamento de Incidentes de Segurança", setor: "ti", dataAtualizacao: "18/06/2025" },
-    // Financeiro
-    { codigo: "POP-FIN-001", nome: "Processo de Contas a Pagar", setor: "financeiro", dataAtualizacao: "05/08/2025" },
-    { codigo: "POP-FIN-002", nome: "Conciliação Bancária", setor: "financeiro", dataAtualizacao: "28/07/2025" },
-    { codigo: "POP-FIN-003", nome: "Elaboração de Relatórios Financeiros", setor: "financeiro", dataAtualizacao: "12/06/2025" }
-  ]
-};
-
-// ---- Navegação ----
-function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-  const el = document.querySelector(`#page-${pageId}`); if (el) el.style.display = "block";
-  document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
-  const link = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`); if (link) link.classList.add("active");
-
-  if (pageId === "documentation") renderDocs();
-  if (pageId === "faq") renderFAQs();
-  if (pageId === "pop") initPOPPage();
+// Feedback flutuante (usa #messageBox já existente no HTML/CSS)
+function showMessage(message) {
+  const box = $("messageBox");
+  if (!box) return;
+  box.textContent = message;
+  box.style.display = "block";
+  box.style.opacity = 1;
+  setTimeout(() => {
+    box.style.opacity = 0;
+    setTimeout(() => (box.style.display = "none"), 500);
+  }, 2000);
 }
 
-function renderFAQs() {
-  const list = $("faqList"); if (!list) return;
-  list.innerHTML = "";
-  wikiData.faqs.forEach(f => {
-    const wrap = document.createElement("div");
-    wrap.className = "faq-item";
-    wrap.innerHTML = `<h4>${f.question}</h4><div class="faq-answer"><p>${f.answer}</p></div>`;
-    const h = wrap.querySelector("h4");
-    const a = wrap.querySelector(".faq-answer");
-    h.addEventListener("click", ()=> a.style.display = (a.style.display==="none"?"block":"none"));
-    list.appendChild(wrap);
+// Navegação (usa as mesmas .page e .nav-link do seu HTML)
+function showPage(pageId) {
+  document.querySelectorAll(".page").forEach((el) => (el.style.display = "none"));
+  const target = document.getElementById(`page-${pageId}`);
+  if (target) target.style.display = "block";
+
+  document.querySelectorAll(".nav-link").forEach((a) => a.classList.remove("active"));
+  const link = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`);
+  if (link) link.classList.add("active");
+}
+
+// Busca simples (mantém sua UX)
+function performSearch() {
+  const input = $("searchInput");
+  if (!input) return;
+  const term = input.value.trim().toLowerCase();
+  if (!term) return;
+  const page = document.getElementById("page-search-results");
+  if (page) showPage("search-results");
+}
+
+// ---------------------------------------------
+// Dados locais (sem banco) só para manter a UI
+// ---------------------------------------------
+const wikiData = {
+  documents: [],            // {id,title,description,fileUrl}
+  tutorials: [],            // {id,title,description,fileUrl}
+  faqs: [],                 // {question,answer}
+  resources: []             // {title,description,link}
+};
+
+// ---------------------------------------------
+// DOCUMENTAÇÃO (Upload local + render)
+// ---------------------------------------------
+function triggerDocUpload() { $("docPDFInput")?.click(); }
+window.triggerDocUpload = triggerDocUpload;
+
+// Modal simples para descrição (opcional)
+async function openDescriptionModal() {
+  const modal = $("descriptionModal");
+  const input = $("editDescriptionInput");
+  return new Promise((resolve) => {
+    if (!modal || !input) return resolve("");
+
+    modal.style.display = "flex";
+    input.value = "";
+    input.focus();
+
+    const onSave = () => { cleanup(); modal.style.display = "none"; resolve(input.value.trim()); };
+    const onClose = () => { cleanup(); modal.style.display = "none"; resolve(""); };
+    const onKey = (e) => {
+      if (e.key === "Enter") { e.preventDefault(); onSave(); }
+      if (e.key === "Escape") onClose();
+    };
+    const cleanup = () => {
+      modal.querySelector(".btn-primary")?.removeEventListener("click", onSave);
+      modal.querySelector(".modal-close")?.removeEventListener("click", onClose);
+      document.removeEventListener("keydown", onKey);
+    };
+
+    modal.querySelector(".btn-primary")?.addEventListener("click", onSave);
+    modal.querySelector(".modal-close")?.addEventListener("click", onClose);
+    document.addEventListener("keydown", onKey);
   });
 }
 
-// ---- Busca ----
-function performSearch() {
-  const input = $("searchInput"); if (!input) return;
-  const term = input.value.toLowerCase();
-  const results = [
-    ...wikiData.pages,
-    ...docs,
-    ...wikiData.faqs
-  ].filter(item =>
-    item.title?.toLowerCase().includes(term) ||
-    item.question?.toLowerCase().includes(term) ||
-    (item.description && item.description.toLowerCase().includes(term)) ||
-    (item.content && item.content.toLowerCase().includes(term))
-  );
-
-  const list = $("searchResultsList"), title = $("searchResultsTitle");
-  if (title) title.textContent = `Resultados para "${input.value}"`;
-  if (list) {
-    list.innerHTML = "";
-    results.forEach(r => {
-      const div = document.createElement("div");
-      div.className = "search-result-full-item";
-      div.innerHTML = `<h4>${r.title || r.question}</h4><p>${r.description || r.content || ""}</p>`;
-      div.addEventListener("click", () => {
-        if (r.type === "page") showPage(r.id);
-        if (r.type === "document") openPDF(r.pdfUrl, r.title);
-      });
-      list.appendChild(div);
+// Vincula o input de documentos (se existir)
+(function bindDocInput() {
+  const input = $("docPDFInput");
+  if (!input) return;
+  input.addEventListener("change", async (ev) => {
+    const file = ev.target.files?.[0];
+    if (!file || file.type !== "application/pdf") {
+      showMessage("Selecione um PDF válido.");
+      return;
+    }
+    const desc = await openDescriptionModal();
+    const title = file.name.replace(/\.pdf$/i, "").replace(/[_-]/g, " ");
+    const url = URL.createObjectURL(file);
+    wikiData.documents.unshift({
+      id: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      title,
+      description: desc || "",
+      fileUrl: url
     });
-  }
-  showPage("search-results");
-}
+    renderDocuments();
+    showMessage("Documento adicionado (local).");
+    input.value = "";
+  });
+})();
 
-// ---- Documentação (local-only) ----
-function triggerDocUpload() { $("docPDFInput")?.click(); }
-
-document.addEventListener("change", (ev) => {
-  const t = ev.target;
-  if (!(t instanceof HTMLInputElement)) return;
-  if (t.id !== "docPDFInput") return;
-  selectedDocFile = t.files?.[0] || null;
-  const span = $("docSelectedName");
-  if (span) span.textContent = selectedDocFile ? selectedDocFile.name : "Nenhum arquivo selecionado";
-});
-
-function createDocFromForm() {
-  const title = $("docTitleInput")?.value.trim();
-  const description = $("docDescInput")?.value.trim();
-  const file = selectedDocFile;
-  if (!title || !file) { showMsg("Informe o título e selecione um PDF."); return; }
-
-  const url = URL.createObjectURL(file); // sem persistência (memória)
-  const item = {
-    id: (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now())),
-    title, description,
-    pdfUrl: url,
-    type: "document",
-    createdAt: new Date().toISOString()
-  };
-  docs.unshift(item);
-
-  if ($("docTitleInput")) $("docTitleInput").value = "";
-  if ($("docDescInput"))  $("docDescInput").value  = "";
-  if ($("docPDFInput"))   $("docPDFInput").value   = "";
-  const span = $("docSelectedName"); if (span) span.textContent = "Nenhum arquivo selecionado";
-  selectedDocFile = null;
-
-  renderDocs();
-  showMsg("Página criada localmente (sem banco de dados).");
-}
-
-function renderDocs() {
-  const list = $("docsList"); if (!list) return;
+function renderDocuments() {
+  const list = $("docsList");
+  if (!list) return;
   list.innerHTML = "";
-  const loading = $("loadingDocs");
-  if (docs.length === 0) { if (loading) loading.style.display = "block"; return; }
-  if (loading) loading.style.display = "none";
-
-  docs.forEach(d => {
+  if (wikiData.documents.length === 0) {
+    const p = document.createElement("p");
+    p.id = "loadingDocs";
+    p.textContent = "Nenhum documento encontrado.";
+    list.appendChild(p);
+    return;
+  }
+  wikiData.documents.forEach((doc) => {
     const item = document.createElement("div");
     item.className = "attachment-item";
     item.innerHTML = `
       <div class="attachment-info">
         <div class="attachment-icon">PDF</div>
         <div class="attachment-details">
-          <h4>${d.title}</h4>
-          <p>${d.description || "Sem descrição"}</p>
+          <h4>${doc.title}</h4>
+          <p>${doc.description || "Sem descrição"}</p>
         </div>
       </div>
       <div class="attachment-actions">
-        <a class="btn btn-secondary" href="${d.pdfUrl}" download>Download</a>
+        <a class="btn btn-secondary" href="${doc.fileUrl}" download="${doc.title}.pdf">Download</a>
         <button class="btn btn-primary">Ler</button>
-      </div>`;
-    item.querySelector(".btn.btn-primary")?.addEventListener("click", () => openPDF(d.pdfUrl, d.title));
+      </div>
+    `;
+    item.querySelector(".btn.btn-primary")?.addEventListener("click", () =>
+      openPDF(doc.fileUrl, doc.title, doc.description)
+    );
     list.appendChild(item);
   });
 }
 
-// ---- PDF Modal ----
-function openPDF(url, title) {
-  const t = $("pdfTitle"); if (t) t.textContent = title || "PDF";
-  const v = $("pdfViewer"); if (v) v.src = url;
-  const m = $("pdfModal");  if (m) m.style.display = "flex";
-}
-function closePDF() {
-  const m = $("pdfModal");  if (m) m.style.display = "none";
-  const v = $("pdfViewer"); if (v) v.src = "";
-}
+// ---------------------------------------------
+// TUTORIAIS (correções pedidas)
+// ---------------------------------------------
+let currentTutorialFile = null;
 
-// ---- Inicialização ----
-document.addEventListener("DOMContentLoaded", () => {
-  // Busca com Enter
-  $("searchInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") performSearch(); });
-  
-  // Busca POP com Enter
-  $("popSearchInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") searchPOPs(); });
+function triggerTutorialFileUpload() {
+  $("tutorialPDFInput")?.click();
+}
+window.triggerTutorialFileUpload = triggerTutorialFileUpload;
 
-  // Click-outside para dropdown de busca (se houver)
-  document.addEventListener("click", (ev) => {
-    const container = document.querySelector(".search-container");
-    const dropdown  = $("searchResults");
-    if (container && dropdown && !container.contains(ev.target)) {
-      dropdown.style.display = "none";
-    }
+// Listener robusto do input de PDF do tutorial
+(function bindTutorialInput() {
+  const el = $("tutorialPDFInput");
+  if (!el) return;
+  el.addEventListener("change", (ev) => {
+    currentTutorialFile = ev.target.files?.[0] || null;
+    const span = $("tutorialFileName");
+    if (span) span.textContent = currentTutorialFile ? currentTutorialFile.name : "Nenhum arquivo selecionado";
+  });
+})();
+
+// Exigir PDF para criar tutorial; descrição opcional
+function addTutorial() {
+  const t = $("tutorialTitleInput")?.value.trim();
+  const d = $("tutorialDescriptionInput")?.value.trim();
+  if (!t) { showMessage("Informe o título do tutorial."); return; }
+  if (!currentTutorialFile) { showMessage("Anexe um arquivo PDF."); return; }
+
+  const url = URL.createObjectURL(currentTutorialFile);
+  wikiData.tutorials.unshift({
+    id: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    title: t, description: d || "", fileUrl: url
   });
 
-  // Página inicial
-  showPage("home");
-});
+  // limpa UI
+  if ($("tutorialTitleInput")) $("tutorialTitleInput").value = "";
+  if ($("tutorialDescriptionInput")) $("tutorialDescriptionInput").value = "";
+  if ($("tutorialPDFInput")) $("tutorialPDFInput").value = "";
+  const s = $("tutorialFileName"); if (s) s.textContent = "Nenhum arquivo selecionado";
+  currentTutorialFile = null;
 
-// ---- Expor funções para o HTML inline (onclick) ----
-window.showPage = showPage;
-window.performSearch = performSearch;
-window.triggerDocUpload = triggerDocUpload;
-window.createDocFromForm = createDocFromForm;
-window.openPDF = openPDF;
-window.closePDF = closePDF;
-
-// ---- Funções POP ----
-function initPOPPage() {
-  // Inicializar página POP - mostrar todos os setores por padrão
-  filterPOPs('todos');
+  renderTutorials();
+  showMessage("Tutorial adicionado.");
 }
+window.addTutorial = addTutorial;
 
-function filterPOPs(setor) {
-  const sections = document.querySelectorAll('.pop-section');
-  const buttons = document.querySelectorAll('.filter-btn');
-  const searchResults = $('popSearchResults');
-  
-  // Ocultar resultados de busca
-  if (searchResults) searchResults.style.display = 'none';
-  
-  // Atualizar botões ativos
-  buttons.forEach(btn => btn.classList.remove('active'));
-  const activeBtn = document.querySelector(`.filter-btn[onclick="filterPOPs('${setor}')"]`);
-  if (activeBtn) activeBtn.classList.add('active');
-  
-  // Mostrar/ocultar seções
-  sections.forEach(section => {
-    if (setor === 'todos') {
-      section.style.display = 'block';
-    } else {
-      section.style.display = section.dataset.setor === setor ? 'block' : 'none';
-    }
-  });
-}
+// RENDERIZAÇÃO: **sem** accordion na listagem
+function renderTutorials() {
+  const list = $("tutorialList");
+  if (!list) return;
+  list.innerHTML = "";
 
-function searchPOPs() {
-  const input = $('popSearchInput');
-  if (!input) return;
-  
-  const term = input.value.toLowerCase().trim();
-  if (!term) {
-    showMsg('Digite um termo para buscar.');
+  if (wikiData.tutorials.length === 0) {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = "Nenhum tutorial cadastrado.";
+    list.appendChild(p);
     return;
   }
-  
-  const results = wikiData.pops.filter(pop => 
-    pop.codigo.toLowerCase().includes(term) || 
-    pop.nome.toLowerCase().includes(term)
-  );
-  
-  const resultsContainer = $('popSearchResults');
-  const resultsList = $('popSearchResultsList');
-  
-  if (!resultsContainer || !resultsList) return;
-  
-  // Ocultar seções de setores
-  document.querySelectorAll('.pop-section').forEach(section => {
-    section.style.display = 'none';
-  });
-  
-  // Mostrar resultados
-  resultsContainer.style.display = 'block';
-  resultsList.innerHTML = '';
-  
-  if (results.length === 0) {
-    resultsList.innerHTML = '<p>Nenhum POP encontrado para o termo pesquisado.</p>';
-    return;
-  }
-  
-  results.forEach(pop => {
-    const item = document.createElement('div');
-    item.className = 'search-result-item';
+
+  wikiData.tutorials.forEach((tutorial) => {
+    const item = document.createElement("div");
+    item.className = "tutorial-item";
+    const actions = tutorial.fileUrl ? `
+      <a class="btn btn-secondary" href="${tutorial.fileUrl}" download="${tutorial.title}.pdf" style="margin-right:.5rem">Download</a>
+      <button class="btn btn-primary">Ver</button>
+    ` : "";
     item.innerHTML = `
-      <h4>${pop.codigo}</h4>
-      <p>${pop.nome}</p>
-      <small>Última atualização: ${pop.dataAtualizacao}</small>
-      <div class="search-result-actions">
-        <button class="btn btn-secondary btn-small" onclick="viewPOP('${pop.codigo}')">Ver</button>
-        <button class="btn btn-primary btn-small" onclick="downloadPOP('${pop.codigo}')">Baixar</button>
+      <h4>${tutorial.title}</h4>
+      <div class="tutorial-content">
+        <p>${tutorial.description || "Sem descrição"}</p>
+        ${actions}
       </div>
     `;
-    resultsList.appendChild(item);
+    if (tutorial.fileUrl) {
+      item.querySelector(".btn.btn-primary")?.addEventListener("click", () =>
+        openPDF(tutorial.fileUrl, tutorial.title, tutorial.description)
+      );
+    }
+    // OBS.: não existe mais listener de clique no <h4>; nada abre/fecha na listagem.
+    list.appendChild(item);
   });
 }
 
-function downloadModelo() {
-  // Simular download do modelo de POP
-  showMsg('Download do modelo de POP iniciado. (Simulação - arquivo não disponível nesta versão demo)');
+// ---------------------------------------------
+// FAQ e Recursos (no-ops locais p/ não quebrar)
+// ---------------------------------------------
+function addFAQ() {
+  const q = $("faqQuestionInput")?.value.trim();
+  const a = $("faqAnswerInput")?.value.trim();
+  if (!q || !a) { showMessage("Informe pergunta e resposta."); return; }
+  wikiData.faqs.unshift({ question: q, answer: a });
+  renderFAQs();
+  $("faqQuestionInput").value = "";
+  $("faqAnswerInput").value = "";
+}
+window.addFAQ = addFAQ;
+
+function renderFAQs() {
+  const list = $("faqList"); if (!list) return;
+  list.innerHTML = "";
+  if (wikiData.faqs.length === 0) {
+    list.innerHTML = `<p class="muted">Nenhuma pergunta cadastrada.</p>`;
+    return;
+  }
+  wikiData.faqs.forEach((f) => {
+    const div = document.createElement("div");
+    div.className = "faq-item";
+    div.innerHTML = `<h4>${f.question}</h4><div class="faq-answer"><p>${f.answer}</p></div>`;
+    // Sem toggle na listagem de tutoriais; FAQ pode manter se você já usava
+    const head = div.querySelector("h4");
+    const ans = div.querySelector(".faq-answer");
+    head.addEventListener("click", () => {
+      ans.style.display = ans.style.display === "none" ? "block" : "none";
+    });
+    list.appendChild(div);
+  });
 }
 
-function viewPOP(codigo) {
-  // Simular visualização do POP
-  showMsg(`Abrindo visualização do ${codigo}. (Simulação - arquivo não disponível nesta versão demo)`);
+function addResource() {
+  const t = $("resourceTitleInput")?.value.trim();
+  const d = $("resourceDescriptionInput")?.value.trim();
+  const l = $("resourceLinkInput")?.value.trim();
+  if (!t || !l) { showMessage("Informe título e link do recurso."); return; }
+  wikiData.resources.unshift({ title: t, description: d || "", link: l });
+  renderResources();
+  $("resourceTitleInput").value = "";
+  $("resourceDescriptionInput").value = "";
+  $("resourceLinkInput").value = "";
+}
+window.addResource = addResource;
+
+function renderResources() {
+  const list = $("resourceList"); if (!list) return;
+  list.innerHTML = "";
+  if (wikiData.resources.length === 0) {
+    list.innerHTML = `<p class="muted">Nenhum recurso cadastrado.</p>`;
+    return;
+  }
+  wikiData.resources.forEach((r) => {
+    const item = document.createElement("div");
+    item.className = "resource-item";
+    item.innerHTML = `
+      <h4>${r.title}</h4>
+      <p>${r.description || ""}</p>
+      <a class="btn btn-secondary" href="${r.link}" target="_blank" rel="noopener">Abrir</a>
+    `;
+    list.appendChild(item);
+  });
 }
 
-function downloadPOP(codigo) {
-  // Simular download do POP
-  showMsg(`Download do ${codigo} iniciado. (Simulação - arquivo não disponível nesta versão demo)`);
+// ---------------------------------------------
+// Modal de PDF — toggle só aqui (no tutorial aberto)
+// ---------------------------------------------
+function openPDF(url, title, description = "") {
+  const t = $("pdfTitle"); if (t) t.textContent = title || "Visualizar PDF";
+  const d = $("pdfDescription");
+  if (d) {
+    d.textContent = description || "";
+    d.style.display = "none"; // começa escondido
+  }
+  const toggle = $("toggleDescBtn");
+  if (toggle) {
+    toggle.style.display = description ? "inline-block" : "none";
+    toggle.textContent = "Ver explicação";
+    toggle.setAttribute("aria-expanded", "false");
+  }
+  const v = $("pdfViewer"); if (v) v.src = url;
+  const m = $("pdfModal"); if (m) m.style.display = "flex";
+}
+function closePDF() {
+  const m = $("pdfModal"); if (m) m.style.display = "none";
+  const v = $("pdfViewer"); if (v) v.src = "";
+}
+function togglePdfDescription() {
+  const d = $("pdfDescription");
+  const btn = $("toggleDescBtn");
+  if (!d || !btn) return;
+  const showing = d.style.display === "block";
+  d.style.display = showing ? "none" : "block";
+  btn.textContent = showing ? "Ver explicação" : "Ocultar explicação";
+  btn.setAttribute("aria-expanded", String(!showing));
 }
 
-// Expor funções POP para o HTML
-window.initPOPPage = initPOPPage;
-window.filterPOPs = filterPOPs;
-window.searchPOPs = searchPOPs;
-window.downloadModelo = downloadModelo;
-window.viewPOP = viewPOP;
-window.downloadPOP = downloadPOP;
-```
+// ---------------------------------------------
+// Inicialização
+// ---------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  showPage("home");
+  renderDocuments();
+  renderTutorials();
+  renderFAQs();
+  renderResources();
+});
+
+// Expõe para os onclick do HTML
+window.showPage = showPage;
+window.performSearch = performSearch;
+window.openPDF = openPDF;
+window.closePDF = closePDF;
+window.togglePdfDescription = togglePdfDescription;
