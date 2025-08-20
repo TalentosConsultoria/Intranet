@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Talentos Consultoria</title>
+  <link rel="icon" href="data:," />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#004aad',secondary:'#196dff',background:'#F0F4F8',card:'#FFFFFF',text:'#111827','text-muted':'#6b7280'},fontFamily:{sans:['Poppins','sans-serif']}}}}</script>
+
+  <!-- MSAL runtime e config (ordem importa) -->
+  <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js" crossorigin="anonymous"></script>
+  <script src="msal-config.js"></script>
+  <style>html,body{height:100%}</style>
+</head>
+<body class="bg-gradient-to-br from-background via-gray-100 to-blue-50 min-h-screen font-sans text-text flex">
+  <main class="m-auto p-6">
+    <div class="bg-card p-8 md:p-10 rounded-3xl shadow-2xl w-[92vw] max-w-md text-center">
+      <img src="https://media.glassdoor.com/sqll/2733569/talentos-consultoria-squarelogo-1649741391944.png" alt="Logo" class="mx-auto h-20 w-20 rounded-full shadow mb-6" />
+      <h1 class="text-3xl font-bold text-primary">Bem‑vindo!</h1>
+      <p class="text-text-muted mt-1">Acesse sua conta corporativa</p>
+
+      <button id="btn-login" class="w-full mt-8 py-3 px-6 bg-primary text-white font-semibold rounded-2xl shadow hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Entrar com Microsoft</button>
+
+      <div class="relative my-5">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t"></div></div>
+        <div class="relative flex justify-center text-sm"><span class="px-2 bg-card text-text-muted">ou</span></div>
+      </div>
+
+      <button id="btn-demo" class="w-full py-3 px-6 border-2 border-gray-300 text-gray-700 rounded-2xl hover:border-primary hover:text-primary">Acesso Demo</button>
+
+      <div id="error" class="hidden mt-5 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm"></div>
+      <div id="ok" class="hidden mt-5 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm"></div>
+
+      <p class="mt-6 text-xs text-text-muted">Use sua conta <strong>@talentosconsultoria.com.br</strong></p>
+    </div>
+  </main>
+
+  <script>
+    const btn = document.getElementById("btn-login");
+    const demoBtn = document.getElementById("btn-demo");
+    const $err = document.getElementById("error");
+    const $ok  = document.getElementById("ok");
+
+    function msg(el, text){ el.textContent=text; el.classList.remove("hidden"); }
+    function hide(el){ el.classList.add("hidden"); }
+
+    let msalInstance;
+
+    async function init() {
+      try {
+        if (!window.MSAL_CONFIG) throw new Error("Configuração MSAL não encontrada");
+        msalInstance = new msal.PublicClientApplication(window.MSAL_CONFIG);
+        window.msalInstance = msalInstance; // útil para logout
+        const response = await msalInstance.handleRedirectPromise().catch(e => {
+          // Ignora 'state_not_found' causado por reload sem fluxo de login
+          if (!String(e).includes("state_not_found")) throw e;
+          return null;
+        });
+
+        if (response && response.account) {
+          // volta do login
+          msalInstance.setActiveAccount(response.account);
+          localStorage.setItem("userAccount", JSON.stringify(response.account));
+          // Tenta pegar token (silencioso)
+          try {
+            const token = await msalInstance.acquireTokenSilent({ ...window.MSAL_LOGIN_REQUEST, account: response.account });
+            localStorage.setItem("authToken", token.accessToken);
+          } catch {}
+
+          const dest = localStorage.getItem("redirectAfterLogin") || "index.html";
+          localStorage.removeItem("redirectAfterLogin");
+          location.replace(dest);
+          return;
+        }
+
+        // Sessão já existe?
+        const acc = msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
+        if (acc) {
+          const dest = localStorage.getItem("redirectAfterLogin") || "index.html";
+          localStorage.removeItem("redirectAfterLogin");
+          location.replace(dest);
+          return;
+        }
+
+        btn.disabled = false; // pronto para logar
+      } catch (e) {
+        console.error(e);
+        msg($err, "Erro ao inicializar o login. Recarregue a página.");
+        btn.disabled = false;
+      }
+    }
+
+    btn.addEventListener("click", () => {
+      try {
+        hide($err); hide($ok);
+        msg($ok, "Redirecionando para a Microsoft…");
+        msalInstance.loginRedirect(window.MSAL_LOGIN_REQUEST);
+      } catch (e) {
+        console.error(e);
+        msg($err, "Falha ao iniciar o login.");
+      }
+    });
+
+    demoBtn.addEventListener("click", () => {
+      localStorage.setItem("demoUser", "true");
+      const dest = localStorage.getItem("redirectAfterLogin") || "index.html";
+      localStorage.removeItem("redirectAfterLogin");
+      location.replace(dest);
+    });
+
+    init();
+  </script>
+</body>
+</html>

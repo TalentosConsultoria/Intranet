@@ -1,2646 +1,618 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+
+<html class="scroll-smooth" lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wiki - Base de Conhecimento</title>
-    <!-- Firebase SDK -->
-    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Central de Ferramentas DP - Talentos Consultoria</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#004aad',
+                        secondary: '#196dff',
+                        background: '#f1f5f9',
+                        card: '#ffffff',
+                    }
+                }
+            }
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #780000 0%, #5a0000 100%);
-            min-height: 100vh;
+    </script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Sistema de Autenticação -->
+<style>
+        .news-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            min-height: 100vh;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #780000, #5a0000);
-            color: white;
-            padding: 1rem 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo-image {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-        }
-
-        .logo-icon {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .logo-t {
-            color: #780000;
-            font-size: 24px;
-            font-weight: bold;
-            position: relative;
-            z-index: 2;
-        }
-
-        .logo-dot {
-            position: absolute;
-            top: 8px;
-            width: 8px;
-            height: 8px;
-            background: #ff8c00;
-            border-radius: 50%;
-            z-index: 3;
-        }
-
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .logo-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        .logo-subtitle {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            font-weight: 300;
-        }
-
-        .search-container {
-            position: relative;
-            flex: 1;
-            max-width: 400px;
-            margin: 0 2rem;
-        }
-
-        .search-wrapper {
-            display: flex;
-            align-items: center;
-            position: relative;
-            width: 100%;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            padding-right: 3rem;
-        }
-
-        .search-box:focus {
-            outline: none;
-            background: white;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        .news-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
-        
-        .search-icon {
-            position: absolute;
-            right: 1rem;
-            color: #780000;
-            font-size: 1.2rem;
+        .weather-widget {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .highlight-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
         }
-        
-        .search-icon svg {
-            color: #780000;
-        }
-
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            margin-top: 0.5rem;
-        }
-
-        .search-result-item {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            transition: background 0.2s ease;
-        }
-
-        .search-result-item:hover {
-            background: #f8f9fa;
-        }
-
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
-
-        /* Navigation */
-        .nav {
-            background: linear-gradient(135deg, #780000, #5a0000);
-            padding: 0;
-        }
-
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-        }
-
-        .nav-item {
-            margin: 0;
-        }
-
-        .nav-link {
-            display: block;
-            padding: 1rem 1.5rem;
-            color: #ecf0f1;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: #780000;
-            color: white;
+        .highlight-card:hover {
             transform: translateY(-2px);
-        }
-
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: -100%;
-            width: 100%;
-            height: 3px;
-            background: #ff8c00;
-            transition: left 0.3s ease;
-        }
-
-        .nav-link:hover::before {
-            left: 0;
-        }
-
-        /* Main Content */
-        .main {
-            display: flex;
-            min-height: calc(100vh - 120px);
-        }
-
-        .sidebar {
-            width: 250px;
-            background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            padding: 2rem 1rem;
-        }
-
-        .sidebar h3 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding-left: 0;
-        }
-        
-        .sidebar-menu li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-link {
-            display: block;
-            padding: 0.5rem 0.75rem;
-            color: #6c757d;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-link:hover {
-            background: #e9ecef;
-            color: #2c3e50;
-            transform: translateX(5px);
-        }
-
-        .content {
-            flex: 1;
-            padding: 2rem;
-        }
-        
-        .page-content-wrapper {
-            display: flex;
-            gap: 2rem;
-        }
-        
-        .document-main-content {
-            flex-grow: 1;
-        }
-
-        .document-details-sidebar {
-            width: 250px;
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            height: fit-content;
-        }
-
-        .document-details-sidebar h4 {
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-        
-        .document-details-sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-.document-details-sidebar a {
-            display: block;
-            padding: 0.5rem;
-            color: #6c757d;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .document-details-sidebar a:hover {
-            color: #780000;
-        }
-
-        .page-title {
-            font-size: 2.5rem;
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #780000, #5a0000);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .page-meta {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 10px;
-            border-left: 4px solid #780000;
-        }
-
-        .meta-item {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .page-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .search-results-list {
-            margin-top: 2rem;
-            display: grid;
-            gap: 1rem;
-        }
-
-        .search-result-full-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .search-result-full-item:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-        }
-
-        .search-result-full-item h4 {
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-
-        .search-result-full-item p {
-            color: #6c757d;
-            margin-bottom: 0;
-        }
-
-
-        .content-section {
-            margin-bottom: 2rem;
-        }
-
-        .content-section h2 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #780000;
-        }
-
-        .content-section h3 {
-            color: #34495e;
-            margin: 1.5rem 0 0.75rem 0;
-        }
-
-        .content-section p {
-            margin-bottom: 1rem;
-            text-align: justify;
-        }
-        
-        .faq-item, .tutorial-item, .resource-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .resource-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .resource-item a {
-            text-decoration: none;
-        }
-        
-        .resource-item h4 {
-            margin: 0;
-            color: #2c3e50;
-        }
-        
-        .resource-item p {
-            color: #6c757d;
-            margin: 0.5rem 0 0 0;
-        }
-
-        .faq-item h4, .tutorial-item h4 {
-            margin: 0;
-            color: #2c3e50;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .faq-item .faq-answer, .tutorial-item .tutorial-content {
-            margin-top: 1rem;
-            padding-left: 1rem;
-            border-left: 3px solid #780000;
-            color: #6c757d;
-            display: none;
-        }
-        
-        .faq-form, .tutorial-form, .resource-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 1px solid #dee2e6;
-        }
-        
-        .faq-form input, .faq-form textarea, .tutorial-form input, .tutorial-form textarea, .resource-form input {
-            padding: 0.75rem;
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-            font-size: 1rem;
-        }
-        
-        .tutorial-upload-controls, .document-details-actions, .document-topics-form {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .document-details-actions {
-            justify-content: flex-end;
-        }
-
-        .document-topics-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .document-topic {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .document-topic h4 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            cursor: pointer;
-        }
-        
-        .document-topic-content {
-            padding-left: 1rem;
-            border-left: 3px solid #780000;
-            color: #6c757d;
-        }
-        
-        .comments-section {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .comments-section h4 {
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-        
-        .comment {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .comment p {
-            margin: 0;
-        }
-        
-        .comment-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        /* PDF Attachments */
-        .attachments {
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid #dee2e6;
-            margin-top: 2rem;
-        }
-
-        .attachments h3 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .attachment-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .attachment-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .attachment-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-color: #780000;
-        }
-
-        .attachment-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .attachment-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #780000, #5a0000);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .attachment-details h4 {
-            color: #2c3e50;
-            margin-bottom: 0.25rem;
-        }
-
-        .attachment-details p {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .attachment-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .upload-controls .btn-primary {
-            width: auto;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #780000, #5a0000);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(120, 0, 0, 0.3);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-        
-        .btn-edit {
-            background: #ff8c00;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #e67e22;
-        }
-
-        /* Styles for the new upload section */
-        .upload-controls {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .upload-controls input {
-            padding: 0.5rem;
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-            flex-grow: 1;
-            font-size: 0.9rem;
-        }
-
-        /* PDF Viewer Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            backdrop-filter: blur(5px);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            position: relative;
-            width: 90%;
-            height: 90%;
-            margin: 2% auto;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        
-        .description-modal-content {
-            width: 500px;
-            height: auto;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .tutorial-upload-modal-content {
-            width: 500px;
-            height: auto;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #780000, #5a0000);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            color: white;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: background 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .pdf-viewer {
-            width: 100%;
-            height: calc(100% - 60px);
-            border: none;
-        }
-
-        /* Cards */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .card h3 {
-            color: #2c3e50;
-            margin-bottom: 0.75rem;
-        }
-
-        .card p {
-            color: #6c757d;
-            margin-bottom: 1rem;
-        }
-
-        /* Home page specific styles */
-        .hero-section {
-            text-align: center;
-            padding: 3rem 0;
-            background: linear-gradient(135deg, #780000, #5a0000);
-            color: white;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-        }
-
-        .hero-section h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: 300;
-        }
-
-        .hero-section p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .quick-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .quick-link {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-decoration: none;
-            color: #2c3e50;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .quick-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border-color: #780000;
-        }
-
-        .quick-link-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        /* Message Box */
-        #messageBox {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background-color: #780000;
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 3000;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        /* POP Styles */
-        .hero-description {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid #780000;
-            margin-bottom: 2rem;
-        }
-
-        .hero-description p {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 1.1rem;
-            line-height: 1.7;
-        }
-
-        .pop-header-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .pop-header-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            width: 100%;
-        }
-
-        .btn-download-modelo {
-            font-size: 1.1rem;
-            padding: 0.75rem 1.5rem;
-            white-space: nowrap;
-        }
-
-        .pop-search {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .search-input {
-            padding: 0.75rem 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            font-size: 1rem;
-            width: 300px;
-            transition: border-color 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #780000;
-            box-shadow: 0 0 0 2px rgba(120, 0, 0, 0.1);
-        }
-
-        .pop-filters {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid #dee2e6;
-            margin-bottom: 2rem;
-        }
-
-        .pop-filters h3 {
-            margin: 0 0 1rem 0;
-            color: #2c3e50;
-            font-size: 1.1rem;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid #dee2e6;
-            background: white;
-            color: #6c757d;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .filter-btn:hover {
-            background: #e9ecef;
-            color: #2c3e50;
-        }
-
-        .filter-btn.active {
-            background: #780000;
-            color: white;
-            border-color: #780000;
-        }
-
-        .pop-section {
-            margin-bottom: 3rem;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .setor-title {
-            background: linear-gradient(135deg, #780000, #5a0000);
-            color: white;
-            margin: 0;
-            padding: 1.5rem;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .pop-table-container {
-            padding: 1.5rem;
-        }
-
-        .pop-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        .pop-table th {
-            background: #f8f9fa;
-            color: #2c3e50;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .pop-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-            vertical-align: middle;
-        }
-
-        .pop-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .pop-table td strong {
-            color: #780000;
-            font-weight: 600;
-        }
-
-        .btn-small {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            margin-right: 0.25rem;
-        }
-
-        .pop-search-results {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-top: 2rem;
-        }
-
-        .pop-search-results h3 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #780000;
-        }
-
-        .search-result-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .search-result-item:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-result-item h4 {
-            margin: 0 0 0.5rem 0;
-            color: #780000;
-        }
-
-        .search-result-item p {
-            margin: 0;
-            color: #6c757d;
-        }
-
-        .search-result-item .search-result-actions {
-            margin-top: 0.75rem;
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .pop-form-wrapper {
-            margin-top: 2rem;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 1.5rem;
-            overflow: hidden;
-            display: none;
-        }
-        
-        .pop-form-wrapper.expanded {
-            animation: expandForm 0.4s ease-out forwards;
-        }
-
-        .pop-form-wrapper.collapsed {
-            animation: collapseForm 0.4s ease-out forwards;
-        }
-        
-        @keyframes expandForm {
-            0% { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
-            100% { max-height: 500px; opacity: 1; padding-top: 1.5rem; padding-bottom: 1.5rem; }
-        }
-        
-        @keyframes collapseForm {
-            0% { max-height: 500px; opacity: 1; padding-top: 1.5rem; padding-bottom: 1.5rem; }
-            100% { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
-        }
-
-        .pop-form-container .faq-form {
-            padding: 0;
-            border: none;
-            background: transparent;
-            margin-top: 0;
-        }
-
-        .pop-form-controls {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .pop-form-controls input, .pop-form-controls select {
-            flex-grow: 1;
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .page-content, .card {
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            .search-container {
-                margin: 0;
-                max-width: none;
-            }
-
-            .nav-menu {
-                flex-direction: column;
-            }
-
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #dee2e6;
-            }
-
-            .page-title {
-                font-size: 2rem;
-            }
-
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .pop-header-actions {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .search-input {
-                width: 100%;
-            }
-
-            .filter-buttons {
-                justify-content: center;
-            }
-
-            .pop-table-container {
-                overflow-x: auto;
-                padding: 1rem;
-            }
-
-            .pop-table {
-                min-width: 600px;
-            }
-
-            .btn-small {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.8rem;
-            }
-        }
-        
-        .history-list {
-            margin-top: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .history-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-        
-        .manage-pop-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .manage-pop-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .manage-pop-header h2 {
-            margin: 0;
-            color: #2c3e50;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #780000;
-        }
-
-        .manage-pop-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .manage-pop-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-
-        .manage-pop-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .manage-pop-info h4 {
-            margin: 0;
-        }
-
-        .manage-pop-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .manage-pop-form-wrapper {
-            margin-bottom: 2rem;
-        }
-        
-        .manage-pop-form-wrapper h4 {
-            margin-bottom: 1rem;
-        }
-        
-        .manage-pop-form-wrapper input, .manage-pop-form-wrapper select {
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        
-        .pop-form-upload-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        .alert-card { background: linear-gradient(135deg, #4285f4, #34a853); }
+        .confronto-card { background: linear-gradient(135deg, #5f6368, #3c4043); }
+        .futebol-card { background: linear-gradient(135deg, #34a853, #137333); }
+        .politica-card { background: linear-gradient(135deg, #ea4335, #d33b2c); }
+        .musica-card { background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+        .arte-card { background: linear-gradient(135deg, #e91e63, #ad1457); }
+        .transporte-card { background: linear-gradient(135deg, #ff9800, #e65100); }
     </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-container">
-                        <div class="logo-image">
-                            <div class="logo-icon">
-                                <div class="logo-dot"></div>
-                                <div class="logo-t">T</div>
-                            </div>
-                        </div>
-                        <div class="logo-text">
-                            <div class="logo-title">Talentos Wiki</div>
-                            <div class="logo-subtitle">Talentos Consultoria</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="search-container">
-                    <div class="search-wrapper">
-                        <input type="text" class="search-box" placeholder="Pesquisar na wiki..." id="searchInput">
-                        <span class="search-icon" onclick="performSearch()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                        </span>
-                    </div>
-                    <div class="search-results" id="searchResults"></div>
-                </div>
-            </div>
-        </header>
+<style>
+@keyframes scroll-x {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-scroll-x {
+  animation: scroll-x 40s linear infinite;
+}
+.animate-scroll-x:hover {
+  animation-play-state: paused;
+}
+</style><style>
+    .news-pill { background: #111827; color: #e5e7eb; }
+    .news-pill:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+    </style><style>html[data-auth='checking'] body{visibility:hidden}</style><script>document.documentElement.setAttribute('data-auth','checking');</script><script crossorigin="anonymous" src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script><script src="msal-config.js"></script><script src="config.js"></script><script src="auth-guard.js"></script></head>
+<body class="bg-background flex flex-col min-h-screen font-sans"><script data-inline-auth="1">
+(function(){
+  try{
+    const isLogin = /login\.html$/i.test(location.pathname);
+    if(!isLogin){
+      const acc = localStorage.getItem('userAccount') || (localStorage.getItem('demoUser')==='true' ? 'demo' : null);
+      if(!acc){
+        // preserve original path for after-login redirect
+        localStorage.setItem('redirectAfterLogin', location.pathname + location.search + location.hash);
+        // Try relative login first (works in subpaths), then absolute as fallback
+        const base = location.origin || (location.protocol + '//' + location.host);
+        location.replace(base + '/login.html');
+        return;
+      }
+    }
+    document.documentElement.removeAttribute('data-auth');
+  }catch(e){
+    console.error('inline-auth error', e);
+  }
+})();
+</script>
+<header class="bg-white shadow-md p-4 sticky top-0 z-50">
+<div class="container mx-auto flex justify-between items-center">
+<a class="flex items-center space-x-3" href="index.html">
+<div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+<span class="text-white font-bold text-lg">T</span>
+</div>
+<span class="text-xl font-bold text-red-700 hidden md:block">Talentos Consultoria</span>
+</a>
+<nav class="flex items-center gap-6">
+<a class="text-gray-600 hover:text-primary font-medium transition duration-300" href="https://intranet.talentosconsultoria.com.br">Wiki</a>
+<a class="text-gray-600 hover:text-primary font-medium transition duration-300" href="https://aej.talentosconsultoria.com.br">AEJ</a>
+<div class="relative">
+<button class="text-gray-600 hover:text-primary font-medium transition duration-300 flex items-center space-x-1 focus:outline-none" id="tools-dropdown-button">
+<span>Ferramentas DP</span>
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 hidden border" id="tools-dropdown-menu">
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="qlp-format.html">📊 QLP - Formatador de Planilhas</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="pdf-tool.html">📄 PDF - Editor de Documentos</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="format-bancodoc.html">🔄 Bdoc - Unificação de Dados</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" href="#ultimas-noticias">📰 Notícias</a></div>
+</div>
+<!-- O botão de logout será adicionado automaticamente pelo auth-guard.js -->
+</nav>
+</div>
+</header>
+<main class="flex-grow p-6">
+<section class="mb-6" id="faixa-noticias">
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-xl font-bold text-gray-800">Últimas Notícias</h2>
+</div>
+<div class="relative">
+<button aria-label="Anterior" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border shadow hover:bg-gray-50 flex items-center justify-center z-30 pointer-events-auto" id="btn-prev">◀</button>
+<button aria-label="Próximo" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border shadow hover:bg-gray-50 flex items-center justify-center z-30 pointer-events-auto" id="btn-next">▶</button>
+<div class="px-12">
+<div class="flex gap-3 overflow-x-auto scroll-smooth no-scrollbar pb-2" id="news-strip"></div>
+</div>
+<div class="pointer-events-none absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-white to-transparent"></div>
+<div class="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white to-transparent"></div>
+</div>
+<script>
+(async function () {
+  const strip = document.getElementById("news-strip");
+  const btnPrev = document.getElementById("btn-prev");
+  const btnNext = document.getElementById("btn-next");
 
-        <!-- Navigation -->
-        <nav class="nav">
-            <div class="nav-content">
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link active" onclick="showPage('home')">Início</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="showPage('documentation')">Documentação</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="showPage('tutorials')">Tutoriais</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="showPage('faq')">FAQ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="showPage('resources')">Recursos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="showPage('pop')">POPs</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+  // --- Fetch notícias do G1 via rss2json (sem key) ---
+  async function fetchJson(url){
+    try { const r = await fetch(url); return await r.json(); }
+    catch(e){ const r = await fetch("https://api.allorigins.win/raw?url="+encodeURIComponent(url)); return await r.json(); }
+  }
+  const rssUrl = "https://g1.globo.com/dynamo/rss2.xml";
+  const api = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+  const data = await fetchJson(api);
 
-        <!-- Main Content -->
-        <main class="main">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <h3>Navegação</h3>
-                <ul class="sidebar-menu" id="sidebarMenu">
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link" onclick="showPage('home')">Página Inicial</a>
-                    </li>
-                    
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link" onclick="showPage('api-docs')">API Reference</a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link" onclick="showPage('pop')">Procedimentos (POP)</a>
-                    </li>
-                </ul>
-            </aside>
+  strip.innerHTML = "";
+  
+  // Helpers de imagem robustos
 
-            <!-- Content Area -->
-            <div class="content">
-                <!-- Home Page -->
-                <div id="page-home" class="page">
-                    <div class="hero-section">
-                        <h1>Bem-vindo à Talentos Wiki</h1>
-                        <p>Sua base de conhecimento completa da Talentos Consultoria com documentação, tutoriais e recursos essenciais</p>
-                    </div>
+  function normHttps(u){
+    if(!u) return "";
+    try{
+      u = u.replace(/&amp;/g,"&").trim();
+      if(u.startsWith("//")) return "https:"+u;
+      if(u.startsWith("http://")) return "https://" + u.slice(7);
+      return u;
+    }catch(e){ return u; }
+  }
+  function extractImgFromContent(html){
+    if(!html) return "";
+    const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    return m ? m[1] : "";
+  }
 
-                    <div class="quick-links">
-                        <a href="#" class="quick-link" onclick="showPage('documentation')">
-                            <span class="quick-link-icon"></span>
-                            <h3>Documentação</h3>
-                            <p>Guias completos e referências</p>
-                        </a>
-                        <a href="#" class="quick-link" onclick="showPage('tutorials')">
-                            <span class="quick-link-icon"></span>
-                            <h3>Tutoriais</h3>
-                            <p>Aprenda passo a passo</p>
-                        </a>
-                        <a href="#" class="quick-link" onclick="showPage('faq')">
-                            <span class="quick-link-icon"></span>
-                            <h3>FAQ</h3>
-                            <p>Perguntas frequentes</p>
-                        </a>
-                        <a href="#" class="quick-link" onclick="showPage('resources')">
-                            <span class="quick-link-icon"></span>
-                            <h3>Recursos</h3>
-                            <p>Ferramentas e materiais</p>
-                        </a>
-                        <a href="#" class="quick-link" onclick="showPage('pop')">
-                            <span class="quick-link-icon"></span>
-                            <h3>POPs</h3>
-                            <p>Procedimentos Operacionais Padrão</p>
-                        </a>
-                    </div>
+  (data.items || []).slice(0, 18).forEach(item => {
+    const a = document.createElement("a");
+    a.href = item.link || "#";
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.className = "news-pill min-w-[220px] w-[220px] rounded-xl shadow transition p-2 inline-flex flex-col";
 
-                    <div class="cards-grid">
-                        <div class="card">
-                            <h3>Artigos Recentes</h3>
-                            <p>Confira as últimas adições à nossa base de conhecimento</p>
-                            <a href="#" class="btn btn-primary">Ver todos</a>
-                        </div>
-                        <div class="card">
-                            <h3>Mais Populares</h3>
-                            <p>Os artigos mais acessados pelos usuários</p>
-                            <a href="#" class="btn btn-primary">Explorar</a>
-                        </div>
-                        <div class="card">
-                            <h3>Dicas Rápidas</h3>
-                            <p>Soluções práticas para problemas comuns</p>
-                            <a href="#" class="btn btn-primary">Ver dicas</a>
-                        </div>
-                    </div>
-                </div>
+    let imgRaw = (item.thumbnail||"") 
+              || (item.enclosure && (item.enclosure.link || item.enclosure.url)) 
+              || extractImgFromContent(item.content || item.description || "");
+    let imgSrc = normHttps(imgRaw) || "https://via.placeholder.com/220x120?text=Not%C3%ADcia";
 
-                <!-- Documentation Page -->
-                <div id="page-documentation" class="page" style="display: none;">
-                    <h1 class="page-title">Documentação</h1>
-                    
-                    <div class="page-meta">
-                        <div class="meta-item">Atualizado: 11/08/2025</div>
-                        <div class="meta-item">Autor: Equipe Wiki</div>
-                        <div class="meta-item">Tempo de leitura: 15 min</div>
-                    </div>
+    a.innerHTML = `
+      <div class="w-full h-[120px] bg-gray-800 rounded overflow-hidden">
+        <img src="${imgSrc}" onerror="this.onerror=null;this.src='https://via.placeholder.com/220x120?text=Not%C3%ADcia';" class="w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer"/>
+      </div>
+      <div class="mt-2 text-sm font-semibold line-clamp-2" style="-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;">
+        ${item.title || ""}
+      </div>
+    `;
+    strip.appendChild(a);
+  });
 
-                    <div class="page-content">
-                        <!-- Controls for description versioning -->
-                        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                            <button class="btn btn-primary" onclick="saveDescription()">Salvar Descrição</button>
-                            <button class="btn btn-secondary" onclick="showHistory()">Ver Histórico</button>
-                        </div>
 
-                        <!-- Main document description field -->
-                        <div class="content-section">
-                            <h2>Descrição Principal do Documento</h2>
-                            <textarea id="mainDescription" style="width: 100%; height: 200px; padding: 1rem; border-radius: 8px; border: 1px solid #dee2e6; font-size: 1rem;"></textarea>
-                        </div>
-                        
-                        <!-- History view -->
-                        <div id="historyView" style="display: none;">
-                            <h2>Histórico de Versões</h2>
-                            <div id="historyList" class="history-list"></div>
-                        </div>
+  // --- Auto-scroll com requestAnimationFrame
+  let paused = false;
+  let last;
+  const SPEED = 30; // px por segundo
+  function tick(ts){
+    if (paused) { last = ts; return requestAnimationFrame(tick); }
+    if (last == null) last = ts;
+    const dt = (ts - last) / 1000;
+    last = ts;
+    const dx = SPEED * dt;
+    if (strip.scrollLeft + strip.clientWidth + 1 >= strip.scrollWidth) {
+      strip.scrollTo({left: 0});
+    } else {
+      strip.scrollLeft += dx;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 
-                        <!-- Upload controls -->
-                        <div class="upload-controls">
-                            <input type="file" id="pdfUploadInput" accept=".pdf" style="display: none;">
-                            <button class="btn btn-primary" onclick="triggerDocUpload()">
-                                <span>+ Upload de Documento</span>
-                            </button>
-                        </div>
+  // Pausa no hover/focus
+  strip.addEventListener("mouseenter", () => paused = true);
+  strip.addEventListener("mouseleave", () => paused = false);
+  document.addEventListener("visibilitychange", () => { paused = document.hidden; });
 
-                        <!-- PDF Attachments Section -->
-                        <div class="attachments">
-                            <h3>Documentos Anexos</h3>
-                            <div class="attachment-list" id="attachmentList">
-                                <p id="loadingAttachments">Carregando documentos...</p>
-                                <!-- Attachments will be rendered here dynamically from Firestore -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Search Results Page -->
-                <div id="page-search-results" class="page" style="display: none;">
-                    <h1 class="page-title">Resultados da Pesquisa</h1>
-                    <div class="page-content">
-                        <h3 id="searchResultsTitle"></h3>
-                        <div class="search-results-list" id="searchResultsList">
-                            <!-- Search results will be rendered here -->
-                        </div>
-                    </div>
-                </div>
+  // --- Botões laterais funcionam junto com auto-scroll
+  function nudge(dir){
+    paused = true;
+    const step = 260 * dir;
+    strip.scrollBy({left: step, behavior: "smooth"});
+    clearTimeout(nudge._t);
+    nudge._t = setTimeout(()=> paused = false, 1200); // retoma depois de 1.2s
+  }
+  btnPrev.addEventListener("click", (e)=>{ e.preventDefault(); nudge(-1); });
+  btnNext.addEventListener("click", (e)=>{ e.preventDefault(); nudge(1); });
+})();
+</script></section>
+<style>
+  .no-scrollbar::-webkit-scrollbar{display:none}
+  .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+</style>
+<style>
+  .no-scrollbar::-webkit-scrollbar{display:none}
+  .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+</style>
+<script>
+async function fetchWithProxy(url){
+  try { return await (await fetch(url)).json(); }
+  catch(e){ return await (await fetch("https://api.allorigins.win/raw?url="+encodeURIComponent(url))).json(); }
+}
+(async function () {
+  // G1 RSS -> usar conversão para JSON via rss2json gratuito (sem key) usando allorigins/raw
+  const rssUrl = "https://g1.globo.com/dynamo/rss2.xml";
+  const rssToJson = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+  let data;
+  try {
+    data = await fetchWithProxy(rssToJson);
+  } catch(e){ console.error(e); return; }
 
-                <!-- Document Details Page -->
-                <div id="page-document-details" class="page" style="display: none;">
-                    <div class="page-content-wrapper">
-                        <div class="document-main-content">
-                            <h1 class="page-title" id="docDetailsTitle"></h1>
-                            <div class="document-details-actions">
-                                <button class="btn btn-primary" id="docDownloadBtn">Download do Arquivo</button>
-                            </div>
-                            
-                            <div class="content-section">
-                                <h2 id="docDetailsDescriptionTitle">Descrição Geral</h2>
-                                <p id="docDetailsDescription"></p>
-                            </div>
+  const strip = document.getElementById("news-strip");
+  (data.items || []).slice(0, 16).forEach(item => {
+    const title = item.title || "";
+    const link = item.link || "#";
+    const img = (item.thumbnail || "").trim() || "https://via.placeholder.com/220x120?text=Noticia";
 
-                            <div class="content-section">
-                                <h2>Tópicos e Seções</h2>
-                                <div id="docTopicsList"></div>
-                                <div class="faq-form document-topics-form">
-                                    <h4>Adicionar novo tópico</h4>
-                                    <input type="text" id="topicTitleInput" placeholder="Título do tópico...">
-                                    <textarea id="topicContentInput" placeholder="Conteúdo do tópico..."></textarea>
-                                    <button class="btn btn-primary" onclick="addTopic()">Adicionar Tópico</button>
-                                </div>
-                            </div>
-                            
-                            <div class="comments-section">
-                                <h4>Comentários</h4>
-                                <div id="docCommentsList"></div>
-                                <div class="comment-form">
-                                    <textarea id="commentInput" placeholder="Adicionar um comentário..."></textarea>
-                                    <button class="btn btn-primary" onclick="addComment()">Comentar</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <aside class="document-details-sidebar">
-                            <h4>Navegação</h4>
-                            <ul id="documentTopicsSidebar">
-                                <!-- Topics will be rendered here dynamically -->
-                            </ul>
-                        </aside>
-                    </div>
-                </div>
+    const card = document.createElement("a");
+    card.href = link;
+    card.target = "_blank";
+    card.rel = "noopener";
+    card.className = "min-w-[220px] w-[220px] bg-white rounded-lg shadow hover:shadow-lg hover:-translate-y-0.5 transition p-2 inline-flex flex-col";
 
-                <!-- Other Pages (Templates) -->
-                <div id="page-tutorials" class="page" style="display: none;">
-                    <h1 class="page-title">Tutoriais</h1>
-                    <div class="page-content">
-                        <p>Aqui você pode adicionar e visualizar tutoriais.</p>
+    card.innerHTML = `
+      <div class="w-full h-[120px] bg-gray-200 rounded overflow-hidden">
+        <img src="${img}" class="w-full h-full object-cover" loading="lazy" />
+      </div>
+      <div class="mt-2 text-sm font-semibold text-gray-800 line-clamp-2" style="-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;">
+        ${title}
+      </div>
+    `;
+    strip.appendChild(card);
+  });
 
-                        <div class="tutorial-form">
-                            <h4>Adicionar novo tutorial</h4>
-                            <input type="text" id="tutorialTitleInput" placeholder="Título do tutorial...">
-                            <textarea id="tutorialDescriptionInput" placeholder="Descrição do tutorial..."></textarea>
-                            <input type="file" id="tutorialPDFInput" accept=".pdf" style="display: none;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span id="tutorialFileName">Nenhum arquivo selecionado</span>
-                                <button class="btn btn-primary" onclick="triggerTutorialFileUpload()">Anexar PDF</button>
-                            </div>
-                            <button class="btn btn-primary" onclick="addTutorial()">Adicionar Tutorial</button>
-                        </div>
+  // Navegação
+  const prev = document.getElementById("btn-prev");
+  const next = document.getElementById("btn-next");
+  const step = 240;
+  prev.addEventListener("click", () => strip.scrollBy({left: -step, behavior: "smooth"}));
+  next.addEventListener("click", () => strip.scrollBy({left: step, behavior: "smooth"}));
+})();
+</script>
+<div class="container mx-auto max-w-7xl">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<!-- Coluna Principal -->
+<div class="lg:col-span-3 space-y-6">
+<!-- Destaques do Dia -->
+<section>
+<h2 class="text-2xl font-bold text-gray-800 mb-6">Destaques do Dia</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="highlight-card alert-card p-6 rounded-xl text-white" onclick="window.open('https://g1.globo.com/rj/rio-de-janeiro/', '_blank')">
+<div class="text-4xl mb-3">🌊</div>
+<h3 class="font-bold text-xl mb-2">Alerta</h3>
+<p class="text-sm opacity-90 mb-3">Ressaca no litoral carioca com ondas de até 2,5 metros afeta praias da Zona Sul</p>
+</div>
+<div class="highlight-card confronto-card p-6 rounded-xl text-white" onclick="window.open('https://extra.globo.com/noticias/rio/', '_blank')">
+<div class="text-4xl mb-3">⚔️</div>
+<h3 class="font-bold text-xl mb-2">Confronto</h3>
+<p class="text-sm opacity-90 mb-3">Operação policial no Complexo da Maré deixa moradores em alerta</p>
+</div>
+<div class="highlight-card futebol-card p-6 rounded-xl text-white" onclick="window.open('https://oglobo.globo.com/esportes/', '_blank')">
+<div class="text-4xl mb-3">⚽</div>
+<h3 class="font-bold text-xl mb-2">Futebol</h3>
+<p class="text-sm opacity-90 mb-3">Palmeiras vence Botafogo por 1 a 0 no Nilton Santos pelo Brasileirão</p>
+</div>
+<div class="highlight-card politica-card p-6 rounded-xl text-white" onclick="window.open('https://rj.gov.br/', '_blank')">
+<div class="text-4xl mb-3">🏛️</div>
+<h3 class="font-bold text-xl mb-2">Política</h3>
+<p class="text-sm opacity-90 mb-3">Governo do RJ anuncia novos investimentos em segurança pública</p>
+</div>
+</div>
+</section>
+<!-- Mais Notícias -->
+<section>
+<h2 class="text-2xl font-bold text-gray-800 mb-6">Mais Notícias</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="highlight-card musica-card p-6 rounded-xl text-white" onclick="window.open('https://g1.globo.com/rj/rio-de-janeiro/musica/', '_blank')">
+<div class="text-4xl mb-3">🎵</div>
+<h3 class="font-bold text-xl mb-2">Música</h3>
+<p class="text-sm opacity-90">Eventos musicais e shows no Rio de Janeiro</p>
+</div>
+<div class="highlight-card arte-card p-6 rounded-xl text-white" onclick="window.open('https://oglobo.globo.com/cultura/', '_blank')">
+<div class="text-4xl mb-3">🎨</div>
+<h3 class="font-bold text-xl mb-2">Arte</h3>
+<p class="text-sm opacity-90">Exposições e eventos culturais na cidade</p>
+</div>
+<div class="highlight-card transporte-card p-6 rounded-xl text-white" onclick="window.open('https://www.rio.rj.gov.br/web/smtr', '_blank')">
+<div class="text-4xl mb-3">🚌</div>
+<h3 class="font-bold text-xl mb-2">Transporte</h3>
+<p class="text-sm opacity-90">Informações sobre mobilidade urbana no Rio</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Barra Lateral -->
+<div class="lg:col-span-1 space-y-6">
+<!-- Widget do Clima -->
+<div class="weather-widget text-white rounded-2xl shadow-xl p-6">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="font-bold text-lg" id="wx-city">Rio de Janeiro</h3>
+<p class="text-sm opacity-90" id="wx-desc">Carregando...</p>
+</div>
+<div class="text-right">
+<div class="text-3xl font-bold" id="wx-temp">--°C</div>
+<div class="text-2xl" id="wx-icon">⛅</div>
+</div>
+</div>
+<div class="grid grid-cols-5 gap-2 text-center" id="wx-daily"></div>
+<script>
+// Open-Meteo Rio de Janeiro com painel de 15 dias (toggle)
+async function loadWeather(){
+  const url = "https://api.open-meteo.com/v1/forecast?latitude=-22.9068&longitude=-43.1729&timezone=America%2FSao_Paulo&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=16";
+  const res = await fetch(url);
+  const data = await res.json();
+  const current = data.current_weather || {};
+  const daily = data.daily || {};
+  document.getElementById('wx-temp').textContent = Math.round(current.temperature) + "°C";
+  document.getElementById('wx-desc').textContent = codeToText(current.weathercode);
 
-                        <div id="tutorialList" class="tutorial-list">
-                            <!-- Tutorial items will be rendered here -->
-                        </div>
-                    </div>
-                </div>
+  const cont = document.getElementById('wx-daily');
+  cont.innerHTML = "";
+  const dates = daily.time || [];
+  for(let i=1;i<Math.min(6, dates.length);i++){
+    cont.appendChild(dayCell(dates[i], daily.weather_code[i], daily.temperature_2m_min[i], daily.temperature_2m_max[i]));
+  }
 
-                <div id="page-faq" class="page" style="display: none;">
-                    <h1 class="page-title">Perguntas Frequentes</h1>
-                    <div class="page-content">
-                        <p>Aqui você pode ver e adicionar perguntas frequentes.</p>
-                        
-                        <div class="faq-form">
-                            <h4>Adicionar nova pergunta</h4>
-                            <input type="text" id="faqQuestionInput" placeholder="Digite sua pergunta...">
-                            <textarea id="faqAnswerInput" placeholder="Digite a resposta..."></textarea>
-                            <button class="btn btn-primary" onclick="addFAQ()">Adicionar Pergunta</button>
-                        </div>
+  // painel estendido
+  const ext = document.createElement('div');
+  ext.id = "wx-extended";
+  ext.className = "grid grid-cols-5 gap-2 text-center mt-2 hidden";
+  for(let i=6;i<Math.min(16, dates.length);i++){
+    ext.appendChild(dayCell(dates[i], daily.weather_code[i], daily.temperature_2m_min[i], daily.temperature_2m_max[i]));
+  }
+  cont.parentElement.appendChild(ext);
 
-                        <div id="faqList" class="faq-list">
-                            <!-- FAQ items will be rendered here -->
-                        </div>
-                    </div>
-                </div>
+  // botão toggle
+  const btn = document.createElement('button');
+  btn.id = "wx-toggle";
+  btn.className = "mt-3 text-xs bg-white/20 hover:bg-white/30 transition rounded px-3 py-1";
+  btn.textContent = "Ver 15 dias";
+  btn.addEventListener('click', ()=>{
+    const h = ext.classList.toggle('hidden');
+    btn.textContent = h ? "Ver 15 dias" : "Ocultar";
+  });
+  cont.parentElement.appendChild(btn);
+}
+function dayCell(dateStr, code, min, max){
+  const el = document.createElement('div');
+  const d = new Date(dateStr + "T00:00:00");
+  el.className = "bg-white/10 rounded p-2";
+  el.innerHTML = `
+    <div class="text-xs">${d.toLocaleDateString('pt-BR', {weekday:'short'})}</div>
+    <div class="text-lg">${codeToIcon(code)}</div>
+    <div class="text-xs">${Math.round(min)}° / ${Math.round(max)}°</div>
+  `;
+  return el;
+}
+function codeToText(code){
+  const map = {0:"Céu limpo",1:"Predomínio de sol",2:"Parcialmente nublado",3:"Nublado",45:"Nevoeiro",48:"Nevoeiro",
+               51:"Garoa fraca",53:"Garoa",55:"Garoa forte",61:"Chuva fraca",63:"Chuva",65:"Chuva forte",71:"Neve",
+               80:"Pancadas",95:"Tempestade"};
+  return map[code] || "Tempo";
+}
+function codeToIcon(code){
+  if(code===0) return "☀️";
+  if([1,2].includes(code)) return "🌤️";
+  if(code===3) return "☁️";
+  if([61,63,65,80].includes(code)) return "🌧️";
+  if([95].includes(code)) return "⛈️";
+  return "⛅";
+}
+loadWeather();
+</script></div>
+<!-- Copa Libertadores -->
+<div class="bg-white rounded-2xl shadow-xl p-6">
+<div class="flex items-center mb-4">
+<div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mr-3">
+<span class="text-white text-xs font-bold">⚽</span>
+</div>
+<h3 class="font-bold text-lg text-gray-800">Futebol - ESPN (Série A)</h3>
+</div>
+<p class="text-sm text-gray-600 mb-4">Jogos de hoje e ao vivo</p>
+<div class="space-y-3" id="espn-list"></div>
+<script>
+async function fetchJson(url){
+  try { return await (await fetch(url)).json(); }
+  catch(e){ return await (await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url))).json(); }
+}
+function timeBR(iso){
+  try{ const d=new Date(iso); return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch{ return ''; }
+}
+function statusText(c){
+  const st = c.status?.type?.state; // 'pre' | 'in' | 'post'
+  const short = c.status?.type?.shortDetail || '';
+  const detail = c.status?.type?.detail || '';
+  if(st==='pre') return timeBR(c.startDate || c.date) || short || 'Agendado';
+  if(st==='in')  return 'AO VIVO ' + (short || detail || '');
+  if(st==='post')return short || 'Final';
+  return short || '';
+}
+async function carregarESPN(){
+  const url = 'https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard';
+  const data = await fetchJson(url);
+  const list = document.getElementById('espn-list');
+  list.innerHTML = '';
+  const events = (data.events || []);
+  if(!events.length){ list.innerHTML = '<div class="text-sm text-gray-500">Sem jogos listados neste momento.</div>'; return; }
 
-                <div id="page-resources" class="page" style="display: none;">
-                    <h1 class="page-title">Recursos</h1>
-                    <div class="page-content">
-                        <p>Aqui você pode adicionar e visualizar recursos úteis.</p>
+  events.slice(0,10).forEach(ev => {
+    const comp = (ev.competitions && ev.competitions[0]) || {};
+    const teams = (comp.competitors || []).sort((a,b)=> (a.home? -1: 1));
+    const home = teams[0] || {};
+    const away = teams[1] || {};
+    const st = comp.status?.type?.state;
+    const showScore = (st==='in' || st==='post');
 
-                        <div class="resource-form">
-                            <h4>Adicionar novo recurso</h4>
-                            <input type="text" id="resourceTitleInput" placeholder="Título do recurso...">
-                            <input type="text" id="resourceDescriptionInput" placeholder="Descrição do recurso...">
-                            <input type="url" id="resourceLinkInput" placeholder="Link (URL) do recurso...">
-                            <button class="btn btn-primary" onclick="addResource()">Adicionar Recurso</button>
-                        </div>
-                        
-                        <div id="resourceList" class="resource-list">
-                            <!-- Resource items will be rendered here -->
-                        </div>
-                    </div>
-                </div>
+    const row = document.createElement('div');
+    row.className = 'bg-gray-50 rounded-lg p-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2';
 
-                <!-- POP Page -->
-                <div id="page-pop" class="page" style="display: none;">
-                    <h1 class="page-title">Procedimentos Operacionais Padrão (POP)</h1>
-                    
-                    <div class="page-meta">
-                        <div class="meta-item">Atualizado: 14/08/2025</div>
-                        <div class="meta-item">Autor: Equipe Wiki</div>
-                        <div class="meta-item">Tempo de leitura: 5 min</div>
-                    </div>
+    row.innerHTML = `
+      <div class="flex items-center gap-2 truncate">
+        <img src="${home.team?.logo || ''}" class="w-6 h-6 rounded-full" alt=""/>
+        <span class="font-semibold text-sm truncate">${home.team?.shortDisplayName || home.team?.name || 'Casa'}</span>
+      </div>
+      <div class="text-center">
+        <div class="text-gray-800 text-sm font-bold">${showScore ? (home.score || '0') + ' : ' + (away.score || '0') : timeBR(ev.date) || '-'}</div>
+        <div class="text-[10px] text-gray-500">${statusText(comp)}</div>
+      </div>
+      <div class="flex items-center gap-2 justify-end truncate">
+        <span class="font-semibold text-sm truncate">${away.team?.shortDisplayName || away.team?.name || 'Fora'}</span>
+        <img src="${away.team?.logo || ''}" class="w-6 h-6 rounded-full" alt=""/>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+carregarESPN();
+setInterval(carregarESPN, 60000);
+</script>
+</div>
+</div>
+</div>
+</div>
+<script>
+async function carregarNoticiasG1() {
+  const rssUrl = "https://g1.globo.com/dynamo/rss2.xml";
+  const response = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl));
+  const data = await response.json();
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(data.contents, "text/xml");
+  const items = xml.querySelectorAll("item");
+  const carousel = document.getElementById("g1-carousel");
+  
+  items.forEach((item, index) => {
+    if (index >= 5) return;
+    const title = item.querySelector("title").textContent;
+    const link = item.querySelector("link").textContent;
+    const description = item.querySelector("description").textContent;
 
-                    <div class="page-content" id="mainPopPageContent">
-                        <div class="hero-description">
-                            <p>Esta seção centraliza os Procedimentos Operacionais Padrão (POPs) da Talentos Consultoria. Os documentos estão organizados por setor e disponíveis para visualização e download. Utilize esta página para consultar processos atualizados e manter a padronização das atividades internas.</p>
-                        </div>
+    // Extrair imagem do <description> com regex
+    const imgMatch = description.match(/<img.*?src="(.*?)"/);
+    const imgSrc = imgMatch ? imgMatch[1] : "https://via.placeholder.com/600x300?text=Notícia";
 
-                        <!-- Download do Modelo -->
-                        <div class="pop-header-actions">
-                            <button class="btn btn-primary btn-download-modelo" onclick="downloadModelo()">
-                                Baixar Modelo de POP
-                            </button>
-                            <div class="pop-search">
-                                <input type="text" id="popSearchInput" placeholder="Pesquisar POP por código ou nome..." class="search-input">
-                                <button class="btn btn-secondary" onclick="searchPOPs()">Buscar</button>
-                            </div>
-                        </div>
-
-                        <!-- Filtros por Setor -->
-                        <div class="pop-filters" id="popFilters">
-                            <h3>Filtrar por Setor:</h3>
-                            <div class="filter-buttons" id="filterButtons">
-                                <button class="filter-btn active" onclick="filterPOPs('todos')">Todos</button>
-                                <!-- Buttons will be rendered here dynamically -->
-                            </div>
-                        </div>
-                        
-                        <!-- Botão Gerenciar POPs -->
-                        <button class="btn btn-primary" id="toggleManagePOPsBtn" onclick="toggleManagePOPs()">Gerenciar POPs</button>
-
-                        <!-- Seções de POPs -->
-                        <div id="popSectionsContainer">
-                            <!-- Setor: Recursos Humanos -->
-                            <div class="pop-section" data-setor="rh">
-                                <h2 class="setor-title">Recursos Humanos (RH)</h2>
-                                <div class="pop-table-container">
-                                    <table class="pop-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Código</th>
-                                                <th>Nome do POP</th>
-                                                <th>Última Atualização</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="pop-table-rh">
-                                            
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Setor: Tecnologia da Informação -->
-                            <div class="pop-section" data-setor="ti">
-                                <h2 class="setor-title">Tecnologia da Informação (TI)</h2>
-                                <div class="pop-table-container">
-                                    <table class="pop-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Código</th>
-                                                <th>Nome do POP</th>
-                                                <th>Última Atualização</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="pop-table-ti">
-                                            
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Setor: Financeiro -->
-                            <div class="pop-section" data-setor="financeiro">
-                                <h2 class="setor-title">Financeiro</h2>
-                                <div class="pop-table-container">
-                                    <table class="pop-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Código</th>
-                                                <th>Nome do POP</th>
-                                                <th>Última Atualização</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="pop-table-financeiro">
-                                            
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Resultados da Busca -->
-                        <div id="popSearchResults" class="pop-search-results" style="display: none;">
-                            <h3>Resultados da Pesquisa</h3>
-                            <div id="popSearchResultsList"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Seção para Gerenciar POPs (Adicionar/Editar/Remover) -->
-                    <div id="managePopPage" class="manage-pop-section" style="display: none;">
-                        <div class="manage-pop-header">
-                            <h2>Gerenciar POPs</h2>
-                            <button class="btn btn-secondary" onclick="toggleManagePOPs()">Voltar</button>
-                        </div>
-                        
-                        <!-- Formulário para Adicionar ou Editar POP -->
-                        <div class="manage-pop-form-wrapper">
-                            <h4 id="popFormTitle">Adicionar Novo POP</h4>
-                            <input type="text" id="popCodigoInput" placeholder="Código do POP (ex: POP-RH-004)">
-                            <input type="text" id="popNomeInput" placeholder="Nome do Procedimento">
-                            <input type="text" id="popDataInput" placeholder="Data de Atualização (ex: DD/MM/AAAA)">
-                            <div class="pop-form-controls">
-                                <input type="text" id="popSetorInput" placeholder="Novo Setor (opcional)">
-                                <select id="popSetorSelect">
-                                    <option value="">-- Selecione um setor existente --</option>
-                                </select>
-                            </div>
-                            <!-- File upload for the POP -->
-                            <div class="pop-form-upload-controls">
-                                <input type="file" id="popPdfInput" accept=".pdf" style="display: none;" onchange="handlePopFileSelection(event)">
-                                <span id="popFileName">Nenhum arquivo selecionado</span>
-                                <button class="btn btn-primary" onclick="triggerPopFileUpload()">Anexar PDF</button>
-                            </div>
-                            <button class="btn btn-primary" id="savePopBtn" onclick="addPOP()">Salvar POP</button>
-                        </div>
-
-                        <!-- Lista de POPs para Edição/Remoção -->
-                        <div class="manage-pop-list-wrapper">
-                            <h4>POPs Existentes</h4>
-                            <div id="managePopList" class="manage-pop-list">
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- PDF Viewer Modal -->
-    <div id="pdfModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="pdfTitle">Visualizar PDF</h3>
-                <button class="modal-close" onclick="closePDF()">Fechar</button>
-            </div>
-            <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
+    const li = document.createElement("li");
+    li.className = "inline-block w-96 h-56 relative flex-shrink-0";
+    li.innerHTML = `
+      <a href="${link}" target="_blank" class="block w-full h-full">
+        <img src="${imgSrc}" class="w-full h-full object-cover rounded-xl" />
+        <div class="absolute bottom-0 bg-black bg-opacity-50 text-white w-full text-sm px-4 py-2 rounded-b-xl">
+          ${title}
         </div>
-    </div>
-    
-    <!-- New Modal for Description -->
-    <div id="descriptionModal" class="modal">
-        <div class="modal-content description-modal-content">
-            <div class="modal-header">
-                <h3>Adicionar / Editar Descrição</h3>
-                <button class="modal-close" onclick="closeDescriptionModal()">Fechar</button>
-            </div>
-            <p>Por favor, insira uma descrição para o documento:</p>
-            <input type="text" id="editDescriptionInput" placeholder="Descrição do documento...">
-            <button class="btn btn-primary" onclick="saveDescription()">Salvar</button>
-        </div>
-    </div>
+      </a>
+    `;
+    carousel.appendChild(li);
+  });
+}
+carregarNoticiasG1();
+</script>
+<!-- Faixa de Notícias (estilo Bing) -->
+<style>
+  .no-scrollbar::-webkit-scrollbar{display:none}
+  .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+</style>
+<script>
+(async function () {
+  const rssUrl = "https://g1.globo.com/dynamo/rss2.xml";
+  const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
 
-    <!-- Message Box for alerts -->
-    <div id="messageBox"></div>
+  const res = await fetch(proxy);
+  const data = await res.json();
+  const xml = new DOMParser().parseFromString(data.contents, "text/xml");
+  const items = Array.from(xml.querySelectorAll("item")).slice(0, 14);
 
-    <!-- Código JavaScript -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, getDocs, serverTimestamp, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  const strip = document.getElementById("news-strip");
 
-        const $ = (id) => document.getElementById(id);
-        const showMsg = (t) => {
-            const box = $("messageBox"); if (!box) return;
-            box.textContent = t; box.style.display = "block"; box.style.opacity = 1;
-            setTimeout(() => { box.style.opacity = 0; setTimeout(() => { box.style.display = "none"; }, 400); }, 2500);
-        };
+  items.forEach(it => {
+    const title = it.querySelector("title")?.textContent || "";
+    const link = it.querySelector("link")?.textContent || "#";
+    const desc = it.querySelector("description")?.textContent || "";
+    const imgMatch = desc.match(/<img.*?src="(.*?)"/i);
+    const img = imgMatch ? imgMatch[1] : "https://via.placeholder.com/160x90?text=Noticia";
+
+    const card = document.createElement("a");
+    card.href = link;
+    card.target = "_blank";
+    card.rel = "noopener";
+    card.className = "min-w-[220px] w-[220px] bg-white rounded-lg shadow hover:shadow-lg hover:-translate-y-0.5 transition p-2 inline-flex flex-col";
+
+    card.innerHTML = `
+      <div class="w-full h-[120px] bg-gray-200 rounded overflow-hidden">
+        <img src="${img}" class="w-full h-full object-cover" loading="lazy" />
+      </div>
+      <div class="mt-2 text-sm font-semibold text-gray-800 line-clamp-2" style="-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;">
+        ${title}
+      </div>
+    `;
+    strip.appendChild(card);
+  });
+
+  // Navegação por botões
+  const prev = document.getElementById("btn-prev");
+  const next = document.getElementById("btn-next");
+  const step = 240; // px por clique
+  prev.addEventListener("click", () => strip.scrollBy({left: -step, behavior: "smooth"}));
+  next.addEventListener("click", () => strip.scrollBy({left: step, behavior: "smooth"}));
+
+  // Arrastar para rolar (drag scroll)
+  let isDown = false, startX = 0, scrollLeft = 0;
+  strip.addEventListener("mousedown", (e) => { isDown = true; startX = e.pageX - strip.offsetLeft; scrollLeft = strip.scrollLeft; strip.classList.add("cursor-grabbing"); });
+  strip.addEventListener("mouseleave", () => { isDown = false; strip.classList.remove("cursor-grabbing"); });
+  strip.addEventListener("mouseup", () => { isDown = false; strip.classList.remove("cursor-grabbing"); });
+  strip.addEventListener("mousemove", (e) => {
+    if(!isDown) return;
+    const x = e.pageX - strip.offsetLeft;
+    const walk = (x - startX) * 1;
+    strip.scrollLeft = scrollLeft - walk;
+  });
+})();
+</script>
+</main>
+<footer class="bg-gray-800 text-white text-center p-6">
+<div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
+<p class="text-gray-400 text-sm">© 2025 Talentos Consultoria. Todos os direitos reservados.</p>
+<div class="flex items-center gap-6">
+<a class="text-gray-400 hover:text-white transition-colors" href="https://talentosconsultoria.com.br/" rel="noopener noreferrer" target="_blank" title="Nosso Site">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path></svg>
+</a>
+<a class="text-gray-400 hover:text-white transition-colors" href="https://www.instagram.com/talentosconsultoria/" rel="noopener noreferrer" target="_blank" title="Nosso Instagram">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.28.058 1.688.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.78 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
+</a>
+<a class="text-gray-400 hover:text-white transition-colors" href="https://www.linkedin.com/company/talentos-consultoria/" rel="noopener noreferrer" target="_blank" title="Nosso LinkedIn">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+</a>
+</div>
+</div>
+</footer>
+<script>
+        // Script para o dropdown do cabeçalho
+        const dropdownButton = document.getElementById('tools-dropdown-button');
+        const dropdownMenu = document.getElementById('tools-dropdown-menu');
         
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let db, auth, userId;
-
-        let docs = [];
-        let selectedDocFile = null;
-        
-        let selectedPopFile = null;
-
-        let wikiData = {
-            pages: [
-                { id: "home", title: "Página Inicial", content: "Bem-vindo à wiki", keywords: ["início", "home", "principal"], type: "page" },
-                { id: "documentation", title: "Documentação", content: "Documentação completa", keywords: ["docs", "documentação", "manual", "guia"], type: "page" },
-                { id: "tutorials", title: "Tutoriais", content: "Tutoriais passo a passo", keywords: ["tutorial", "aprender", "passo", "guia"], type: "page" },
-                { id: "faq", title: "FAQ", content: "Perguntas frequentes", keywords: ["faq", "perguntas", "dúvidas", "ajuda"], type: "page" },
-                { id: "resources", title: "Recursos", content: "Recursos úteis", keywords: ["recursos", "ferramentas", "templates"], type: "page" },
-                { id: "pop", title: "POPs", content: "Procedimentos Operacionais", keywords: ["pop", "procedimentos", "padrão", "operacional"], type: "page" }
-            ],
-            faqs: [
-                { question: "Como crio uma página?", answer: "Na aba Documentação, informe título, selecione um PDF e clique em Criar Página." }
-            ],
-            tutorials: [],
-            resources: [],
-            pops: [
-                { codigo: "POP-RH-001", nome: "Procedimento de Admissão de Colaboradores", setor: "rh", dataAtualizacao: "10/07/2025", fileUrl: null },
-                { codigo: "POP-RH-002", nome: "Processo de Avaliação de Desempenho", setor: "rh", dataAtualizacao: "25/06/2025", fileUrl: null },
-                { codigo: "POP-RH-003", nome: "Gestão de Férias e Licenças", setor: "rh", dataAtualizacao: "15/05/2025", fileUrl: null },
-                { codigo: "POP-TI-001", nome: "Backup e Recuperação de Dados", setor: "ti", dataAtualizacao: "02/08/2025", fileUrl: null },
-                { codigo: "POP-TI-002", nome: "Configuração de Novas Estações de Trabalho", setor: "ti", dataAtualizacao: "20/07/2025", fileUrl: null },
-                { codigo: "POP-TI-003", nome: "Gerenciamento de Incidentes de Segurança", setor: "ti", dataAtualizacao: "18/06/2025", fileUrl: null },
-                { codigo: "POP-FIN-001", nome: "Processo de Contas a Pagar", setor: "financeiro", dataAtualizacao: "05/08/2025", fileUrl: null },
-                { codigo: "POP-FIN-002", nome: "Conciliação Bancária", setor: "financeiro", dataAtualizacao: "28/07/2025", fileUrl: null },
-                { codigo: "POP-FIN-003", nome: "Elaboração de Relatórios Financeiros", setor: "financeiro", dataAtualizacao: "12/06/2025", fileUrl: null }
-            ]
-        };
-
-        const popSectors = {
-            'todos': 'Todos',
-            'rh': 'Recursos Humanos',
-            'ti': 'Tecnologia da Informação',
-            'financeiro': 'Financeiro'
-        };
-
-        let editingPop = null;
-
-        // Initialize Firebase and set up auth state listener
-        async function initializeFirebase() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        console.log("Usuário autenticado:", userId);
-                    } else {
-                        console.log("Nenhum usuário autenticado.");
-                    }
-                });
-            } catch (error) {
-                console.error("Erro ao inicializar Firebase:", error);
-            }
-        }
-        
-        // ---- Firestore functions for description versioning ----
-        async function saveDescription() {
-            if (!userId) {
-                showMsg("Autenticação pendente. Tente novamente em instantes.");
-                return;
-            }
-
-            const description = $('mainDescription').value;
-            if (!description.trim()) {
-                showMsg("A descrição não pode estar vazia.");
-                return;
-            }
-
-            try {
-                // Save the new version
-                const versionRef = doc(collection(db, `artifacts/${appId}/users/${userId}/descriptions`));
-                await setDoc(versionRef, {
-                    content: description,
-                    timestamp: serverTimestamp()
-                });
-                showMsg("Descrição salva com sucesso!");
-                loadDescription(); // Load the new version
-            } catch (e) {
-                console.error("Erro ao salvar a descrição: ", e);
-                showMsg("Erro ao salvar a descrição.");
-            }
-        }
-
-        async function loadDescription() {
-            if (!userId) {
-                setTimeout(loadDescription, 500);
-                return;
-            }
-            try {
-                const q = query(collection(db, `artifacts/${appId}/users/${userId}/descriptions`), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    const latestDoc = querySnapshot.docs[0];
-                    $('mainDescription').value = latestDoc.data().content;
-                } else {
-                    $('mainDescription').value = "Adicione uma descrição para o seu documento aqui.";
-                }
-            } catch (e) {
-                console.error("Erro ao carregar a descrição: ", e);
-                showMsg("Erro ao carregar a descrição.");
-            }
-        }
-
-        async function showHistory() {
-            if (!userId) {
-                showMsg("Autenticação pendente. Tente novamente em instantes.");
-                return;
-            }
-            try {
-                const historyList = $('historyList');
-                const historyView = $('historyView');
-                if (!historyList || !historyView) return;
-
-                const q = query(collection(db, `artifacts/${appId}/users/${userId}/descriptions`), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-
-                historyList.innerHTML = '';
-                historyView.style.display = 'block';
-
-                if (querySnapshot.empty) {
-                    historyList.innerHTML = '<p>Nenhum histórico de versão encontrado.</p>';
-                    return;
-                }
-
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const item = document.createElement('div');
-                    item.className = 'history-item';
-                    const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Data desconhecida';
-                    item.innerHTML = `
-                        <h4>Versão de ${date}</h4>
-                        <p>${data.content.substring(0, 150)}...</p>
-                        <button class="btn btn-secondary btn-small" onclick="restoreVersion('${doc.id}')">Restaurar</button>
-                    `;
-                    historyList.appendChild(item);
-                });
-
-            } catch (e) {
-                console.error("Erro ao mostrar histórico: ", e);
-                showMsg("Erro ao carregar o histórico.");
-            }
-        }
-        
-        async function restoreVersion(docId) {
-             if (!userId) {
-                showMsg("Autenticação pendente. Tente novamente em instantes.");
-                return;
-            }
-            try {
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/descriptions/${docId}`);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    $('mainDescription').value = docSnap.data().content;
-                    showMsg("Versão restaurada com sucesso! Clique em 'Salvar Descrição' para guardar permanentemente.");
-                    $('historyView').style.display = 'none';
-                } else {
-                    showMsg("Versão não encontrada.");
-                }
-            } catch (e) {
-                console.error("Erro ao restaurar versão: ", e);
-                showMsg("Erro ao restaurar a versão.");
-            }
-        }
-
-        // ---- Navegação ----
-        function showPage(pageId) {
-            document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-            const el = document.querySelector(`#page-${pageId}`);
-            if (el) el.style.display = "block";
-            document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
-            const link = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`);
-            if (link) link.classList.add("active");
-
-            if (pageId === "documentation") {
-                renderDocs();
-                loadDescription();
-            }
-            if (pageId === "tutorials") renderTutorials();
-            if (pageId === "resources") renderResources();
-            if (pageId === "faq") renderFAQs();
-            if (pageId === "pop") initPOPPage();
-        }
-
-        function renderFAQs() {
-            const list = $("faqList");
-            if (!list) return;
-            list.innerHTML = "";
-            wikiData.faqs.forEach(f => {
-                const wrap = document.createElement("div");
-                wrap.className = "faq-item";
-                wrap.innerHTML = `<h4>${f.question}</h4><div class="faq-answer"><p>${f.answer}</p></div>`;
-                const h = wrap.querySelector("h4");
-                const a = wrap.querySelector(".faq-answer");
-                h.addEventListener("click", () => a.style.display = (a.style.display === "none" ? "block" : "none"));
-                list.appendChild(wrap);
+        if (dropdownButton && dropdownMenu) {
+            dropdownButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                dropdownMenu.classList.toggle('hidden');
             });
-        }
-
-        // ---- Busca ----
-        function performSearch() {
-            const input = $("searchInput");
-            if (!input) return;
-            const term = input.value.toLowerCase();
-            const results = [
-                ...wikiData.pages,
-                ...docs,
-                ...wikiData.faqs,
-                ...wikiData.tutorials,
-                ...wikiData.resources
-            ].filter(item =>
-                item.title?.toLowerCase().includes(term) ||
-                item.question?.toLowerCase().includes(term) ||
-                (item.description && item.description.toLowerCase().includes(term)) ||
-                (item.content && item.content.toLowerCase().includes(term))
-            );
-
-            const list = $("searchResultsList"),
-                title = $("searchResultsTitle");
-            if (title) title.textContent = `Resultados para "${input.value}"`;
-            if (list) {
-                list.innerHTML = "";
-                results.forEach(r => {
-                    const div = document.createElement("div");
-                    div.className = "search-result-full-item";
-                    div.innerHTML = `<h4>${r.title || r.question}</h4><p>${r.description || r.content || ""}</p>`;
-                    div.addEventListener("click", () => {
-                        if (r.type === "page") showPage(r.id);
-                        if (r.type === "document") openPDF(r.pdfUrl, r.title);
-                        if (r.type === "tutorial") showPage('tutorials');
-                        if (r.type === "faq") showPage('faq');
-                        if (r.type === "resource") showPage('resources');
-                    });
-                    list.appendChild(div);
-                });
-            }
-            showPage("search-results");
-        }
-
-        // ---- Documentação (local-only) ----
-        function triggerDocUpload() { $("pdfUploadInput")?.click(); }
-
-        document.addEventListener("change", (ev) => {
-            const t = ev.target;
-            if (!(t instanceof HTMLInputElement)) return;
-            if (t.id !== "pdfUploadInput") return;
-            selectedDocFile = t.files?.[0] || null;
-            if (selectedDocFile) {
-                showMsg("Arquivo de documento selecionado: " + selectedDocFile.name);
-            }
-        });
-
-        function renderDocs() {
-            const list = $("attachmentList");
-            if (!list) return;
-            list.innerHTML = "";
-            if (docs.length === 0) {
-                list.innerHTML = '<p id="loadingAttachments">Nenhum documento disponível. Clique em "Upload de Documento" para adicionar um.</p>';
-                return;
-            }
-            docs.forEach(d => {
-                const item = document.createElement("div");
-                item.className = "attachment-item";
-                item.innerHTML = `
-                    <div class="attachment-info">
-                        <div class="attachment-icon">PDF</div>
-                        <div class="attachment-details">
-                            <h4>${d.title}</h4>
-                            <p>${d.description || "Sem descrição"}</p>
-                        </div>
-                    </div>
-                    <div class="attachment-actions">
-                        <a class="btn btn-secondary" href="${d.pdfUrl}" download="${d.title}.pdf">Download</a>
-                        <button class="btn btn-primary">Ler</button>
-                    </div>`;
-                item.querySelector(".btn.btn-primary")?.addEventListener("click", () => openPDF(d.pdfUrl, d.title));
-                list.appendChild(item);
-            });
-        }
-        
-        // ---- PDF Modal ----
-        function openPDF(url, title) {
-            const t = $("pdfTitle");
-            if (t) t.textContent = title || "PDF";
-            const v = $("pdfViewer");
-            if (v) v.src = url;
-            const m = $("pdfModal");
-            if (m) m.style.display = "flex";
-        }
-
-        function closePDF() {
-            const m = $("pdfModal");
-            if (m) m.style.display = "none";
-            const v = $("pdfViewer");
-            if (v) v.src = "";
-        }
-
-        // ---- Funções para Tutoriais ----
-        function renderTutorials() {
-            const list = $("tutorialList");
-            if (!list) return;
-            list.innerHTML = "";
-            if (wikiData.tutorials.length === 0) {
-                list.innerHTML = '<p>Nenhum tutorial disponível.</p>';
-                return;
-            }
-            wikiData.tutorials.forEach(t => {
-                const item = document.createElement("div");
-                item.className = "tutorial-item";
-                item.innerHTML = `
-                    <h4>${t.title}</h4>
-                    <div class="tutorial-content"><p>${t.description}</p></div>
-                `;
-                const h = item.querySelector("h4");
-                const c = item.querySelector(".tutorial-content");
-                h.addEventListener("click", () => c.style.display = (c.style.display === "none" ? "block" : "none"));
-                list.appendChild(item);
-            });
-        }
-
-        function addTutorial() {
-            const title = $("tutorialTitleInput")?.value.trim();
-            const description = $("tutorialDescriptionInput")?.value.trim();
-            if (!title || !description) {
-                showMsg("Por favor, preencha o título e a descrição do tutorial.");
-                return;
-            }
-            const newTutorial = {
-                id: (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now())),
-                title,
-                description,
-                type: "tutorial"
-            };
-            wikiData.tutorials.unshift(newTutorial);
-            $("tutorialTitleInput").value = "";
-            $("tutorialDescriptionInput").value = "";
-            renderTutorials();
-            showMsg("Tutorial adicionado com sucesso!");
-        }
-
-        // ---- Funções para FAQ ----
-        function addFAQ() {
-            const question = $("faqQuestionInput")?.value.trim();
-            const answer = $("faqAnswerInput")?.value.trim();
-            if (!question || !answer) {
-                showMsg("Por favor, preencha a pergunta e a resposta do FAQ.");
-                return;
-            }
-            const newFAQ = {
-                id: (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now())),
-                question,
-                answer,
-                type: "faq"
-            };
-            wikiData.faqs.unshift(newFAQ);
-            $("faqQuestionInput").value = "";
-            $("faqAnswerInput").value = "";
-            renderFAQs();
-            showMsg("FAQ adicionado com sucesso!");
-        }
-
-        // ---- Funções para Recursos ----
-        function renderResources() {
-            const list = $("resourceList");
-            if (!list) return;
-            list.innerHTML = "";
-            if (wikiData.resources.length === 0) {
-                list.innerHTML = '<p>Nenhum recurso disponível.</p>';
-                return;
-            }
-            wikiData.resources.forEach(r => {
-                const item = document.createElement("div");
-                item.className = "resource-item";
-                item.innerHTML = `
-                    <div>
-                        <h4>${r.title}</h4>
-                        <p>${r.description}</p>
-                    </div>
-                    <a href="${r.link}" target="_blank" class="btn btn-primary">Acessar</a>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        function addResource() {
-            const title = $("resourceTitleInput")?.value.trim();
-            const description = $("resourceDescriptionInput")?.value.trim();
-            const link = $("resourceLinkInput")?.value.trim();
-            if (!title || !description || !link) {
-                showMsg("Por favor, preencha todos os campos do recurso.");
-                return;
-            }
-            const newResource = {
-                id: (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now())),
-                title,
-                description,
-                link,
-                type: "resource"
-            };
-            wikiData.resources.unshift(newResource);
-            $("resourceTitleInput").value = "";
-            $("resourceDescriptionInput").value = "";
-            $("resourceLinkInput").value = "";
-            renderResources();
-            showMsg("Recurso adicionado com sucesso!");
-        }
-        
-        // ---- Funções de Detalhes do Documento (simulação) ----
-        // Estas funções são apenas simulações, a funcionalidade completa de
-        // tópicos e comentários requereria um backend e um banco de dados
-        function addTopic() { showMsg("Adicionar tópico (simulação)."); }
-        function addComment() { showMsg("Adicionar comentário (simulação)."); }
-        function showDocDetails() { showMsg("Mostrando detalhes do documento (simulação)."); }
-        function openDescriptionModal() { showMsg("Abrindo modal de descrição (simulação)."); }
-        function closeDescriptionModal() { showMsg("Fechando modal de descrição (simulação)."); }
-        
-        // A função saveDescription e showHistory foram movidas e reescritas para usar o Firebase.
-        function toggleEditMode() { showMsg("Modo de edição ativado/desativado (simulação)."); }
-
-
-        // ---- Funções POP ----
-        function initPOPPage() {
-            // Esconde a página de gerenciamento ao inicializar a página principal de POPs
-            $('managePopPage').style.display = 'none';
-            // Mostra o conteúdo principal da página de POPs
-            $('mainPopPageContent').style.display = 'block';
-            renderPOPFilters();
-            renderPOPs();
-            filterPOPs('todos');
-        }
-
-        function renderPOPFilters() {
-            const filterButtonsContainer = $('filterButtons');
-            if (!filterButtonsContainer) return;
-            filterButtonsContainer.innerHTML = '';
-
-            const allButton = document.createElement('button');
-            allButton.className = 'filter-btn active';
-            allButton.textContent = 'Todos';
-            allButton.onclick = () => filterPOPs('todos');
-            filterButtonsContainer.appendChild(allButton);
-
-            const uniqueSectors = [...new Set(wikiData.pops.map(pop => pop.setor))];
-            uniqueSectors.forEach(setor => {
-                if (popSectors[setor]) {
-                    const btn = document.createElement('button');
-                    btn.className = 'filter-btn';
-                    btn.textContent = popSectors[setor];
-                    btn.onclick = () => filterPOPs(setor);
-                    filterButtonsContainer.appendChild(btn);
-                }
-            });
-
-            // Update the selector with new options
-            const setorSelect = $('popSetorSelect');
-            if (setorSelect) {
-                setorSelect.innerHTML = '<option value="">-- Selecione um setor existente --</option>';
-                Object.entries(popSectors).forEach(([key, value]) => {
-                    if (key !== 'todos') {
-                        const option = document.createElement('option');
-                        option.value = key;
-                        option.textContent = value;
-                        setorSelect.appendChild(option);
-                    }
-                });
-            }
-        }
-
-        function renderPOPs() {
-            const sectionsContainer = $('popSectionsContainer');
-            if (!sectionsContainer) return;
-
-            sectionsContainer.innerHTML = '';
             
-            const uniqueSectors = [...new Set(wikiData.pops.map(pop => pop.setor))].sort();
-
-            uniqueSectors.forEach(setor => {
-                const section = document.createElement('div');
-                section.className = 'pop-section';
-                section.dataset.setor = setor;
-                section.innerHTML = `
-                    <h2 class="setor-title">${popSectors[setor] || setor.toUpperCase()}</h2>
-                    <div class="pop-table-container">
-                        <table class="pop-table">
-                            <thead>
-                                <tr>
-                                    <th>Código</th>
-                                    <th>Nome do POP</th>
-                                    <th>Última Atualização</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pop-table-${setor}"></tbody>
-                        </table>
-                    </div>
-                `;
-                sectionsContainer.appendChild(section);
-            });
-
-            const sortedPops = wikiData.pops.sort((a,b) => a.codigo.localeCompare(b.codigo));
-
-            sortedPops.forEach(pop => {
-                const tableBody = $(`pop-table-${pop.setor}`);
-                if (tableBody) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${pop.codigo}</strong></td>
-                        <td>${pop.nome}</td>
-                        <td>${pop.dataAtualizacao}</td>
-                        <td>
-                            <button class="btn btn-secondary btn-small" onclick="viewPOP('${pop.codigo}')">Ver</button>
-                            <button class="btn btn-primary btn-small" onclick="downloadPOP('${pop.codigo}')">Baixar</button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
+            // Fechar dropdown ao clicar fora
+            document.addEventListener('click', (event) => {
+                if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.add('hidden');
                 }
             });
         }
-        
-        function renderManagePOPs() {
-            const managePopList = $('managePopList');
-            if (!managePopList) return;
-            managePopList.innerHTML = '';
-            
-            wikiData.pops.forEach(pop => {
-                const item = document.createElement('div');
-                item.className = 'manage-pop-item';
-                item.innerHTML = `
-                    <div class="manage-pop-info">
-                        <h4>${pop.codigo} - ${pop.nome}</h4>
-                        <small>Setor: ${popSectors[pop.setor] || pop.setor.toUpperCase()}</small>
-                    </div>
-                    <div class="manage-pop-actions">
-                        <button class="btn btn-edit btn-small" onclick="editPOP('${pop.codigo}')">Editar</button>
-                        <button class="btn btn-secondary btn-small" onclick="removePOP('${pop.codigo}')">Remover</button>
-                    </div>
-                `;
-                managePopList.appendChild(item);
-            });
-        }
-
-        function filterPOPs(setor) {
-            const sections = document.querySelectorAll('.pop-section');
-            const buttons = document.querySelectorAll('.filter-btn');
-            const searchResults = $('popSearchResults');
-
-            if (searchResults) searchResults.style.display = 'none';
-
-            buttons.forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector(`.filter-btn[onclick="filterPOPs('${setor}')"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-
-            sections.forEach(section => {
-                if (setor === 'todos') {
-                    section.style.display = 'block';
-                } else {
-                    section.style.display = section.dataset.setor === setor ? 'block' : 'none';
-                }
-            });
-        }
-
-        function searchPOPs() {
-            const input = $('popSearchInput');
-            if (!input) return;
-
-            const term = input.value.toLowerCase().trim();
-            if (!term) {
-                showMsg('Digite um termo para buscar.');
-                return;
-            }
-
-            const results = wikiData.pops.filter(pop =>
-                pop.codigo.toLowerCase().includes(term) ||
-                pop.nome.toLowerCase().includes(term)
-            );
-
-            const resultsContainer = $('popSearchResults');
-            const resultsList = $('popSearchResultsList');
-
-            if (!resultsContainer || !resultsList) return;
-
-            document.querySelectorAll('.pop-section').forEach(section => {
-                section.style.display = 'none';
-            });
-
-            resultsContainer.style.display = 'block';
-            resultsList.innerHTML = '';
-
-            if (results.length === 0) {
-                resultsList.innerHTML = '<p>Nenhum POP encontrado para o termo pesquisado.</p>';
-                return;
-            }
-
-            results.forEach(pop => {
-                const item = document.createElement('div');
-                item.className = 'search-result-item';
-                item.innerHTML = `
-                <h4>${pop.codigo}</h4>
-                <p>${pop.nome}</p>
-                <small>Última atualização: ${pop.dataAtualizacao}</small>
-                <div class="search-result-actions">
-                    <button class="btn btn-secondary btn-small" onclick="viewPOP('${pop.codigo}')">Ver</button>
-                    <button class="btn btn-primary btn-small" onclick="downloadPOP('${pop.codigo}')">Baixar</button>
-                </div>
-                `;
-                resultsList.appendChild(item);
-            });
-        }
-        
-        function toggleManagePOPs() {
-            const managePage = $('managePopPage');
-            const mainPopPageContent = $('mainPopPageContent');
-            if (!managePage || !mainPopPageContent) return;
-
-            if (managePage.style.display === 'none' || managePage.style.display === '') {
-                mainPopPageContent.style.display = 'none';
-                managePage.style.display = 'block';
-                renderManagePOPs();
-            } else {
-                managePage.style.display = 'none';
-                mainPopPageContent.style.display = 'block';
-                initPOPPage();
-            }
-            // Limpa o formulário de edição/adição ao sair ou entrar
-            $('popFormTitle').textContent = 'Adicionar Novo POP';
-            $('popCodigoInput').value = '';
-            $('popNomeInput').value = '';
-            $('popDataInput').value = '';
-            $('popSetorInput').value = '';
-            $('popSetorSelect').value = '';
-            $('popFileName').textContent = 'Nenhum arquivo selecionado';
-            selectedPopFile = null;
-            $('savePopBtn').textContent = 'Salvar POP';
-            $('savePopBtn').onclick = addPOP;
-            editingPop = null;
-        }
-
-        function triggerPopFileUpload() {
-            $('popPdfInput').click();
-        }
-
-        function handlePopFileSelection(event) {
-            const file = event.target.files[0];
-            if (file) {
-                selectedPopFile = file;
-                $('popFileName').textContent = file.name;
-                showMsg(`Arquivo "${file.name}" selecionado.`);
-            } else {
-                selectedPopFile = null;
-                $('popFileName').textContent = 'Nenhum arquivo selecionado';
-            }
-        }
-        
-        function addPOP() {
-            const codigo = $('popCodigoInput').value.trim();
-            const nome = $('popNomeInput').value.trim();
-            const dataAtualizacao = $('popDataInput').value.trim();
-            const novoSetor = $('popSetorInput').value.trim().toLowerCase();
-            const setorExistente = $('popSetorSelect').value;
-
-            let setor = '';
-            let setorNome = '';
-
-            if (novoSetor) {
-                setor = novoSetor.replace(/ /g, '-').toLowerCase();
-                setorNome = novoSetor.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                popSectors[setor] = setorNome;
-            } else if (setorExistente) {
-                setor = setorExistente;
-                setorNome = popSectors[setor];
-            } else {
-                showMsg("Por favor, preencha o campo 'Novo Setor' ou selecione um setor existente.");
-                return;
-            }
-
-            if (!codigo || !nome || !dataAtualizacao) {
-                showMsg("Por favor, preencha todos os campos obrigatórios para o POP.");
-                return;
-            }
-
-            // Check if POP code already exists
-            if (wikiData.pops.some(p => p.codigo === codigo)) {
-                showMsg(`O POP com o código "${codigo}" já existe. Por favor, use um código único.`);
-                return;
-            }
-
-            const newPOP = {
-                codigo: codigo,
-                nome: nome,
-                setor: setor,
-                dataAtualizacao: dataAtualizacao,
-                fileUrl: selectedPopFile ? URL.createObjectURL(selectedPopFile) : null
-            };
-
-            wikiData.pops.push(newPOP);
-
-            $('popCodigoInput').value = '';
-            $('popNomeInput').value = '';
-            $('popDataInput').value = '';
-            $('popSetorInput').value = '';
-            $('popSetorSelect').value = '';
-            $('popFileName').textContent = 'Nenhum arquivo selecionado';
-            selectedPopFile = null;
-            
-            renderManagePOPs();
-            initPOPPage();
-            showMsg(`POP "${codigo}" adicionado com sucesso ao setor "${setorNome}"!`);
-        }
-
-        function editPOP(codigo) {
-            editingPop = wikiData.pops.find(pop => pop.codigo === codigo);
-            if (!editingPop) return;
-
-            $('popFormTitle').textContent = `Editar POP: ${codigo}`;
-            $('popCodigoInput').value = editingPop.codigo;
-            $('popNomeInput').value = editingPop.nome;
-            $('popDataInput').value = editingPop.dataAtualizacao;
-            $('popSetorSelect').value = editingPop.setor;
-            $('savePopBtn').textContent = 'Salvar Edição';
-            $('savePopBtn').onclick = () => saveEditedPOP(codigo);
-        }
-
-        function saveEditedPOP(originalCodigo) {
-            const newCodigo = $('popCodigoInput').value.trim();
-            const newNome = $('popNomeInput').value.trim();
-            const newDataAtualizacao = $('popDataInput').value.trim();
-            const newSetor = $('popSetorSelect').value;
-
-            if (!newCodigo || !newNome || !newDataAtualizacao || !newSetor) {
-                showMsg("Por favor, preencha todos os campos para editar o POP.");
-                return;
-            }
-
-            const popIndex = wikiData.pops.findIndex(pop => pop.codigo === originalCodigo);
-            if (popIndex !== -1) {
-                wikiData.pops[popIndex] = {
-                    codigo: newCodigo,
-                    nome: newNome,
-                    setor: newSetor,
-                    dataAtualizacao: newDataAtualizacao,
-                    fileUrl: selectedPopFile ? URL.createObjectURL(selectedPopFile) : wikiData.pops[popIndex].fileUrl
-                };
-            }
-
-            // Reset form
-            $('popFormTitle').textContent = 'Adicionar Novo POP';
-            $('popCodigoInput').value = '';
-            $('popNomeInput').value = '';
-            $('popDataInput').value = '';
-            $('popSetorInput').value = '';
-            $('popSetorSelect').value = '';
-            $('popFileName').textContent = 'Nenhum arquivo selecionado';
-            selectedPopFile = null;
-            $('savePopBtn').textContent = 'Salvar POP';
-            $('savePopBtn').onclick = addPOP;
-            editingPop = null;
-
-            renderManagePOPs();
-            initPOPPage();
-            showMsg(`POP "${newCodigo}" editado com sucesso!`);
-        }
-        
-        function removePOP(codigo) {
-            const popIndex = wikiData.pops.findIndex(pop => pop.codigo === codigo);
-            if (popIndex !== -1) {
-                wikiData.pops.splice(popIndex, 1);
-                renderManagePOPs();
-                initPOPPage();
-                showMsg(`POP "${codigo}" removido com sucesso.`);
-            }
-        }
-
-        function downloadModelo() {
-            showMsg('Download do modelo de POP iniciado. (Simulação - arquivo não disponível nesta versão demo)');
-        }
-
-        function viewPOP(codigo) {
-            const pop = wikiData.pops.find(p => p.codigo === codigo);
-            if (pop && pop.fileUrl) {
-                openPDF(pop.fileUrl, pop.nome);
-            } else {
-                showMsg(`O POP "${codigo}" não tem um arquivo anexado para visualização.`);
-            }
-        }
-
-        function downloadPOP(codigo) {
-            const pop = wikiData.pops.find(p => p.codigo === codigo);
-            if (pop && pop.fileUrl) {
-                const a = document.createElement('a');
-                a.href = pop.fileUrl;
-                a.download = pop.nome + '.pdf';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                showMsg(`Download do POP "${codigo}" iniciado.`);
-            } else {
-                showMsg(`O POP "${codigo}" não tem um arquivo anexado para download.`);
-            }
-        }
-
-        // ---- Inicialização ----
-        document.addEventListener("DOMContentLoaded", () => {
-        // Busca com Enter
-        $("searchInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") performSearch(); });
-        
-        // Busca POP com Enter
-        $("popSearchInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") searchPOPs(); });
-
-        // Click-outside para dropdown de busca (se houver)
-        document.addEventListener("click", (ev) => {
-            const container = document.querySelector(".search-container");
-            const dropdown  = $("searchResults");
-            if (container && dropdown && !container.contains(ev.target)) {
-            dropdown.style.display = "none";
-            }
-        });
-
-        initializeFirebase();
-        showPage("home");
-        });
-
-        // Expor todas as funções para o contexto global
-        window.showPage = showPage;
-        window.performSearch = performSearch;
-        window.triggerDocUpload = triggerDocUpload;
-        window.openPDF = openPDF;
-        window.closePDF = closePDF;
-        window.saveDescription = saveDescription;
-        window.showHistory = showHistory;
-        window.restoreVersion = restoreVersion;
-        window.initPOPPage = initPOPPage;
-        window.filterPOPs = filterPOPs;
-        window.searchPOPs = searchPOPs;
-        window.addPOP = addPOP;
-        window.downloadModelo = downloadModelo;
-        window.viewPOP = viewPOP;
-        window.downloadPOP = downloadPOP;
-        window.renderTutorials = renderTutorials;
-        window.addTutorial = addTutorial;
-        window.addFAQ = addFAQ;
-        window.renderResources = renderResources;
-        window.addResource = addResource;
-        window.addTopic = addTopic;
-        window.addComment = addComment;
-        window.triggerTutorialFileUpload = () => { showMsg("Anexar PDF a tutorial (simulação)."); };
-        window.toggleEditMode = toggleEditMode;
-        window.closeDescriptionModal = closeDescriptionModal;
-        window.toggleManagePOPs = toggleManagePOPs;
-        window.editPOP = editPOP;
-        window.removePOP = removePOP;
-        window.saveEditedPOP = saveEditedPOP;
-        window.triggerPopFileUpload = triggerPopFileUpload;
-        window.handlePopFileSelection = handlePopFileSelection;
     </script>
 </body>
 </html>

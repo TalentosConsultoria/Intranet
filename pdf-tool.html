@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ferramenta de PDF - Talentos Consultoria</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#004aad',
+                        secondary: '#196dff',
+                        background: '#f1f5f9',
+                        card: '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        /* Base para os botões pequenos e redondos sobre a miniatura */
+        .pdf-thumbnail-btn {
+            position: absolute;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pdf-thumbnail-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .pdf-thumbnail-btn.delete {
+            top: 0.375rem;
+            right: 0.375rem;
+            background-color: #dc2626;
+        }
+
+        .pdf-thumbnail-btn.delete:hover {
+            background-color: #b91c1c;
+        }
+
+        .pdf-thumbnail-btn.preview {
+            bottom: 0.375rem;
+            right: 0.375rem;
+            background-color: #004aad;
+        }
+
+        .pdf-thumbnail-btn.preview:hover {
+            background-color: #1e40af;
+        }
+
+        .pdf-thumbnail-btn.rotate-left {
+            bottom: 0.375rem;
+            left: 0.375rem;
+            background-color: #4b5563;
+        }
+
+        .pdf-thumbnail-btn.rotate-left:hover {
+            background-color: #374151;
+        }
+
+        .pdf-thumbnail-btn.rotate-right {
+            bottom: 0.375rem;
+            left: 2.75rem;
+            background-color: #4b5563;
+            transform: scaleX(-1);
+        }
+
+        .pdf-thumbnail-btn.rotate-right:hover {
+            background-color: #374151;
+        }
+
+        .pdf-thumbnail {
+            position: relative;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            background-color: white;
+            cursor: grab;
+            transition: border-color 0.2s ease;
+        }
+
+        .pdf-thumbnail:hover {
+            border-color: #004aad;
+        }
+
+        .pdf-thumbnail-overlay {
+            position: absolute;
+            top: 0.375rem;
+            left: 0.375rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #004aad;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+<style>html[data-auth='checking'] body{visibility:hidden}</style><script>document.documentElement.setAttribute('data-auth','checking');</script><script crossorigin="anonymous" src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script><script src="msal-config.js"></script><script src="config.js"></script><script src="auth-guard.js"></script></head>
+<body class="bg-background flex flex-col min-h-screen font-sans"><script data-inline-auth="1">
+(function(){
+  try{
+    const isLogin = /login\.html$/i.test(location.pathname);
+    if(!isLogin){
+      const acc = localStorage.getItem('userAccount') || (localStorage.getItem('demoUser')==='true' ? 'demo' : null);
+      if(!acc){
+        // preserve original path for after-login redirect
+        localStorage.setItem('redirectAfterLogin', location.pathname + location.search + location.hash);
+        // Try relative login first (works in subpaths), then absolute as fallback
+        const base = location.origin || (location.protocol + '//' + location.host);
+        location.replace(base + '/login.html');
+        return;
+      }
+    }
+    document.documentElement.removeAttribute('data-auth');
+  }catch(e){
+    console.error('inline-auth error', e);
+  }
+})();
+</script>
+<header class="bg-white shadow-md p-4 sticky top-0 z-40">
+<div class="container mx-auto flex justify-between items-center">
+<a class="flex items-center space-x-2" href="index.html">
+<img alt="Logo da Talentos Consultoria" class="h-10 rounded-full shadow-md" src="https://media.glassdoor.com/sqll/2733569/talentos-consultoria-squarelogo-1649741391944.png"/>
+<span class="text-xl font-bold text-red-700 hidden md:block">Talentos Consultoria</span>
+</a>
+<nav class="relative">
+<button class="text-gray-600 hover:text-primary font-semibold transition duration-300 flex items-center space-x-1 focus:outline-none" id="tools-dropdown-button">
+<span>Ferramentas DP</span>
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="tools-dropdown-menu">
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="qlp-format.html">QLP</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="pdf-tool.html">PDF</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="format-bancodoc.html">Bdoc</a>
+</div>
+</nav>
+</div>
+</header>
+<main class="flex-grow container mx-auto p-4 lg:p-6 mb-48">
+<div class="bg-card rounded-3xl shadow-xl p-6 md:p-8">
+<h1 class="text-2xl font-bold text-gray-800 text-center mb-4">Juntar, Reorganizar e Editar Páginas de PDFs</h1>
+<div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer mb-6 bg-slate-50 hover:bg-slate-100 hover:border-primary transition-colors" id="dropzone">
+<p class="text-gray-600">Arraste e solte seus arquivos PDF aqui, ou <span class="text-primary font-semibold">clique para selecioná-los</span>.</p>
+<input accept=".pdf" class="hidden" id="pdfFiles" multiple="" type="file"/>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 min-h-[200px] bg-slate-100 p-4 rounded-lg" id="thumbnails-container">
+<p class="text-gray-500 italic col-span-full text-center self-center" id="placeholder">As miniaturas das páginas aparecerão aqui.</p>
+</div>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 w-full bg-slate-100 p-4 border-t border-gray-200 shadow-lg z-50" id="fixed-download-bar">
+<div class="container mx-auto flex flex-wrap justify-between items-center gap-4">
+<div class="flex-grow flex flex-wrap gap-4 items-end">
+<div class="flex-grow min-w-[200px]">
+<label class="text-sm font-semibold text-gray-700 block mb-1" for="output-filename">Nome do arquivo:</label>
+<input class="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" id="output-filename" type="text" value="documento_editado.pdf"/>
+</div>
+<div class="flex-grow min-w-[200px]">
+<label class="text-sm font-semibold text-gray-700 block mb-1" for="page-range">Intervalo de páginas (ex: 1-3, 5):</label>
+<input class="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary" id="page-range" placeholder="Todas as páginas" type="text"/>
+</div>
+</div>
+<div class="flex flex-wrap gap-3 items-center">
+<button class="px-4 py-2 text-sm font-semibold rounded-md bg-red-600 text-white hover:bg-red-700 transition" id="limpar-btn">Limpar Tudo</button>
+<button class="px-4 py-2 text-sm font-semibold rounded-md bg-blue-600 text-white hover:bg-blue-700 transition" id="baixar-selecionados-btn">Baixar Intervalo</button>
+<button class="px-4 py-2 text-sm font-semibold rounded-md bg-green-600 text-white hover:bg-green-700 transition" id="baixar-todos-btn">Juntar e Baixar Tudo</button>
+</div>
+</div>
+</div>
+<div class="hidden flex fixed inset-0 bg-black bg-opacity-80 z-[100] justify-center items-center p-4" id="preview-modal">
+<button class="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl opacity-70 hover:opacity-100 z-10" id="prev-page">❮</button>
+<div class="relative" id="preview-content">
+<button class="absolute -top-8 right-0 text-white text-4xl font-bold opacity-70 hover:opacity-100" id="close-preview">×</button>
+<canvas class="max-w-[90vw] max-h-[85vh] rounded shadow-lg" id="preview-canvas"></canvas>
+</div>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl opacity-70 hover:opacity-100 z-10" id="next-page">❯</button>
+</div>
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[101] justify-center items-center" id="loading-overlay">
+<div class="spinner"></div>
+</div>
+<footer class="bg-gray-800 text-white text-center p-6">
+<div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
+<p class="text-gray-400 text-sm">© 2025 Talentos Consultoria. Todos os direitos reservados.</p>
+<div class="flex items-center gap-6">
+<a class="text-gray-400 hover:text-white transition-colors" href="https://talentosconsultoria.com.br/" rel="noopener noreferrer" target="_blank" title="Nosso Site">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path></svg>
+</a>
+<a class="text-gray-400 hover:text-white transition-colors" href="https://www.instagram.com/talentosconsultoria/" rel="noopener noreferrer" target="_blank" title="Nosso Instagram">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.28.058 1.688.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
+</a>
+<a class="text-gray-400 hover:text-white transition-colors" href="https://www.linkedin.com/company/talentos-consultoria/" rel="noopener noreferrer" target="_blank" title="Nosso LinkedIn">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+</a>
+</div>
+</div>
+</footer>
+<!-- CDN Scripts com versões compatíveis -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+<script>
+        // Configuração do PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        // Elementos do DOM e Estado
+        const { PDFDocument, degrees } = PDFLib;
+        const thumbnailsContainer = document.getElementById('thumbnails-container');
+        const fileInput = document.getElementById('pdfFiles');
+        const dropzone = document.getElementById('dropzone');
+        const outputFilenameInput = document.getElementById('output-filename');
+        const pageRangeInput = document.getElementById('page-range');
+        const previewModal = document.getElementById('preview-modal');
+        const previewCanvas = document.getElementById('preview-canvas');
+        const closePreviewButton = document.getElementById('close-preview');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const prevPageButton = document.getElementById('prev-page');
+        const nextPageButton = document.getElementById('next-page');
+
+        let sortableInstance = null;
+        let lastViewedGlobalIndex = -1;
+        let lastHighlightedThumbnail = null;
+        const highlightClasses = ['border-4', 'border-primary', 'ring-2', 'ring-primary'];
+
+        // Dropdown do Cabeçalho
+        const dropdownButton = document.getElementById('tools-dropdown-button');
+        const dropdownMenu = document.getElementById('tools-dropdown-menu');
+        dropdownButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle('hidden');
+        });
+        window.addEventListener('click', () => {
+            if (!dropdownMenu.classList.contains('hidden')) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+
+        // --- Funções de Destaque ---
+        function highlightLastViewed() {
+            if (lastHighlightedThumbnail) {
+                lastHighlightedThumbnail.classList.remove(...highlightClasses);
+                lastHighlightedThumbnail = null;
+            }
+            if (lastViewedGlobalIndex !== -1) {
+                const allThumbnails = Array.from(thumbnailsContainer.querySelectorAll('.pdf-thumbnail'));
+                const thumbnailToHighlight = allThumbnails[lastViewedGlobalIndex];
+                if (thumbnailToHighlight) {
+                    thumbnailToHighlight.classList.add(...highlightClasses);
+                    lastHighlightedThumbnail = thumbnailToHighlight;
+                    thumbnailToHighlight.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        // --- Funções do Modal ---
+        function fecharModal() {
+            previewModal.classList.add('hidden');
+            highlightLastViewed();
+        }
+
+        closePreviewButton.addEventListener('click', fecharModal);
+        previewModal.addEventListener('click', (event) => { if (event.target === previewModal) fecharModal(); });
+        document.addEventListener('keydown', (e) => {
+            if (!previewModal.classList.contains('hidden')) {
+                if (e.key === 'ArrowLeft') navegarPagina(-1);
+                else if (e.key === 'ArrowRight') navegarPagina(1);
+                else if (e.key === 'Escape') fecharModal();
+            }
+        });
+        
+        // --- Lógica de Navegação e Visualização ---
+        prevPageButton.addEventListener('click', () => navegarPagina(-1));
+        nextPageButton.addEventListener('click', () => navegarPagina(1));
+
+        async function mostrarVisualizacao(globalIndex) {
+            const allThumbnails = Array.from(thumbnailsContainer.querySelectorAll('.pdf-thumbnail'));
+            if (globalIndex < 0 || globalIndex >= allThumbnails.length) return;
+
+            lastViewedGlobalIndex = globalIndex;
+            const thumbnailDiv = allThumbnails[globalIndex];
+            const { file, pageIndex } = thumbnailDiv.pdfData;
+            const rotation = parseInt(thumbnailDiv.dataset.rotation || '0');
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const page = await pdfDocument.getPage(pageIndex + 1);
+
+                const viewport = page.getViewport({ scale: 1.5, rotation });
+                previewCanvas.height = viewport.height;
+                previewCanvas.width = viewport.width;
+                await page.render({ canvasContext: previewCanvas.getContext('2d'), viewport }).promise;
+                
+                previewModal.classList.remove('hidden');
+                verificarBotoesNavegacao(globalIndex);
+            } catch (error) {
+                console.error('Erro ao mostrar visualização:', error);
+                alert('Erro ao exibir a página do PDF.');
+            }
+        }
+
+        function navegarPagina(direcao) {
+            const newGlobalIndex = lastViewedGlobalIndex + direcao;
+            mostrarVisualizacao(newGlobalIndex);
+        }
+
+        function verificarBotoesNavegacao(globalIndex) {
+            const totalPages = thumbnailsContainer.querySelectorAll('.pdf-thumbnail').length;
+            prevPageButton.style.display = globalIndex > 0 ? 'block' : 'none';
+            nextPageButton.style.display = globalIndex < totalPages - 1 ? 'block' : 'none';
+        }
+
+        // --- Lógica Principal da Ferramenta ---
+        document.getElementById('limpar-btn').addEventListener('click', limparPdfs);
+        document.getElementById('baixar-selecionados-btn').addEventListener('click', baixarIntervaloDePaginas);
+        document.getElementById('baixar-todos-btn').addEventListener('click', juntarPdfs);
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            carregarArquivos(e.target.files);
+            e.target.value = null;
+        });
+
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary', 'bg-blue-50'); });
+        dropzone.addEventListener('dragleave', (e) => { e.currentTarget.classList.remove('border-primary', 'bg-blue-50'); });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-primary', 'bg-blue-50');
+            carregarArquivos(e.dataTransfer.files);
+        });
+
+        function atualizarNumeracaoMiniaturas() {
+            const thumbnails = thumbnailsContainer.querySelectorAll('.pdf-thumbnail');
+            thumbnails.forEach((thumbnail, index) => {
+                const span = thumbnail.querySelector('.pdf-thumbnail-overlay');
+                if (span) span.textContent = `Pág. ${index + 1}`;
+            });
+        }
+
+        function girarPagina(event, angulo) {
+            event.stopPropagation();
+            const thumbnailDiv = event.currentTarget.closest('.pdf-thumbnail');
+            if (!thumbnailDiv) return;
+            let currentRotation = parseInt(thumbnailDiv.dataset.rotation || '0', 10);
+            let newRotation = (currentRotation + angulo + 360) % 360;
+            thumbnailDiv.dataset.rotation = newRotation;
+            const canvas = thumbnailDiv.querySelector('canvas');
+            if (canvas) canvas.style.transform = `rotate(${newRotation}deg)`;
+        }
+
+        async function carregarArquivos(files) {
+            loadingOverlay.style.display = 'flex';
+            document.getElementById('placeholder')?.remove();
+
+            for (const file of files) {
+                if (file.type !== 'application/pdf') {
+                    alert(`O arquivo ${file.name} não é um PDF válido.`);
+                    continue;
+                }
+
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    
+                    for (let i = 1; i <= pdfDocument.numPages; i++) {
+                        const page = await pdfDocument.getPage(i);
+                        const viewport = page.getViewport({ scale: 0.3 });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        
+                        const thumbnailDiv = document.createElement('div');
+                        thumbnailDiv.className = 'pdf-thumbnail';
+                        thumbnailDiv.dataset.rotation = '0';
+                        thumbnailDiv.pdfData = { file, pageIndex: i - 1 };
+                        
+                        thumbnailDiv.appendChild(canvas);
+                        
+                        const overlayHTML = `
+                            <span class="pdf-thumbnail-overlay"></span>
+                            <button class="pdf-thumbnail-btn delete" title="Excluir">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            <button class="pdf-thumbnail-btn rotate-left" title="Girar Esquerda">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"></path></svg>
+                            </button>
+                            <button class="pdf-thumbnail-btn rotate-right" title="Girar Direita">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"></path></svg>
+                            </button>
+                            <button class="pdf-thumbnail-btn preview" title="Visualizar">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C3.732 4.943 9.522 3 10 3s6.268 1.943 9.542 7c-3.274 5.057-9.064 7-9.542 7S3.732 15.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+                            </button>
+                        `;
+
+                        thumbnailDiv.insertAdjacentHTML('beforeend', overlayHTML);
+                        thumbnailsContainer.appendChild(thumbnailDiv);
+
+                        thumbnailDiv.querySelector('.delete').onclick = (e) => {
+                            e.stopPropagation();
+                            thumbnailDiv.remove();
+                            atualizarNumeracaoMiniaturas();
+                        };
+                        thumbnailDiv.querySelector('.rotate-left').onclick = (e) => girarPagina(e, -90);
+                        thumbnailDiv.querySelector('.rotate-right').onclick = (e) => girarPagina(e, 90);
+                        thumbnailDiv.querySelector('.preview').onclick = async (e) => {
+                            e.stopPropagation();
+                            const allThumbnails = Array.from(thumbnailsContainer.querySelectorAll('.pdf-thumbnail'));
+                            const globalIndex = allThumbnails.indexOf(thumbnailDiv);
+                            await mostrarVisualizacao(globalIndex);
+                        };
+                    }
+                } catch (e) {
+                    console.error(`Erro ao carregar ${file.name}:`, e);
+                    alert(`Ocorreu um erro ao carregar o arquivo ${file.name}.`);
+                }
+            }
+            
+            loadingOverlay.style.display = 'none';
+            atualizarNumeracaoMiniaturas();
+
+            if (!sortableInstance) {
+                sortableInstance = new Sortable(thumbnailsContainer, {
+                    animation: 150,
+                    onUpdate: () => atualizarNumeracaoMiniaturas()
+                });
+            }
+        }
+
+        function parsePageRange(rangeString) {
+            if (!rangeString.trim()) return null;
+            const selectedPages = new Set();
+            const parts = rangeString.split(',').map(s => s.trim()).filter(Boolean);
+            for (const part of parts) {
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(Number);
+                    if (!isNaN(start) && !isNaN(end) && start > 0 && end >= start) {
+                        for (let i = start; i <= end; i++) selectedPages.add(i);
+                    }
+                } else {
+                    const page = Number(part);
+                    if (!isNaN(page) && page > 0) selectedPages.add(page);
+                }
+            }
+            return Array.from(selectedPages).sort((a, b) => a - b);
+        }
+
+        async function baixarIntervaloDePaginas() {
+            const rangeString = pageRangeInput.value;
+            const pagesToDownload = parsePageRange(rangeString);
+            if (!pagesToDownload || pagesToDownload.length === 0) {
+                alert("Formato de intervalo de páginas inválido ou campo vazio. Exemplo: '1-3, 5, 8'.");
+                return;
+            }
+            await gerarPdf(pagesToDownload);
+        }
+        
+        async function juntarPdfs() {
+             await gerarPdf(null);
+        }
+
+        async function gerarPdf(pagesToKeep) {
+            loadingOverlay.style.display = 'flex';
+            try {
+                const reorderedThumbnails = Array.from(thumbnailsContainer.querySelectorAll('.pdf-thumbnail'));
+                if (reorderedThumbnails.length === 0) {
+                    alert("Nenhuma página para processar.");
+                    return;
+                }
+                const pdfDestino = await PDFDocument.create();
+                const sourcePdfs = new Map();
+                for (let i = 0; i < reorderedThumbnails.length; i++) {
+                    const thumbnail = reorderedThumbnails[i];
+                    const currentPageNumber = i + 1;
+                    if (pagesToKeep && !pagesToKeep.includes(currentPageNumber)) {
+                        continue;
+                    }
+                    const { file, pageIndex } = thumbnail.pdfData;
+                    const rotationDegrees = parseInt(thumbnail.dataset.rotation || '0', 10);
+                    let pdfOrigem = sourcePdfs.get(file);
+                    if (!pdfOrigem) {
+                        const arrayBuffer = await file.arrayBuffer();
+                        pdfOrigem = await PDFDocument.load(arrayBuffer);
+                        sourcePdfs.set(file, pdfOrigem);
+                    }
+                    const [paginaCopiada] = await pdfDestino.copyPages(pdfOrigem, [pageIndex]);
+                    paginaCopiada.setRotation(degrees(rotationDegrees));
+                    pdfDestino.addPage(paginaCopiada);
+                }
+                if (pdfDestino.getPageCount() === 0) {
+                    alert("Nenhuma página corresponde ao intervalo selecionado.");
+                    return;
+                }
+                const bytesDoPdf = await pdfDestino.save();
+                triggerDownload(bytesDoPdf, outputFilenameInput.value);
+            } catch (e) {
+                console.error("Erro ao gerar PDF:", e);
+                alert("Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.");
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        function limparPdfs() {
+            thumbnailsContainer.innerHTML = '<p id="placeholder" class="text-gray-500 italic col-span-full text-center self-center">As miniaturas das páginas aparecerão aqui.</p>';
+            fileInput.value = null;
+            outputFilenameInput.value = "documento_editado.pdf";
+            pageRangeInput.value = "";
+            if (sortableInstance) {
+                sortableInstance.destroy();
+                sortableInstance = null;
+            }
+            lastViewedGlobalIndex = -1;
+            lastHighlightedThumbnail = null;
+        }
+
+        function triggerDownload(bytes, filename) {
+            const blob = new Blob([bytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename || 'documento.pdf';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

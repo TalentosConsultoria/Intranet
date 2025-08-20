@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Unificação de Planilhas: QLP - Bancodoc</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#004aad',
+                        secondary: '#196dff',
+                        background: '#f1f5f9',
+                        card: '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>html[data-auth='checking'] body{visibility:hidden}</style><script>document.documentElement.setAttribute('data-auth','checking');</script><script crossorigin="anonymous" src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script><script src="msal-config.js"></script><script src="config.js"></script><script src="auth-guard.js"></script></head>
+<body class="bg-background flex flex-col min-h-screen font-sans"><script data-inline-auth="1">
+(function(){
+  try{
+    const isLogin = /login\.html$/i.test(location.pathname);
+    if(!isLogin){
+      const acc = localStorage.getItem('userAccount') || (localStorage.getItem('demoUser')==='true' ? 'demo' : null);
+      if(!acc){
+        // preserve original path for after-login redirect
+        localStorage.setItem('redirectAfterLogin', location.pathname + location.search + location.hash);
+        // Try relative login first (works in subpaths), then absolute as fallback
+        const base = location.origin || (location.protocol + '//' + location.host);
+        location.replace(base + '/login.html');
+        return;
+      }
+    }
+    document.documentElement.removeAttribute('data-auth');
+  }catch(e){
+    console.error('inline-auth error', e);
+  }
+})();
+</script>
+<header class="bg-white shadow-md p-4 sticky top-0 z-50">
+<div class="container mx-auto flex justify-between items-center">
+<a class="flex items-center space-x-2" href="index.html">
+<img alt="Logo da Talentos Consultoria" class="h-10 rounded-full shadow-md" src="https://media.glassdoor.com/sqll/2733569/talentos-consultoria-squarelogo-1649741391944.png"/>
+<span class="text-xl font-bold text-red-700 hidden md:block">Talentos Consultoria</span>
+</a>
+<nav class="relative">
+<button class="text-gray-600 hover:text-primary font-semibold transition duration-300 flex items-center space-x-1 focus:outline-none" id="tools-dropdown-button">
+<span>Ferramentas DP</span>
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="tools-dropdown-menu">
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="qlp-format.html">QLP</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="pdf-tool.html">PDF</a>
+<a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" href="format-bancodoc.html">Bdoc</a>
+</div>
+</nav>
+</div>
+</header>
+<main class="flex-grow flex justify-center items-center p-4">
+<div class="bg-card p-8 md:p-12 rounded-3xl shadow-2xl w-full max-w-2xl">
+<div class="text-center">
+<h1 class="text-2xl font-bold text-gray-800 mb-2">Unificação de Planilhas: QLP - Bancodoc</h1>
+<p class="text-gray-600 mb-8">Importe as três planilhas abaixo para corrigir os dados e gerar o arquivo final.</p>
+</div>
+<div class="space-y-6">
+<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-colors duration-200 hover:border-primary hover:bg-blue-50">
+<label class="cursor-pointer" for="admissaoFile">
+<strong class="block text-lg font-semibold text-gray-800">Documentos não Depositados de Admissão</strong>
+<span class="text-gray-500 text-sm">Clique aqui para importar ou arraste o arquivo</span>
+<span class="block mt-1 text-sm text-primary font-medium italic" id="admissaoFileName"></span>
+</label>
+<input accept=".xlsx,.csv" class="hidden" id="admissaoFile" type="file"/>
+</div>
+<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-colors duration-200 hover:border-primary hover:bg-blue-50">
+<label class="cursor-pointer" for="relatorioFile">
+<strong class="block text-lg font-semibold text-gray-800">Relatório de Empregados</strong>
+<span class="text-gray-500 text-sm">Clique aqui para importar ou arraste o arquivo</span>
+<span class="block mt-1 text-sm text-primary font-medium italic" id="relatorioFileName"></span>
+</label>
+<input accept=".xlsx,.csv" class="hidden" id="relatorioFile" type="file"/>
+</div>
+<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-colors duration-200 hover:border-primary hover:bg-blue-50">
+<label class="cursor-pointer" for="cadastroFile">
+<strong class="block text-lg font-semibold text-gray-800">QLP Geral</strong>
+<span class="text-gray-500 text-sm">Clique aqui para importar ou arraste o arquivo</span>
+<span class="block mt-1 text-sm text-primary font-medium italic" id="cadastroFileName"></span>
+</label>
+<input accept=".xlsx,.csv" class="hidden" id="cadastroFile" type="file"/>
+</div>
+</div>
+<div class="mt-8 text-center">
+<button class="bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-secondary transition-colors duration-300 w-full sm:w-auto" onclick="processarArquivos()">
+                    Corrigir e Baixar Planilha
+                </button>
+</div>
+<pre class="bg-gray-100 p-4 rounded-lg text-left text-sm text-gray-700 whitespace-pre-wrap break-words mt-6 min-h-[50px]" id="relatorioOutput"></pre>
+</div>
+</main>
+<footer class="bg-gray-800 text-white text-center p-6">
+<div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
+<p class="text-gray-400 text-sm">© 2025 Talentos Consultoria. Todos os direitos reservados.</p>
+<!-- Seção de Contato com Ícones -->
+<div class="flex items-center gap-6">
+<a class="text-gray-400 hover:text-white transition-colors" href="https://talentosconsultoria.com.br/" rel="noopener noreferrer" target="_blank" title="Nosso Site">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path></svg>
+</a>
+<a class="text-gray-400 hover:text-white transition-colors" href="https://www.instagram.com/talentosconsultoria/" rel="noopener noreferrer" target="_blank" title="Nosso Instagram">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.28.058 1.688.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
+</a>
+<a class="text-gray-400 hover:text-white transition-colors" href="https://www.linkedin.com/company/talentos-consultoria/" rel="noopener noreferrer" target="_blank" title="Nosso LinkedIn">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+</a>
+</div>
+</div>
+</footer>
+<script>
+        // Script para o dropdown do cabeçalho
+        const dropdownButton = document.getElementById('tools-dropdown-button');
+        const dropdownMenu = document.getElementById('tools-dropdown-menu');
+        dropdownButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle('hidden');
+        });
+        window.addEventListener('click', () => {
+            if (!dropdownMenu.classList.contains('hidden')) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+
+        // FUNCIONALIDADE DA FERRAMENTA DE UNIFICAÇÃO
+        // Adiciona event listeners para atualizar o nome do arquivo
+        document.getElementById('admissaoFile').addEventListener('change', function(e) {
+            document.getElementById('admissaoFileName').textContent = e.target.files.length > 0 ? e.target.files[0].name : '';
+        });
+        document.getElementById('relatorioFile').addEventListener('change', function(e) {
+            document.getElementById('relatorioFileName').textContent = e.target.files.length > 0 ? e.target.files[0].name : '';
+        });
+        document.getElementById('cadastroFile').addEventListener('change', function(e) {
+            document.getElementById('cadastroFileName').textContent = e.target.files.length > 0 ? e.target.files[0].name : '';
+        });
+
+        function normalizarTexto(texto) {
+            if (typeof texto !== 'string') return '';
+            return texto.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/\s+/g, "").trim();
+        }
+
+        function normalizarCPF(cpf) {
+            if (typeof cpf !== 'string' && typeof cpf !== 'number') return '';
+            let numeros = String(cpf).replace(/\D/g, '');
+            return numeros.padStart(11, '0');
+        }
+        
+        function excelDateToJSDate(serial) {
+            if (typeof serial !== 'number' || serial <= 0) return serial;
+            const utc_days  = Math.floor(serial - 25569);
+            const utc_value = utc_days * 86400;
+            const date_info = new Date(utc_value * 1000);
+            const day = String(date_info.getDate()).padStart(2, '0');
+            const month = String(date_info.getMonth() + 1).padStart(2, '0');
+            const year = date_info.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function formatarCPF(cpf) {
+            const numeros = String(cpf).replace(/\D/g, "");
+            const cpfFormatado = numeros.padStart(11, "0");
+            if (cpfFormatado.length === 11) {
+                return cpfFormatado.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            }
+            return cpf;
+        }
+
+        async function processarArquivos() {
+            const admissaoInput = document.getElementById('admissaoFile').files[0];
+            const relatorioInput = document.getElementById('relatorioFile').files[0];
+            const cadastroInput = document.getElementById('cadastroFile').files[0];
+            const relatorioOutput = document.getElementById('relatorioOutput');
+            relatorioOutput.textContent = 'Processando...';
+
+            if (!admissaoInput || !relatorioInput || !cadastroInput) {
+                alert("Por favor, envie as três planilhas.");
+                relatorioOutput.textContent = '';
+                return;
+            }
+
+            try {
+                const [admissaoJson, relatorioJson, cadastroRaw] = await Promise.all([
+                    fileToJson(admissaoInput),
+                    fileToJson(relatorioInput),
+                    fileToJson(cadastroInput, { header: 1 })
+                ]);
+
+                if (!admissaoJson || admissaoJson.length === 0 || !relatorioJson || relatorioJson.length === 0 || !cadastroRaw || cadastroRaw.length === 0) {
+                    alert("Uma ou mais planilhas estão vazias ou com formato inválido.");
+                    relatorioOutput.textContent = 'Falha no processamento.';
+                    return;
+                }
+
+                const admissaoHeaders = Object.keys(admissaoJson[0] || {});
+                const relatorioHeaders = Object.keys(relatorioJson[0] || {});
+                const normalizedAdmissaoHeaders = admissaoHeaders.map(h => h ? normalizarTexto(h) : '');
+                const normalizedRelatorioHeaders = relatorioHeaders.map(h => h ? normalizarTexto(h) : '');
+                
+                let colunaNomeAdmissao = admissaoHeaders[normalizedAdmissaoHeaders.findIndex(h => h.includes("nome") || h.includes("empregado"))];
+                let colunaCpfAdmissao = admissaoHeaders[normalizedAdmissaoHeaders.findIndex(h => h.includes("cpf"))];
+                let colunaNomeRelatorio = relatorioHeaders[normalizedRelatorioHeaders.findIndex(h => h.includes("nome") || h.includes("empregado"))];
+                let colunaCpfRelatorio = relatorioHeaders[normalizedRelatorioHeaders.findIndex(h => h.includes("cpf") || h.includes("documento") || h.includes("registro"))];
+
+                const erros = [];
+                if (!colunaNomeAdmissao) erros.push("❌ A planilha 'Documentos não Depositados' não possui uma coluna de nome.");
+                if (!colunaCpfAdmissao) erros.push("❌ A planilha 'Documentos não Depositados' não possui uma coluna de CPF.");
+                if (!colunaNomeRelatorio) erros.push("❌ A planilha 'Relatório de Empregados' não possui uma coluna de nome.");
+                if (!colunaCpfRelatorio) erros.push("❌ A planilha 'Relatório de Empregados' não possui uma coluna de CPF/Documento.");
+
+                if (erros.length > 0) {
+                    alert(erros.join("\n"));
+                    relatorioOutput.textContent = 'Verifique os erros acima e tente novamente.';
+                    return;
+                }
+
+                const mapaCpfCorreto = new Map();
+                for (const linha of relatorioJson) {
+                    const nomeNormalizado = normalizarTexto(linha[colunaNomeRelatorio]);
+                    const cpf = linha[colunaCpfRelatorio]?.toString();
+                    if (nomeNormalizado && cpf && !cpf.includes("*")) {
+                        mapaCpfCorreto.set(nomeNormalizado, cpf);
+                    }
+                }
+
+                let cpfsAtualizados = 0;
+                for (const linha of admissaoJson) {
+                    const nomeNormalizado = normalizarTexto(linha[colunaNomeAdmissao]);
+                    if (mapaCpfCorreto.has(nomeNormalizado)) {
+                        linha[colunaCpfAdmissao] = formatarCPF(mapaCpfCorreto.get(nomeNormalizado));
+                        cpfsAtualizados++;
+                    }
+                }
+                
+                const qlpData = cadastroRaw;
+                const colunaIndiceCadastro = 0;
+                const colunaIndiceAdmissao = 7;
+                const colunaIndiceCpfCadastro = 15;
+                
+                const mapaCadastroAdmissao = new Map();
+                for (const linha of qlpData) {
+                    const cpfNormalizado = linha[colunaIndiceCpfCadastro] ? normalizarCPF(linha[colunaIndiceCpfCadastro]) : '';
+                    const cadastroValue = linha[colunaIndiceCadastro] || '';
+                    const admissaoValue = linha[colunaIndiceAdmissao] || '';
+
+                    if (cpfNormalizado && cadastroValue && admissaoValue) {
+                        mapaCadastroAdmissao.set(cpfNormalizado, {
+                            cadastro: cadastroValue,
+                            admissao: admissaoValue
+                        });
+                    }
+                }
+
+                const nomeColIndexAdmissao = admissaoHeaders.indexOf(colunaNomeAdmissao);
+                const novaPlanilhaFinal = [];
+                const cabecalhoFinal = [...admissaoHeaders];
+                cabecalhoFinal.splice(nomeColIndexAdmissao, 0, 'Admissão');
+                cabecalhoFinal.splice(nomeColIndexAdmissao, 0, 'Cadastro');
+                novaPlanilhaFinal.push(cabecalhoFinal);
+                
+                for(const linha of admissaoJson) {
+                    const cpfNormalizado = normalizarCPF(linha[colunaCpfAdmissao]);
+                    const dadosExtras = mapaCadastroAdmissao.get(cpfNormalizado) || { cadastro: '', admissao: '' };
+                    
+                    const novaLinha = [...Object.values(linha)];
+                    novaLinha.splice(nomeColIndexAdmissao, 0, excelDateToJSDate(dadosExtras.admissao));
+                    novaLinha.splice(nomeColIndexAdmissao, 0, dadosExtras.cadastro);
+                    novaPlanilhaFinal.push(novaLinha);
+                }
+
+                let mensagem = `✅ Processamento concluído com sucesso!\n\n`;
+                mensagem += `➡️ CPFs atualizados na planilha de admissão: ${cpfsAtualizados}\n`;
+                mensagem += `➡️ Colunas 'Cadastro' e 'Admissão' adicionadas.\n\n`;
+                mensagem += `O download do arquivo 'admissao_corrigida.xlsx' iniciará em breve.`;
+                relatorioOutput.textContent = mensagem;
+
+                const novaPlanilha = XLSX.utils.aoa_to_sheet(novaPlanilhaFinal);
+                const novoWorkbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(novoWorkbook, novaPlanilha, 'Corrigido');
+                XLSX.writeFile(novoWorkbook, 'admissao_corrigida.xlsx');
+
+            } catch (error) {
+                console.error("Erro ao processar arquivos:", error);
+                alert("Ocorreu um erro ao ler ou processar uma das planilhas. Verifique se os arquivos são válidos (.xlsx, .csv) e tente novamente.");
+                relatorioOutput.textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function fileToJson(file, options = {}) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                const extension = file.name.split('.').pop().toLowerCase();
+
+                reader.onload = (e) => {
+                    try {
+                        let workbook;
+                        if (extension === 'csv') {
+                            workbook = XLSX.read(e.target.result, { type: 'string', FS: ';' });
+                        } else {
+                            const data = new Uint8Array(e.target.result);
+                            workbook = XLSX.read(data, { type: 'array' });
+                        }
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(sheet, options);
+                        resolve(json);
+                    } catch (err) {
+                        reject(new Error(`Falha ao processar o arquivo ${file.name}. Formato pode ser inválido.`));
+                    }
+                };
+                reader.onerror = (err) => reject(new Error(`Falha ao ler o arquivo ${file.name}.`));
+                if (extension === 'csv') {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
