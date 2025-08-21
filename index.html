@@ -3,229 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wiki - Base de Conhecimento</title>
+    <title>Template - Página Principal da Wikipédia</title>
+    <!-- Link para o arquivo CSS externo -->
     <link rel="stylesheet" href="styles.css">
+    <!-- Adicionando a fonte Inter, se necessário -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
 </head>
 <body>
 
+    <!-- Cabeçalho Fixo (Topo) -->
+    <header class="top-header">
+        <div class="wiki-logo">Wikipédia</div>
+        <!-- Novo container para agrupar a barra de pesquisa e os links -->
+        <div class="header-elements">
+            <div class="search-bar">
+                <input type="text" placeholder="Pesquisar na Wiki">
+            </div>
+            <div class="user-links">
+                <a href="#">Não autenticado</a> |
+                <a href="#">Conversar</a> |
+                <a href="#">Contribuições</a>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo-container">
-                <div class="logo-image">
-                    <div class="logo-icon"><div class="logo-t">T</div></div>
-                </div>
-                <div class="logo-text">
-                    <div class="logo-title">Talentos Wiki</div>
-                    <div class="logo-subtitle">Talentos Consultoria</div>
-                </div>
-                </div>
+        <!-- Barra Lateral Esquerda -->
+        <aside class="sidebar">
+            <ul>
+                <li><a href="#">Página principal</a></li>
+                <li><a href="#">Índice A-Z</a></li>
+                <li><a href="#">Comunidade</a></li>
+                <li><a href="#">Portal da comunidade</a></li>
+                <li><a href="#">Ajuda</a></li>
+                <li><a href="#">Página aleatória</a></li>
+            </ul>
+        </aside>
 
-                <div class="search-container">
-                <div class="search-wrapper">
-                    <input type="text" class="search-box" placeholder="Pesquisar na wiki..." id="searchInput">
-                    <span class="search-icon" onclick="performSearch()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    </span>
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Seção de Destaque -->
+            <section class="content-section">
+                <h2><a href="#">Em destaque</a></h2>
+                <p>O que você está vendo é um template. Este texto e as imagens abaixo são apenas exemplos para mostrar como o layout se parece, mas o conteúdo não é real. A estrutura de colunas e seções está pronta para ser preenchida com o que você desejar.</p>
+                <div class="content-columns">
+                    <div class="column">
+                        <h3><a href="#">Sabia que?</a></h3>
+                        <ul>
+                            <li>...que o café foi descoberto por uma cabra etíope chamada Kaldi, que ficou energizada após comer as bagas de café?</li>
+                            <li>...que as formigas conseguem carregar até 50 vezes o seu próprio peso corporal?</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3><a href="#">Eventos atuais</a></h3>
+                        <ul>
+                            <li>- Início da temporada de furacões no Atlântico.</li>
+                            <li>- Lançamento de nova tecnologia de inteligência artificial.</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="search-results" id="searchResults"></div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Navigation -->
-        <nav class="nav">
-            <div class="nav-content">
-                <ul class="nav-menu" id="navMenu">
-                    <li class="nav-item"><a href="#" class="nav-link active" onclick="showPage('home')">Início</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('documentation')">Documentação</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('tutorials')">Tutoriais</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('faq')">FAQ</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('resources')">Recursos</a></li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="main">
+            </section>
             
+            <!-- Seção Imagem do Dia -->
+            <section class="content-section image-box">
+                <h2><a href="#">Imagem do dia</a></h2>
+                <img src="https://placehold.co/600x400/87ceeb/fff?text=Imagem+do+dia" alt="Imagem do dia">
+                <p>Legenda da imagem do dia.</p>
+            </section>
 
-            <!-- Content Area -->
-            <div class="content">
-                <!-- Home Page -->
-                <div id="page-home" class="page active">
-                    <div class="hero-section">
-                        <h1>Bem-vindo à Talentos Wiki</h1>
-                        <p>Sua base de conhecimento completa da Talentos Consultoria com documentação, tutoriais e recursos essenciais.</p>
-                    </div>
-
-                    <div class="quick-links">
-                        <a href="#" class="quick-link" onclick="showPage('documentation')">
-                            <h3>Documentação</h3>
-                            <p>Guias completos e referências</p>
-                        </a>
-                        <a href="#" class="quick-link" onclick="showPage('tutorials')">
-                            <h3>Tutoriais</h3>
-                            <p>Aprenda passo a passo</p>
-                        </a>
-                        <a href="#" class="quick-link" onclick="showPage('faq')">
-                            <h3>FAQ</h3>
-                            <p>Perguntas frequentes</p>
-                        </a>
-                        <a href="#" class="quick-link" onclick="showPage('resources')">
-                            <h3>Recursos</h3>
-                            <p>Ferramentas e materiais</p>
-                        </a>
-                    </div>
-
-                    <div class="cards-grid">
-                        <div class="card">
-                            <h3>Artigos Recentes</h3>
-                            <p>Confira as últimas adições à nossa base de conhecimento.</p>
-                            <a href="#">Ver todos</a>
-                        </div>
-                        <div class="card">
-                            <h3>Mais Populares</h3>
-                            <p>Os artigos mais acessados pelos usuários.</p>
-                            <a href="#">Explorar</a>
-                        </div>
-                        <div class="card">
-                            <h3>Dicas Rápidas</h3>
-                            <p>Soluções práticas para problemas comuns.</p>
-                            <a href="#">Ver dicas</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Documentation Page -->
-                <div id="page-documentation" class="page">
-                     <div class="page-content">
-                        <h1 class="page-title">Documentação</h1>
-                        <p>Esta seção contém todos os documentos e guias de referência.</p>
-                        
-                        <!-- Upload controls -->
-                        <div class="upload-controls">
-                            <input type="file" id="docPDFInput" accept=".pdf" style="display: none;">
-                            <button class="btn btn-primary" onclick="triggerDocUpload()">+ Upload de Documento</button>
-                        </div>
-
-                        <!-- PDF Attachments Section -->
-                        <div class="attachments">
-                            <h3>Documentos Anexos</h3>
-                            <div class="attachment-list" id="docsList">
-                                <p id="loadingDocs">Carregando documentos...</p>
-                                <!-- Attachments will be rendered here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Search Results Page -->
-                <div id="page-search-results" class="page">
-                    <div class="page-content">
-                        <h1 id="searchResultsTitle" class="page-title">Resultados da Pesquisa</h1>
-                        <div class="search-results-list" id="searchResultsList">
-                            <!-- Search results will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tutorials Page -->
-                <div id="page-tutorials" class="page">
-                    <div class="page-content">
-                        <h1 class="page-title">Tutoriais</h1>
-                        <p>Aqui você pode adicionar e visualizar tutoriais.</p>
-                        <div class="tutorial-form">
-                            <h4>Adicionar novo tutorial</h4>
-                            <input type="text" id="tutorialTitleInput" placeholder="Título do tutorial...">
-                            <textarea id="tutorialDescriptionInput" placeholder="Descrição do tutorial..."></textarea>
-                            <input type="file" id="tutorialPDFInput" accept=".pdf" style="display: none;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 0.5rem; border-radius: 6px; border: 1px solid #dee2e6;">
-                                <span id="tutorialFileName">Nenhum arquivo selecionado</span>
-                                <button class="btn btn-secondary" onclick="triggerTutorialFileUpload()">Anexar PDF</button>
-                            </div>
-                            <button class="btn btn-primary" onclick="addTutorial()">Adicionar Tutorial</button>
-                        </div>
-                        <div id="tutorialList" class="tutorial-list">
-                            <!-- Tutorial items will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FAQ Page -->
-                <div id="page-faq" class="page">
-                    <div class="page-content">
-                        <h1 class="page-title">Perguntas Frequentes</h1>
-                        <p>Aqui você pode ver e adicionar perguntas frequentes.</p>
-                        <div class="faq-form">
-                            <h4>Adicionar nova pergunta</h4>
-                            <input type="text" id="faqQuestionInput" placeholder="Digite sua pergunta...">
-                            <textarea id="faqAnswerInput" placeholder="Digite a resposta..."></textarea>
-                            <button class="btn btn-primary" onclick="addFAQ()">Adicionar Pergunta</button>
-                        </div>
-                        <div id="faqList" class="faq-list">
-                            <!-- FAQ items will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resources Page -->
-                <div id="page-resources" class="page">
-                    <div class="page-content">
-                        <h1 class="page-title">Recursos</h1>
-                        <p>Aqui você pode adicionar e visualizar recursos úteis.</p>
-                        <div class="resource-form">
-                            <h4>Adicionar novo recurso</h4>
-                            <input type="text" id="resourceTitleInput" placeholder="Título do recurso...">
-                            <input type="text" id="resourceDescriptionInput" placeholder="Descrição do recurso...">
-                            <input type="url" id="resourceLinkInput" placeholder="Link (URL) do recurso...">
-                            <button class="btn btn-primary" onclick="addResource()">Adicionar Recurso</button>
-                        </div>
-                        <div id="resourceList" class="resource-list">
-                            <!-- Resource items will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Seção Outros projetos da Wikimedia -->
+            <section class="content-section">
+                <h2><a href="#">Outros projetos da Wikimedia</a></h2>
+                <p>Esta seção pode conter links para outros projetos, como Wikcionário, Wikilivros, etc.</p>
+            </section>
+            
         </main>
     </div>
 
-    <!-- Modals -->
-    <div id="pdfModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div>
-                    <h3 id="pdfTitle">Visualizar PDF</h3>
-                    <p id="pdfDescription"></p>
-                </div>
-                <div class="modal-header-actions" style="display: flex; align-items: center; gap: 1rem;">
-                     <a id="pdfDownloadBtn" href="#" download class="btn btn-secondary">Download</a>
-                     <button class="modal-close" onclick="closePDF()">✕</button>
-                </div>
-            </div>
-            <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
-        </div>
-    </div>
+    <!-- Rodapé -->
+    <footer class="footer">
+        <p>Este é um template da Wikipédia e não a página oficial. Para a página real, visite pt.wikipedia.org.</p>
+        <p>Texto sob a licença Creative Commons Atribuição-CompartilhaIgual 3.0; pode estar sujeito a condições adicionais. Para mais detalhes, consulte as Condições de Uso.</p>
+    </footer>
 
-    <div id="descriptionModal" class="modal">
-        <div class="modal-content description-modal-content">
-            <div class="modal-header">
-                <h3>Adicionar Descrição</h3>
-                <button class="modal-close" onclick="closeDescriptionModal()">✕</button>
-            </div>
-            <p>Por favor, insira uma descrição para o documento:</p>
-            <input type="text" id="editDescriptionInput" placeholder="Descrição do documento..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-            <button class="btn btn-primary" onclick="saveDescription()" style="width: 100%; margin-top: 10px;">Salvar</button>
-        </div>
-    </div>
-
-    <!-- Message Box -->
-    <div id="messageBox"></div>
-
-    <script src="script.js"></script>
 </body>
 </html>
