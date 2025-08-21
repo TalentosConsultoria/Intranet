@@ -3,12 +3,12 @@ body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa; /* Cor de fundo da Wikipédia */
-    color: #202122; /* Cor principal do texto */
+    background-color: #f8f9fa; /* Cor de fundo principal clara */
+    color: #f8f9fa; /* Cor principal do texto alterada para branco */
 }
 
 a {
-    color: #3366cc; /* Cor padrão dos links da Wikipédia */
+    color: #791b1d; /* Cor padrão dos links em destaque */
     text-decoration: none;
 }
 
@@ -27,34 +27,31 @@ a:hover {
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #ffffff;
+    background-color: #791b1d; /* Fundo do cabeçalho */
     border-bottom: 1px solid #a2a9b1;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     display: flex;
     align-items: center;
-    /* Remove o espaçamento entre os elementos e os alinha à esquerda */
     justify-content: flex-start; 
     padding: 5px 20px;
-    gap: 20px; /* Adiciona um espaço entre a logo e o novo grupo */
+    gap: 20px; /* Espaço entre a logo e o novo grupo */
 }
 
 .wiki-logo {
     font-size: 24px;
     font-weight: bold;
-    color: #3366cc;
+    color: #f8f9fa; /* Cor da logo */
 }
 
 /* Estilos para o novo grupo de elementos */
 .header-elements {
     display: flex;
     align-items: center;
-    /* Aumenta o espaço para separar os links da barra de pesquisa */
     gap: 35px; 
 }
 
 .search-bar {
-    /* Aumenta o tamanho da barra de pesquisa */
     flex-grow: 1; 
     margin: 0;
 }
@@ -65,23 +62,45 @@ a:hover {
     border: 1px solid #a2a9b1;
     border-radius: 25px;
     outline: none;
+    background-color: #ffffff;
+    color: #2c090a;
 }
 
 .user-links a {
-    color: #54595d;
+    color: #f8f9fa; /* Cor dos links de usuário */
+}
+
+/* Estilos do botão de alternância */
+.toggle-button {
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #f8f9fa;
+    position: fixed; /* Posição fixa na tela */
+    top: 60px; /* Posicionamento vertical */
+    left: 205px; /* Posição horizontal para ficar à direita da barra lateral */
+    z-index: 1001; /* Garante que fique acima de outros elementos */
+    transition: left 0.3s ease-in-out; /* Adiciona transição para o movimento */
 }
 
 /* Estilos da barra lateral esquerda */
 .sidebar {
     width: 200px;
     padding: 20px 10px;
-    background-color: #f0f0f0;
-    border-right: 1px solid #d3d3d3;
+    background-color: #f0f0f0; /* Fundo da barra lateral */
+    border-right: 1px solid #a2a9b1;
     height: calc(100vh - 50px);
     position: fixed;
     top: 50px;
     left: 0;
     overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Classe para esconder a barra lateral */
+.hidden-sidebar {
+    transform: translateX(-100%);
 }
 
 .sidebar ul {
@@ -93,12 +112,12 @@ a:hover {
 .sidebar ul li a {
     display: block;
     padding: 8px 10px;
-    color: #54595d;
+    color: #202122; /* Cor dos links da barra lateral */
     font-size: 14px;
 }
 
 .sidebar ul li a:hover {
-    background-color: #e6e6e6;
+    background-color: #d3d3d3; /* Fundo do hover da barra lateral */
     text-decoration: none;
 }
 
@@ -107,14 +126,21 @@ a:hover {
     margin-left: 210px; /* Espaço para a barra lateral */
     padding: 20px;
     width: 100%;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* Classe para expandir o conteúdo principal quando a barra lateral estiver escondida */
+.expanded-content {
+    margin-left: 0;
 }
 
 .content-section {
-    background-color: #ffffff;
+    background-color: #791b1d; /* Fundo das seções de conteúdo */
     border: 1px solid #a2a9b1;
     border-radius: 5px;
     padding: 15px;
     margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .content-section h2 {
@@ -126,7 +152,7 @@ a:hover {
 }
 
 .content-section h2 a {
-    color: #000;
+    color: #fff; /* Cor dos títulos de seção */
 }
 
 .content-columns {
@@ -198,7 +224,6 @@ a:hover {
 
     .search-bar {
         margin: 10px 0;
-        /* Reduz o tamanho da barra de pesquisa em telas menores */
         width: 80%;
     }
 }

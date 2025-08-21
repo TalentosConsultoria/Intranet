@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Template - Página Principal da Wikipédia</title>
     <!-- Link para o arquivo CSS externo -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles2.css">
     <!-- Adicionando a fonte Inter, se necessário -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
 </head>
@@ -17,7 +17,7 @@
         <!-- Novo container para agrupar a barra de pesquisa e os links -->
         <div class="header-elements">
             <div class="search-bar">
-                <input type="text" placeholder="Pesquisar na Wiki">
+                <input type="text" placeholder="Pesquisar na Wikipédia">
             </div>
             <div class="user-links">
                 <a href="#">Não autenticado</a> |
@@ -25,11 +25,13 @@
                 <a href="#">Contribuições</a>
             </div>
         </div>
+        <!-- Botão para alternar a barra lateral -->
+        <button id="toggle-sidebar" class="toggle-button">☰</button>
     </header>
 
     <div class="container">
         <!-- Barra Lateral Esquerda -->
-        <aside class="sidebar">
+        <aside id="sidebar" class="sidebar">
             <ul>
                 <li><a href="#">Página principal</a></li>
                 <li><a href="#">Índice A-Z</a></li>
@@ -41,7 +43,7 @@
         </aside>
 
         <!-- Conteúdo Principal -->
-        <main class="main-content">
+        <main id="main-content" class="main-content">
             <!-- Seção de Destaque -->
             <section class="content-section">
                 <h2><a href="#">Em destaque</a></h2>
@@ -85,6 +87,7 @@
         <p>Este é um template da Wikipédia e não a página oficial. Para a página real, visite pt.wikipedia.org.</p>
         <p>Texto sob a licença Creative Commons Atribuição-CompartilhaIgual 3.0; pode estar sujeito a condições adicionais. Para mais detalhes, consulte as Condições de Uso.</p>
     </footer>
-
+    <!-- O script agora é um arquivo externo -->
+    <script src="script.js"></script>
 </body>
 </html>
