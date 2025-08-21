@@ -564,6 +564,8 @@
             font-weight: normal;
             margin-top: 4px;
             word-break: break-all; /* Garante a quebra de linha */
+            display: none;
+           
         }
 
         .modal-close {
