@@ -72,16 +72,13 @@ a:hover {
 
 /* Estilos do botão de alternância */
 .toggle-button {
-    background-color: transparent;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #f8f9fa;
-    position: fixed; /* Posição fixa na tela */
-    top: 60px; /* Posicionamento vertical */
-    left: 205px; /* Posição horizontal para ficar à direita da barra lateral */
-    z-index: 1001; /* Garante que fique acima de outros elementos */
-    transition: left 0.3s ease-in-out; /* Adiciona transição para o movimento */
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 205px;                 /* posição com sidebar aberta */
+  color: #d00000;
+  z-index: 1001;
+  transition: left .3s ease-in-out;
 }
 
 /* Estilos da barra lateral esquerda */
@@ -226,4 +223,29 @@ a:hover {
         margin: 10px 0;
         width: 80%;
     }
+}
+footer {
+  position: relative;   /* para o ::before se posicionar em relação ao footer */
+  z-index: 1002;        /* maior que .sidebar (1000) e que o botão (1001) */
+  background: #f8f9fa;  /* cor do fundo do rodapé */
+}
+
+/* Estende o fundo do footer para cobrir a área da sidebar à esquerda */
+footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--sidebar-w));     /* avança 220px para a esquerda */
+  width: calc(100% + var(--sidebar-w));  /* aumenta a largura em 220px */
+  background: inherit;                   /* mesma cor do footer */
+  z-index: -1;                           /* fica atrás do texto do footer */
+  pointer-events: none;                  /* não intercepta cliques */
+}
+.toggle-button:hover,
+.toggle-button:focus {
+  color: #ff2b2b;
+}
+body.sidebar-is-hidden .toggle-button {
+  left: 10px; /* sempre visível p/ reabrir */
 }
