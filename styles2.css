@@ -23,19 +23,21 @@ a:hover {
 
 /* Estilos do cabeçalho fixo no topo */
 .top-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #791b1d; /* Fundo do cabeçalho */
-    border-bottom: 1px solid #a2a9b1;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; 
-    padding: 5px 20px;
-    gap: 20px; /* Espaço entre a logo e o novo grupo */
+  /* antes era fixed; agora entra no fluxo normal */
+  position: relative;     /* ou simplesmente remova a propriedade */
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: 1003;
+
+  height: 60px;
+  background: #7a0e0e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;   /* itens ficam lado a lado à esquerda */
+  gap: 12px;
+  padding: 0 1rem;
 }
 
 .wiki-logo {
@@ -73,24 +75,25 @@ a:hover {
 /* Estilos do botão de alternância */
 .toggle-button {
   position: fixed;
-  top: 50%;
+  top: 55%;
   transform: translateY(-50%);
   left: 205px;                 /* posição com sidebar aberta */
-  color: #d00000;
+  color: #7a0e0e;
   z-index: 1001;
   transition: left .3s ease-in-out;
 }
 
 /* Estilos da barra lateral esquerda */
 .sidebar {
-    width: 200px;
+    position: fixed;
+    top: 0;                 /* antes: 60px */
+    left: 0;
+    width: 220px;
+    height: 100vh;
+    margin-top: 50px;
     padding: 20px 10px;
     background-color: #f0f0f0; /* Fundo da barra lateral */
     border-right: 1px solid #a2a9b1;
-    height: calc(100vh - 50px);
-    position: fixed;
-    top: 50px;
-    left: 0;
     overflow-y: auto;
     transition: transform 0.3s ease-in-out;
 }
@@ -120,10 +123,9 @@ a:hover {
 
 /* Estilos do conteúdo principal */
 .main-content {
-    margin-left: 210px; /* Espaço para a barra lateral */
-    padding: 20px;
-    width: 100%;
-    transition: margin-left 0.3s ease-in-out;
+  margin-left: 220px;            /* mantém quando sidebar visível */
+  padding: 20px 20px 20px;       /* antes: 80px 20px 20px */
+  transition: margin-left 0.3s ease-in-out;
 }
 
 /* Classe para expandir o conteúdo principal quando a barra lateral estiver escondida */

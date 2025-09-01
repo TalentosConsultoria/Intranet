@@ -3,56 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Template - Página Principal da Wikipédia</title>
+    <title>Wiki Talentos</title>
     <!-- Link para o arquivo CSS externo -->
     <link rel="stylesheet" href="styles2.css">
     <!-- Adicionando a fonte Inter, se necessário -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
 </head>
-<body>
+<body class="sidebar-is-hidden">
 
     <!-- Cabeçalho Fixo (Topo) -->
     <header class="top-header">
-        <div class="wiki-logo">Wikipédia</div>
-        <!-- Novo container para agrupar a barra de pesquisa e os links -->
+        <!-- Logo + título -->
+        <div class="site-brand">
+            <img src="logo.png" alt="Logo da empresa" class="site-logo" onerror="this.style.display='none'">
+            <h1 class="site-title">Talentos Wiki</h1>
+        </div>
+
+        <!-- Barra de pesquisa e itens do header -->
         <div class="header-elements">
             <div class="search-bar">
-                <input type="text" placeholder="Pesquisar na Wikipédia">
-            </div> 
+            <input type="text" placeholder="Pesquisar na Wikipédia">
+            </div>
         </div>
+
         <!-- Botão para alternar a barra lateral -->
-        <button id="toggle-sidebar" class="toggle-button">☰</button>
+        <button id="toggle-sidebar" class="toggle-button">◀</button>
     </header>
 
     <div class="container">
         <!-- Barra Lateral Esquerda -->
-        <aside id="sidebar" class="sidebar">
+        <aside id="sidebar" class="sidebar hidden-sidebar">
             <ul>
-                <li><a href="#">Página principal</a></li>
-                <li><a href="#">Índice A-Z</a></li>
-                <li><a href="#">Comunidade</a></li>
-                <li><a href="#">Portal da comunidade</a></li>
-                <li><a href="#">Ajuda</a></li>
-                <li><a href="#">Página aleatória</a></li>
+                <li><a href="https://www.coca-cola.com/br/pt" target="_blank">Página principal</a></li>
+                <li><a href="#">Lista de processos</a></li>
+                
             </ul>
         </aside>
 
         <!-- Conteúdo Principal -->
-        <main id="main-content" class="main-content">
+        <main id="main-content" class="main-content expanded-content">
             <!-- Seção de Destaque -->
             <section class="content-section">
                 <h2><a href="#">Em destaque</a></h2>
                 <p>O que você está vendo é um template. Este texto e as imagens abaixo são apenas exemplos para mostrar como o layout se parece, mas o conteúdo não é real. A estrutura de colunas e seções está pronta para ser preenchida com o que você desejar.</p>
                 <div class="content-columns">
                     <div class="column">
-                        <h3><a href="#">Sabia que?</a></h3>
+                        <h3>Sabia que?</h3>
                         <ul>
                             <li>...que o café foi descoberto por uma cabra etíope chamada Kaldi, que ficou energizada após comer as bagas de café?</li>
                             <li>...que as formigas conseguem carregar até 50 vezes o seu próprio peso corporal?</li>
                         </ul>
                     </div>
                     <div class="column">
-                        <h3><a href="#">Eventos atuais</a></h3>
+                        <h3>Eventos atuais</h3>
                         <ul>
                             <li>- Início da temporada de furacões no Atlântico.</li>
                             <li>- Lançamento de nova tecnologia de inteligência artificial.</li>
@@ -79,8 +82,8 @@
 
     <!-- Rodapé -->
     <footer class="footer">
-        <p>Este é um template da Wikipédia e não a página oficial. Para a página real, visite pt.wikipedia.org.</p>
-        <p>Texto sob a licença Creative Commons Atribuição-CompartilhaIgual 3.0; pode estar sujeito a condições adicionais. Para mais detalhes, consulte as Condições de Uso.</p>
+        <p>Talentos Consultoria LTDA.</p>
+        
     </footer>
     <!-- O script agora é um arquivo externo -->
     <script src="script.js"></script>
