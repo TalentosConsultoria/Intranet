@@ -3,12 +3,12 @@ body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa; /* Cor de fundo da Wikipédia */
-    color: #202122; /* Cor principal do texto */
+    background-color: #f8f9fa; /* Cor de fundo principal clara */
+    color: #f8f9fa; /* Cor principal do texto alterada para branco */
 }
 
 a {
-    color: #3366cc; /* Cor padrão dos links da Wikipédia */
+    color: #791b1d; /* Cor padrão dos links em destaque */
     text-decoration: none;
 }
 
@@ -18,43 +18,42 @@ a:hover {
 
 .container {
     display: flex;
-    padding-top: 50px; /* Espaço para o cabeçalho fixo */
+   /* padding-top: 10px; /* Espaço para o cabeçalho fixo */
 }
 
 /* Estilos do cabeçalho fixo no topo */
 .top-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #ffffff;
-    border-bottom: 1px solid #a2a9b1;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    /* Remove o espaçamento entre os elementos e os alinha à esquerda */
-    justify-content: flex-start; 
-    padding: 5px 20px;
-    gap: 20px; /* Adiciona um espaço entre a logo e o novo grupo */
+  /* antes era fixed; agora entra no fluxo normal */
+  position: relative;     /* ou simplesmente remova a propriedade */
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: 1003;
+
+  height: 60px;
+  background: #7a0e0e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;   /* itens ficam lado a lado à esquerda */
+  gap: 12px;
+  padding: 0 1rem;
 }
 
 .wiki-logo {
     font-size: 24px;
     font-weight: bold;
-    color: #3366cc;
+    color: #f8f9fa; /* Cor da logo */
 }
 
 /* Estilos para o novo grupo de elementos */
 .header-elements {
     display: flex;
     align-items: center;
-    /* Aumenta o espaço para separar os links da barra de pesquisa */
     gap: 35px; 
 }
 
 .search-bar {
-    /* Aumenta o tamanho da barra de pesquisa */
     flex-grow: 1; 
     margin: 0;
 }
@@ -65,23 +64,42 @@ a:hover {
     border: 1px solid #a2a9b1;
     border-radius: 25px;
     outline: none;
+    background-color: #ffffff;
+    color: #2c090a;
 }
 
 .user-links a {
-    color: #54595d;
+    color: #f8f9fa; /* Cor dos links de usuário */
+}
+
+/* Estilos do botão de alternância */
+.toggle-button {
+  position: fixed;
+  top: 14%;
+  transform: translateY(-50%);
+  left: 205px;                 /* posição com sidebar aberta */
+  color: #7a0e0e;
+  z-index: 1001;
+  transition: left .3s ease-in-out;
 }
 
 /* Estilos da barra lateral esquerda */
 .sidebar {
-    width: 200px;
-    padding: 20px 10px;
-    background-color: #f0f0f0;
-    border-right: 1px solid #d3d3d3;
-    height: calc(100vh - 50px);
     position: fixed;
-    top: 50px;
+    top: 0;                 /* antes: 60px */
     left: 0;
+    width: 220px;
+    height: 100vh;
+    padding: 20px 10px;
+    background-color: #f0f0f0; /* Fundo da barra lateral */
+    border-right: 1px solid #a2a9b1;
     overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Classe para esconder a barra lateral */
+.hidden-sidebar {
+    transform: translateX(-100%);
 }
 
 .sidebar ul {
@@ -93,28 +111,38 @@ a:hover {
 .sidebar ul li a {
     display: block;
     padding: 8px 10px;
-    color: #54595d;
+    color: #202122; /* Cor dos links da barra lateral */
     font-size: 14px;
 }
 
 .sidebar ul li a:hover {
-    background-color: #e6e6e6;
+    background-color: #d3d3d3; /* Fundo do hover da barra lateral */
     text-decoration: none;
 }
 
 /* Estilos do conteúdo principal */
 .main-content {
-    margin-left: 210px; /* Espaço para a barra lateral */
-    padding: 20px;
-    width: 100%;
+  margin-left: 220px;            /* mantém quando sidebar visível */
+  padding: 20px 20px 20px;       /* antes: 80px 20px 20px */
+  transition: margin-left 0.3s ease-in-out;
+   width: 100%;
+}
+
+/* Classe para expandir o conteúdo principal quando a barra lateral estiver escondida */
+.expanded-content {
+    margin-left: 0;
 }
 
 .content-section {
-    background-color: #ffffff;
+    background-color: #791b1d; /* Fundo das seções de conteúdo */
     border: 1px solid #a2a9b1;
     border-radius: 5px;
     padding: 15px;
     margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    display: block;      /* evita inline/inline-block encolhendo à largura do texto */
+    width: 100%;         /* ocupa toda a largura do .main-content */
+    box-sizing: border-box; /* inclui padding/borda no cálculo de largura */
 }
 
 .content-section h2 {
@@ -126,7 +154,7 @@ a:hover {
 }
 
 .content-section h2 a {
-    color: #000;
+    color: #fff; /* Cor dos títulos de seção */
 }
 
 .content-columns {
@@ -198,7 +226,60 @@ a:hover {
 
     .search-bar {
         margin: 10px 0;
-        /* Reduz o tamanho da barra de pesquisa em telas menores */
         width: 80%;
     }
+}
+footer {
+  position: relative;   /* para o ::before se posicionar em relação ao footer */
+  z-index: 1002;        /* maior que .sidebar (1000) e que o botão (1001) */
+  background: #f8f9fa;  /* cor do fundo do rodapé */
+}
+
+/* Estende o fundo do footer para cobrir a área da sidebar à esquerda */
+footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--sidebar-w));     /* avança 220px para a esquerda */
+  width: calc(100% + var(--sidebar-w));  /* aumenta a largura em 220px */
+  background: inherit;                   /* mesma cor do footer */
+  z-index: -1;                           /* fica atrás do texto do footer */
+  pointer-events: none;                  /* não intercepta cliques */
+}
+
+
+.toggle-button:hover{
+    color: #ff2b2b;
+}
+body.sidebar-is-hidden .toggle-button {
+  left: 10px; /* sempre visível p/ reabrir */
+}
+/* ajuste conforme a altura real do seu header */
+:root {
+  --header-h: 80px;
+}
+
+/* HEADER grudado no topo da tela (como era antes) */
+.top-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-h);
+  z-index: 1003; /* acima da sidebar (1000) e do botão (1001) */
+  /* mantém suas demais cores/estilos existentes */
+}
+
+/* Sidebar começa logo abaixo do header e ocupa só o espaço útil */
+.sidebar {
+  top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  /* mantém o restante das suas regras da sidebar */
+}
+
+/* Conteúdo principal com respiro para o header fixo */
+.main-content {
+  padding-top: calc(var(--header-h) + 20px); /* evita sobreposição do conteúdo */
+  /* mantém as regras de margin-left/expanded-content que você já usa */
 }
