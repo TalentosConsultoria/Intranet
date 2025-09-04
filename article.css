@@ -1,0 +1,107 @@
+/* ====== Estilos escopados do artigo ====== */
+:root {
+  --text: #1f2328;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --bg: #ffffff;
+  --bg-soft: #f8f9fa;
+}
+
+.wiki-article {
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.wiki-article .article-title {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 0 0 8px;
+}
+
+.wiki-article .lead {
+  font-size: 1.1rem;
+  color: #2a2f36;
+  margin: 0 0 16px;
+}
+
+/* Infobox */
+.wiki-article .infobox {
+  float: right;
+  width: 320px;
+  max-width: 100%;
+  margin: 0 0 16px 24px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.wiki-article .infobox-image img { display: block; width: 100%; height: auto; }
+.wiki-article .infobox-image figcaption {
+  font-size: 0.875rem; color: var(--muted);
+  padding: 8px 12px; border-top: 1px solid var(--border); background: var(--bg-soft);
+}
+.wiki-article .infobox-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.wiki-article .infobox-table th,
+.wiki-article .infobox-table td { padding: 8px 12px; vertical-align: top; border-top: 1px solid var(--border); }
+.wiki-article .infobox-table th { width: 40%; font-weight: 600; color: #374151; background: #fafafa; }
+
+/* Índice (TOC) */
+.wiki-article .toc {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin: 8px 0 16px;
+}
+.wiki-article .toc-title { font-weight: 700; margin-bottom: 8px; }
+.wiki-article .toc-list { list-style: decimal; padding-left: 20px; margin: 0; }
+.wiki-article .toc-list a { color: #1a73e8; text-decoration: none; }
+.wiki-article .toc-list a:hover { text-decoration: underline; }
+
+/* Cabeçalhos e thumbs */
+.wiki-article h2 { font-size: 1.5rem; margin: 24px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.wiki-article h3 { font-size: 1.2rem; margin: 16px 0 8px; }
+
+.wiki-article .thumb {
+  max-width: 360px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; margin: 8px 16px;
+}
+.wiki-article .thumb.right { float: right; }
+.wiki-article .thumb.left  { float: left;  }
+.wiki-article .thumb img { display: block; width: 100%; height: auto; }
+.wiki-article .thumb figcaption {
+  font-size: 0.875rem; color: var(--muted);
+  padding: 8px 12px; border-top: 1px solid var(--border); background: var(--bg-soft);
+}
+
+/* Referências, navbox, categorias */
+.wiki-article .ref a { text-decoration: none; color: #1a73e8; }
+.wiki-article .references { margin: 8px 0 24px; padding-left: 20px; }
+.wiki-article .references li { margin-bottom: 8px; }
+.wiki-article .back-ref { margin-left: 6px; text-decoration: none; }
+
+.wiki-article .navbox {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin: 16px 0;
+}
+.wiki-article .navbox-title { font-weight: 700; margin-bottom: 8px; }
+.wiki-article .navbox-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px;
+}
+.wiki-article .navbox-grid a {
+  display: block; background: var(--bg-soft); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px; text-decoration: none; color: #333;
+}
+
+.wiki-article .catlinks { font-size: 0.9rem; color: var(--muted); margin: 8px 0 0; }
+.wiki-article .catlinks a { color: #1a73e8; text-decoration: none; }
+.wiki-article .catlinks a:hover { text-decoration: underline; }
+
+/* Responsividade */
+@media (max-width: 900px) {
+  .wiki-article .infobox,
+  .wiki-article .thumb.right,
+  .wiki-article .thumb.left {
+    float: none; width: 100%; margin: 8px 0 16px;
+  }
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Título do Artigo — Talentos Wiki</title>
+
+  <!-- CSS global do site -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- CSS do artigo (escopado) -->
+  <link rel="stylesheet" href="article.css">
+</head>
+<body>
+  <!-- Cabeçalho (igual ao index) -->
+  <header class="top-header">
+    <div class="site-brand">
+      <img src="logo.png" alt="Logo da empresa" class="site-logo" onerror="this.style.display='none'">
+      <h1 class="site-title">Talentos Wiki</h1>
+    </div>
+
+    <div class="header-elements">
+      <div class="search-bar">
+        <input type="text" placeholder="Pesquisar na Wiki">
+      </div>
+    </div>
+
+    <!-- Botão para alternar a barra lateral -->
+    <button id="toggle-sidebar" class="toggle-button" aria-label="Recolher barra lateral" aria-expanded="true">◀</button>
+  </header>
+
+  <!-- Sidebar (igual ao index) -->
+  <aside id="sidebar" class="sidebar">
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li><a href="index.html#page-documentation">Documentação</a></li>
+        <li><a href="index.html#page-tutorials">Tutoriais</a></li>
+        <li><a href="index.html#page-faq">FAQ</a></li>
+        <li><a href="index.html#page-resources">Recursos</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Conteúdo principal -->
+  <main id="main-content" class="main-content">
+    <!-- ================== Artigo estilo Wikipédia ================== -->
+    <section class="wiki-article" id="article-root">
+
+      <!-- Título do artigo -->
+      <h1 class="article-title">Título do Artigo</h1>
+
+      <!-- Lead (resumo) -->
+      <p class="lead">
+        Parágrafo introdutório apresentando o tema de forma concisa, como nas páginas da Wikipédia.
+      </p>
+
+      <!-- Infobox à direita -->
+      <aside class="infobox" role="complementary" aria-label="Resumo do artigo">
+        <figure class="infobox-image">
+          <img src="https://via.placeholder.com/360x240?text=Imagem+do+artigo" alt="Legenda descritiva">
+          <figcaption>Legenda da imagem na infobox.</figcaption>
+        </figure>
+        <table class="infobox-table" aria-label="Dados principais">
+          <tbody>
+            <tr><th>Campo 1</th><td>Valor A</td></tr>
+            <tr><th>Campo 2</th><td>Valor B</td></tr>
+            <tr><th>Campo 3</th><td>Valor C</td></tr>
+            <tr><th>Atualizado</th><td>Set 2025</td></tr>
+          </tbody>
+        </table>
+      </aside>
+
+      <!-- Índice (TOC) – preenchido via JS -->
+      <nav class="toc" id="toc" aria-label="Índice">
+        <div class="toc-title">Índice</div>
+        <ol class="toc-list" id="toc-list"></ol>
+      </nav>
+
+      <!-- Seções do artigo -->
+      <h2>Histórico</h2>
+      <p>
+        Texto da seção “Histórico”. Exemplo de citação <sup class="ref"><a href="#ref-1" id="cite-1">[1]</a></sup>.
+      </p>
+
+      <div class="thumb right">
+        <figure>
+          <img src="https://via.placeholder.com/320x220?text=Imagem+com+legenda" alt="Descrição acessível">
+          <figcaption>Legenda descritiva da imagem.</figcaption>
+        </figure>
+      </div>
+
+      <h3>Primeiras iniciativas</h3>
+      <p>Detalhes e contexto nesta subseção.</p>
+
+      <h2>Características</h2>
+      <ul>
+        <li>Característica A</li>
+        <li>Característica B</li>
+        <li>Característica C</li>
+      </ul>
+
+      <h2>Ver também</h2>
+      <ul class="see-also">
+        <li><a href="#">Assunto relacionado 1</a></li>
+        <li><a href="#">Assunto relacionado 2</a></li>
+      </ul>
+
+      <!-- Referências -->
+      <h2 id="refs">Referências</h2>
+      <ol class="references">
+        <li id="ref-1">
+          Autor. <em>Título</em>. Ano. URL: <a href="#" rel="nofollow">https://exemplo.com</a>.
+          <a href="#cite-1" class="back-ref" aria-label="Voltar à citação">↩</a>
+        </li>
+      </ol>
+
+      <!-- Navbox (opcional) -->
+      <nav class="navbox" aria-label="Tópicos relacionados">
+        <div class="navbox-title">Tópicos relacionados</div>
+        <div class="navbox-grid">
+          <a href="#">Tema A</a>
+          <a href="#">Tema B</a>
+          <a href="#">Tema C</a>
+          <a href="#">Tema D</a>
+        </div>
+      </nav>
+
+      <!-- Categorias (opcional) -->
+      <div class="catlinks" aria-label="Categorias">
+        Categorias:
+        <a href="#" rel="tag">Categoria 1</a> ·
+        <a href="#" rel="tag">Categoria 2</a>
+      </div>
+
+    </section>
+    <!-- ================== /Artigo ================== -->
+  </main>
+
+  <!-- Rodapé (igual ao index, se você tiver) -->
+  <footer>
+    © 2025 Talentos Consultoria — Todos os direitos reservados.
+  </footer>
+
+  <!-- JS global do site (sidebar/header) -->
+  <script src="script.js"></script>
+  <!-- JS do artigo (TOC/âncoras) -->
+  <script src="article.js"></script>
+</body>
+</html>

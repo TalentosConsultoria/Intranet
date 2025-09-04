@@ -1,4 +1,4 @@
-// TOC automático e âncoras nos títulos (h2/h3) – escopado ao artigo
+// TOC automático e âncoras de títulos para .wiki-article
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.querySelector('.wiki-article');
   if (!root) return;
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .trim().replace(/\s+/g, '-');
 
   headings.forEach((h, idx) => {
+    // cria id único se não houver
     if (!h.id) {
       const base = slugify(h.textContent) || `secao-${idx+1}`;
       let id = base, n = 2;
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
       h.id = id;
     }
 
-    // link âncora visual
+    // adiciona link âncora no próprio heading (estilo wiki)
     if (!h.querySelector('.anchor-link')) {
       const a = document.createElement('a');
       a.href = `#${h.id}`;
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
       h.appendChild(a);
     }
 
-    // item do TOC
+    // inclui no TOC
     if (tocList) {
       const li = document.createElement('li');
       li.className = h.tagName.toLowerCase() === 'h2' ? 'toc-h2' : 'toc-h3';
