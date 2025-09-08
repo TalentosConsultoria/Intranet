@@ -88,7 +88,7 @@ a:hover {
     position: fixed;
     top: 0;                 /* antes: 60px */
     left: 0;
-    width: 220px;
+    width: var(--sidebar-w);
     height: 100vh;
     padding: 20px 10px;
     background-color: #f0f0f0; /* Fundo da barra lateral */
@@ -122,7 +122,7 @@ a:hover {
 
 /* Estilos do conteúdo principal */
 .main-content {
-  margin-left: 220px;            /* mantém quando sidebar visível */
+  margin-left: calc(var(--sidebar-w) + var(--sidebar-gap));            /* mantém quando sidebar visível */
   padding: 20px 20px 20px;       /* antes: 80px 20px 20px */
   transition: margin-left 0.3s ease-in-out;
    width: 100%;
@@ -258,6 +258,9 @@ body.sidebar-is-hidden .toggle-button {
 /* ajuste conforme a altura real do seu header */
 :root {
   --header-h: 80px;
+
+  --sidebar-w: 220px;
+  --sidebar-gap: 24px;
 }
 
 /* HEADER grudado no topo da tela (como era antes) */
@@ -283,3 +286,9 @@ body.sidebar-is-hidden .toggle-button {
   padding-top: calc(var(--header-h) + 20px); /* evita sobreposição do conteúdo */
   /* mantém as regras de margin-left/expanded-content que você já usa */
 }
+
+
+@media (max-width: 900px) {
+  :root { --sidebar-gap: 12px; }
+}
+
