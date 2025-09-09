@@ -3,66 +3,72 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Título do Artigo — Wiki Talentos</title>
+  <title>Artigo</title>
 
-  <!-- CSS global e do artigo (mesmos caminhos do index) -->
+  <!-- CSS global e do artigo com os caminhos corretos -->
   <link rel="stylesheet" href="/estilos/styles.css">
   <link rel="stylesheet" href="/estilos/article.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
 </head>
 
-<!-- Estado inicial compatível com script.js/styles.css: sidebar escondida -->
-<body class="sidebar-is-hidden">
+<body>
 
-  <!-- Cabeçalho idêntico ao index.html -->
+  <!-- Cabeçalho idêntico ao index.html, mas sem o botão da sidebar -->
   <header class="top-header">
     <!-- Logo + título -->
     <div class="site-brand">
-      <img src="logo.png" alt="Logo da empresa" class="site-logo" onerror="this.style.display='none'">
-      <h1 class="site-title">Talentos Wiki</h1>
+        <img src="https://placehold.co/40x40/ffffff/7a0e0e?text=T" alt="Logo da empresa" class="site-logo">
+        <h1 class="site-title"><a href="index.html" class="link_top">Talentos Wiki</a></h1>
     </div>
 
     <!-- Barra de pesquisa e itens do header -->
     <div class="header-elements">
-      <div class="search-bar">
-        <input type="text" placeholder="Pesquisar na Wiki">
-      </div>
-    </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Pesquisar na Wiki">
+        </div>
 
-    <!-- Botão para alternar a barra lateral (o script.js sincroniza o texto/aria) -->
-    <button id="toggle-sidebar" class="toggle-button" aria-expanded="false" aria-label="Expandir barra lateral">▶</button>
+        <!-- MENU DROPDOWN -->
+        <nav class="header-nav">
+            <div class="dropdown">
+                <button class="dropdown-button" id="dropdown-btn">
+                    Navegação
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </button>
+                <div class="dropdown-content" id="dropdown-links">
+                    <a href="index.html">Página inicial</a>
+                    <a href="article.html">Tutoriais</a>
+                    <a href="index.html#projetos">Outros Projetos</a>
+                    <a href="#">Ajuda</a>
+                </div>
+            </div>
+        </nav>
+        <!-- FIM DO MENU DROPDOWN -->
+    </div>
   </header>
 
+  <!-- Container principal sem a sidebar -->
   <div class="container">
-    <!-- Sidebar inicia escondida conforme script.js/styles.css -->
-    <aside id="sidebar" class="sidebar hidden-sidebar" aria-label="Menu lateral">
-      <ul>
-        <li><a href="index.html">Início</a></li>
-        <li><a href="article.html">Lista de processos</a></li>
-      </ul>
-    </aside>
-
-    <!-- Conteúdo expandido para ocupar a tela com a sidebar oculta -->
-    <main id="main-content" class="main-content expanded-content" tabindex="-1">
+    <!-- Conteúdo principal agora ocupa todo o espaço -->
+    <main id="main-content" class="main-content" tabindex="-1">
       <!-- ================== Artigo ================== -->
       <section class="wiki-article" id="article-root">
         <!-- Título do artigo -->
         <h1 class="article-title">Título do Artigo</h1>
 
         <!-- Lead (resumo) -->
-        <p class="lead">
+        <p>
           Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
         </p>
-        <p class="lead">
+        <p>
           Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
         </p>
-
+        
         <!-- ======= Leitura e Download de PDF ======= -->
         <section class="document-reader" aria-label="Leitura do documento em PDF">
           <h2>Documento em PDF</h2>
           <p>Leia o documento diretamente abaixo ou faça o download para visualizar no seu dispositivo.</p>
-
-          <!-- Ajuste o caminho do PDF abaixo para o arquivo real do seu projeto -->
           <div class="pdf-actions">
             <a class="btn btn-primary" href="TESTE.pdf" download>Baixar PDF</a>
           </div>
@@ -75,12 +81,10 @@
               aria-label="Visualizador de PDF">
               <p>
                 Não foi possível carregar o PDF no navegador.
-                <a href="/docs/documento.pdf" download>Baixe o PDF</a> para visualizar localmente.
+                <a href="TESTE.pdf" download>Baixe o PDF</a> para visualizar localmente.
               </p>
             </object>
           </div>
-
-          
         </section>
         <!-- ======= /Leitura e Download de PDF ======= -->
 
@@ -94,8 +98,9 @@
     <p>Talentos Consultoria LTDA.</p>
   </footer>
 
-  <!-- Scripts -->
-  <script src="/scripts/script.js"></script>
+  <!-- Scripts com caminhos corretos (script.js foi removido por ser desnecessário) -->
   <script src="/scripts/article.js"></script>
+  <script src="/scripts/script.js"></script>
 </body>
 </html>
+

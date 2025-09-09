@@ -3,12 +3,12 @@ body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa; /* Cor de fundo principal clara */
-    color: #f8f9fa; /* Cor principal do texto alterada para branco */
+    background-color: #f8f9fa;
+    color: #333;
 }
 
 a {
-    color: #791b1d; /* Cor padrão dos links em destaque */
+    color: #791b1d;
     text-decoration: none;
 }
 
@@ -16,50 +16,63 @@ a:hover {
     text-decoration: underline;
 }
 
-.container {
-    display: flex;
-   /* padding-top: 10px; /* Espaço para o cabeçalho fixo */
+:root {
+  --header-h: 60px;
+}
+.link_top{
+
+    color: white;
 }
 
+.link_top:hover{
+
+    text-decoration: none;
+}
 /* Estilos do cabeçalho fixo no topo */
 .top-header {
-  /* antes era fixed; agora entra no fluxo normal */
-  position: relative;     /* ou simplesmente remova a propriedade */
-  top: auto;
-  left: auto;
-  right: auto;
-  z-index: 1003;
-
-  height: 60px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-h);
   background: #7a0e0e;
   color: #fff;
   display: flex;
   align-items: center;
-  justify-content: flex-start;   /* itens ficam lado a lado à esquerda */
-  gap: 12px;
+  justify-content: flex-start; /* Alinha itens à esquerda */
+  gap: 16px;
   padding: 0 1rem;
+  z-index: 1003;
 }
 
-.wiki-logo {
-    font-size: 24px;
-    font-weight: bold;
-    color: #f8f9fa; /* Cor da logo */
+.site-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-/* Estilos para o novo grupo de elementos */
+.site-logo {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+}
+
+.site-title {
+    font-size: 1.2rem;
+    margin: 0;
+    color: #fff;
+}
+
 .header-elements {
     display: flex;
     align-items: center;
-    gap: 35px; 
-}
-
-.search-bar {
-    flex-grow: 1; 
-    margin: 0;
+    gap: 20px;
+    /* Adicionado para empurrar este bloco para a direita */
+    /*margin-left: auto;*/
 }
 
 .search-bar input {
-    width: 100%;
+    width: 250px;
     padding: 8px 12px;
     border: 1px solid #a2a9b1;
     border-radius: 25px;
@@ -68,93 +81,96 @@ a:hover {
     color: #2c090a;
 }
 
-.user-links a {
-    color: #f8f9fa; /* Cor dos links de usuário */
+/* --- ESTILOS DO DROPDOWN --- */
+.header-nav {
+    position: relative;
 }
 
-/* Estilos do botão de alternância */
-.toggle-button {
-  position: fixed;
-  top: 14%;
-  transform: translateY(-50%);
-  left: 205px;                 /* posição com sidebar aberta */
-  color: #7a0e0e;
-  z-index: 1001;
-  transition: left .3s ease-in-out;
+.dropdown-button {
+    background-color: #fff;
+    color: #7a0e0e;
+    padding: 8px 16px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    transition: background-color 0.2s;
 }
 
-/* Estilos da barra lateral esquerda */
-.sidebar {
-    position: fixed;
-    top: 0;                 /* antes: 60px */
-    left: 0;
-    width: var(--sidebar-w);
-    height: 100vh;
-    padding: 20px 10px;
-    background-color: #f0f0f0; /* Fundo da barra lateral */
-    border-right: 1px solid #a2a9b1;
-    overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
+.dropdown-button:hover, .dropdown-button.active {
+    background-color: #f0f0f0;
 }
 
-/* Classe para esconder a barra lateral */
-.hidden-sidebar {
-    transform: translateX(-100%);
+.dropdown-button svg {
+    transition: transform 0.2s;
 }
 
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+.dropdown-button.active svg {
+    transform: rotate(180deg);
 }
 
-.sidebar ul li a {
-    display: block;
-    padding: 8px 10px;
-    color: #202122; /* Cor dos links da barra lateral */
-    font-size: 14px;
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    right: 0;
+    top: 120%;
 }
 
-.sidebar ul li a:hover {
-    background-color: #d3d3d3; /* Fundo do hover da barra lateral */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
     text-decoration: none;
+    display: block;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-/* Estilos do conteúdo principal */
+.dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.show {
+    display: block;
+}
+/* --- FIM DOS ESTILOS DO DROPDOWN --- */
+
+
+/* Conteúdo principal simplificado */
 .main-content {
-  margin-left: calc(var(--sidebar-w) + var(--sidebar-gap));            /* mantém quando sidebar visível */
-  padding: 20px 20px 20px;       /* antes: 80px 20px 20px */
-  transition: margin-left 0.3s ease-in-out;
-   width: 100%;
-}
-
-/* Classe para expandir o conteúdo principal quando a barra lateral estiver escondida */
-.expanded-content {
-    margin-left: 0;
+    width: 100%;
+    padding: calc(var(--header-h) + 20px) 20px 20px;
+    box-sizing: border-box;
 }
 
 .content-section {
-    background-color: #791b1d; /* Fundo das seções de conteúdo */
+    background-color: #ffffff;
     border: 1px solid #a2a9b1;
     border-radius: 5px;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    display: block;      /* evita inline/inline-block encolhendo à largura do texto */
-    width: 100%;         /* ocupa toda a largura do .main-content */
-    box-sizing: border-box; /* inclui padding/borda no cálculo de largura */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #333;
 }
 
 .content-section h2 {
-    margin-top: 0;
-    font-size: 18px;
-    border-bottom: 1px solid #a2a9b1;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
+    color: #7a0e0e;
 }
 
 .content-section h2 a {
-    color: #fff; /* Cor dos títulos de seção */
+    color: #7a0e0e;
 }
 
 .content-columns {
@@ -162,30 +178,7 @@ a:hover {
     gap: 20px;
 }
 
-.column {
-    flex: 1;
-}
-
-.column ul {
-    padding: 0;
-    list-style-type: none;
-}
-
-.column ul li {
-    margin-bottom: 5px;
-}
-
-.image-box {
-    text-align: center;
-}
-
-.image-box img {
-    max-width: 100%;
-    height: auto;
-    border: 1px solid #d3d3d3;
-    padding: 5px;
-}
-
+/* Rodapé */
 .footer {
     text-align: center;
     padding: 20px;
@@ -193,102 +186,19 @@ a:hover {
     color: #54595d;
     border-top: 1px solid #a2a9b1;
     margin-top: 20px;
+    background: #f8f9fa;
 }
 
 /* Media Queries para responsividade */
 @media (max-width: 768px) {
-    .container {
-        flex-direction: column;
+    .header-elements {
+        gap: 10px;
+        /* Oculta a barra de pesquisa em telas muito pequenas para dar espaço ao menu */
+        .search-bar {
+            display: none;
+        }
     }
-
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-        border-right: none;
-        border-bottom: 1px solid #d3d3d3;
-        padding-bottom: 10px;
-    }
-
-    .main-content {
-        margin-left: 0;
-    }
-
     .content-columns {
         flex-direction: column;
     }
-
-    .top-header {
-        flex-direction: column;
-        padding: 10px;
-        position: static;
-    }
-
-    .search-bar {
-        margin: 10px 0;
-        width: 80%;
-    }
 }
-footer {
-  position: relative;   /* para o ::before se posicionar em relação ao footer */
-  z-index: 1002;        /* maior que .sidebar (1000) e que o botão (1001) */
-  background: #f8f9fa;  /* cor do fundo do rodapé */
-}
-
-/* Estende o fundo do footer para cobrir a área da sidebar à esquerda */
-footer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(-1 * var(--sidebar-w));     /* avança 220px para a esquerda */
-  width: calc(100% + var(--sidebar-w));  /* aumenta a largura em 220px */
-  background: inherit;                   /* mesma cor do footer */
-  z-index: -1;                           /* fica atrás do texto do footer */
-  pointer-events: none;                  /* não intercepta cliques */
-}
-
-
-.toggle-button:hover{
-    color: #ff2b2b;
-}
-body.sidebar-is-hidden .toggle-button {
-  left: 10px; /* sempre visível p/ reabrir */
-}
-/* ajuste conforme a altura real do seu header */
-:root {
-  --header-h: 80px;
-
-  --sidebar-w: 220px;
-  --sidebar-gap: 24px;
-}
-
-/* HEADER grudado no topo da tela (como era antes) */
-.top-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--header-h);
-  z-index: 1003; /* acima da sidebar (1000) e do botão (1001) */
-  /* mantém suas demais cores/estilos existentes */
-}
-
-/* Sidebar começa logo abaixo do header e ocupa só o espaço útil */
-.sidebar {
-  top: var(--header-h);
-  height: calc(100vh - var(--header-h));
-  /* mantém o restante das suas regras da sidebar */
-}
-
-/* Conteúdo principal com respiro para o header fixo */
-.main-content {
-  padding-top: calc(var(--header-h) + 20px); /* evita sobreposição do conteúdo */
-  /* mantém as regras de margin-left/expanded-content que você já usa */
-}
-
-
-@media (max-width: 900px) {
-  :root { --sidebar-gap: 12px; }
-}
-

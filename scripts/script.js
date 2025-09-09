@@ -1,23 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('toggle-sidebar');
-  const sidebar = document.getElementById('sidebar');
-  const main = document.getElementById('main-content');
 
-  const sync = () => {
-    const hidden = sidebar.classList.contains('hidden-sidebar');
-    document.body.classList.toggle('sidebar-is-hidden', hidden);
-    main.classList.toggle('expanded-content', hidden); // se você usa expanded_content
-    btn.textContent = hidden ? '▶' : '◀';
-    btn.setAttribute('aria-expanded', String(!hidden));
-    btn.setAttribute('aria-label', hidden ? 'Expandir barra lateral' : 'Recolher barra lateral');
-  };
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownBtn = document.getElementById('dropdown-btn');
+    const dropdownContent = document.getElementById('dropdown-links');
 
-  // calibra estado inicial
-  sync();
+    // Função para alternar a visibilidade do dropdown
+    function toggleDropdown() {
+        dropdownContent.classList.toggle('show');
+        dropdownBtn.classList.toggle('active');
+    }
 
-  btn.addEventListener('click', () => {
-    sidebar.classList.toggle('hidden-sidebar');
-    main.classList.toggle('expanded-content'); // mantenha se já usa essa classe
-    sync(); // re-calibra após o clique
-  });
+    // Evento de clique no botão
+    dropdownBtn.addEventListener('click', function(event) {
+        // Impede que o clique no botão feche o menu imediatamente (ver evento 'window.onclick')
+        event.stopPropagation(); 
+        toggleDropdown();
+    });
+
+    // Fecha o dropdown se o usuário clicar fora dele
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropdown-button')) {
+            if (dropdownContent.classList.contains('show')) {
+                toggleDropdown();
+            }
+        }
+    }
 });
+
