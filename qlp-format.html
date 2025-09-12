@@ -26,6 +26,30 @@
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        .message-box {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+        }
+        .message-box.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .message-box.error {
+            background-color: #dc2626;
+        }
+        .message-box.success {
+            background-color: #16a34a;
+        }
+    </style>
 </head>
 <body class="bg-background flex flex-col min-h-screen font-sans">
     <!-- Header -->
@@ -78,6 +102,9 @@
             </button>
         </div>
     </div>
+    
+    <!-- Message Box for feedback -->
+    <div id="message-box" class="message-box"></div>
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white text-center p-6">
@@ -117,6 +144,15 @@
             const fileInput = document.getElementById('file-input');
             const modal = document.getElementById('column-selection-modal');
             const closeModalButton = document.getElementById('close-modal-button');
+            const messageBox = document.getElementById('message-box');
+
+            function showMessageBox(message, type) {
+                messageBox.textContent = message;
+                messageBox.className = 'message-box show ' + type;
+                setTimeout(() => {
+                    messageBox.className = 'message-box';
+                }, 4000);
+            }
             
             // Mapeamento de cabeçalhos fixo, conforme o primeiro código
             const headerMapping = [
@@ -222,7 +258,7 @@
 
             function processAndDownloadData(data, columnsToKeep, newHeaders, unitName) {
                 if (!data || data.length <= 4) {
-                    alert("Arquivo inválido. Verifique se o arquivo possui pelo menos 5 linhas.");
+                    showMessageBox("Arquivo inválido. Verifique se o arquivo possui pelo menos 5 linhas.", "error");
                     return;
                 }
                 
@@ -294,6 +330,8 @@
                 
                 const fileName = `QLP - ${unitName || 'PlanilhaFormatada'}.xlsx`;
                 XLSX.writeFile(newWorkbook, fileName);
+
+                showMessageBox("Planilha formatada baixada com sucesso!", "success");
 
                 fileInput.value = null; // Limpa o input para permitir upload do mesmo arquivo novamente
             }
