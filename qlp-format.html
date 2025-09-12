@@ -1,58 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>QLP – Teste Local</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;padding:24px}
+    .box{max-width:700px;margin:auto;border:1px solid #ddd;border-radius:12px;padding:20px}
+    label{display:block;margin:12px 0 6px}
+    button{padding:10px 16px;border-radius:8px;border:0;background:#004aad;color:#fff;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Teste Local – QLP</h1>
+    <p>Importe sua planilha QLP. O script vai:</p>
+    <ol>
+      <li>pular as 4 primeiras linhas;</li>
+      <li>manter 46 linhas e pular 5, repetindo;</li>
+      <li>parar em uma linha que contenha “total” na primeira coluna;</li>
+      <li>renomear/formatar colunas e converter datas (Admissão col 7, Nascimento col 10) para <b>dd/mm/aaaa</b> sem timezone.</li>
+    </ol>
+
+    <label for="file">Planilha (.xlsx/.xls/.csv)</label>
+    <input id="file" type="file" accept=".xlsx,.xls,.csv"/>
+
+    <div style="margin-top:16px">
+      <button id="go" disabled>Baixar planilha formatada</button>
+    </div>
+  </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // ===== Utilidades de data (sem timezone) =====
-  const pad2 = n => String(n).padStart(2,'0');
+  const file = document.getElementById('file');
+  const go   = document.getElementById('go');
+  let rawData = null;
 
-  // Aceita: serial Excel | "dd/mm/aaaa" | "dd-mm-aaaa" | "aaaa-mm-dd"
-  // Retorna sempre "dd/mm/aaaa", SEM depender do fuso horário local
+  // datas sem timezone
+  const pad2 = n => String(n).padStart(2,'0');
   function toDDMMYYYY(v){
     if (v == null || v === "") return "";
-
-    // 1) Número serial do Excel (ou string numérica)
     if ((typeof v === "number" && isFinite(v)) || (/^\d+(\.\d+)?$/.test(String(v)))){
-      const excelEpochUTC = Date.UTC(1899,11,30); // 1899-12-30 corrige o "bug de 1900"
-      const msUTC = excelEpochUTC + Math.round(Number(v) * 86400) * 1000; // arredonda fração
+      const excelEpochUTC = Date.UTC(1899,11,30); // 1899-12-30
+      const msUTC = excelEpochUTC + Math.round(Number(v)*86400)*1000;
       const d = new Date(msUTC);
       return `${pad2(d.getUTCDate())}/${pad2(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`;
     }
-
     const s = String(v).trim();
-
-    // 2) dd/mm/aaaa ou dd-mm-aaaa
     let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-    if (m){
-      let [_, d, mo, y] = m;
-      if (y.length === 2) y = (parseInt(y,10) > 50 ? "19" : "20") + y;
-      return `${pad2(d)}/${pad2(mo)}/${y}`;
-    }
-
-    // 3) aaaa-mm-dd
+    if (m){ let [_, d, mo, y]=m; if (y.length===2) y=(parseInt(y,10)>50?"19":"20")+y; return `${pad2(d)}/${pad2(mo)}/${y}`; }
     m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (m) return `${m[3]}/${m[2]}/${m[1]}`;
-
-    return s; // fallback sem corromper
+    return s;
   }
-  // ============================================
-
-  // Dropdown do cabeçalho (só conecta se existir)
-  const dropdownButton = document.getElementById('tools-dropdown-button');
-  const dropdownMenu   = document.getElementById('tools-dropdown-menu');
-  if (dropdownButton && dropdownMenu){
-    dropdownButton.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      dropdownMenu.classList.toggle('hidden');
-    });
-    window.addEventListener('click', () => {
-      if (!dropdownMenu.classList.contains('hidden')) dropdownMenu.classList.add('hidden');
-    });
-  }
-
-  // Elementos da ferramenta
-  let rawData;
-  const fileInput        = document.getElementById('file-input');
-  const modal            = document.getElementById('column-selection-modal');
-  const closeModalButton = document.getElementById('close-modal-button');
-  const columnList       = document.getElementById('column-list');
 
   const headerMapping = [
     { newName: "CADASTRO",   originalIndex: 0 },
@@ -69,144 +69,71 @@ document.addEventListener('DOMContentLoaded', () => {
     { newName: "CPF",        originalIndex:15 },
     { newName: "PIS",        originalIndex:16 }
   ];
+  const keepIdx = headerMapping.map(m => m.originalIndex);
+  const newHeaders = headerMapping.map(m => m.newName);
 
-  // Eventos
-  fileInput.addEventListener('change', handleFile, false);
-  closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
-  window.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
-
-  // Leitura do arquivo (sem conversão automática de datas)
-  function handleFile(e){
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
+  file.addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       const data = new Uint8Array(ev.target.result);
-      // Mantém valores crus: impede o SheetJS de "mexer" em datas
-      const wb = XLSX.read(data, { type: 'array', cellDates: false, raw: true });
+      const wb = XLSX.read(data, { type: 'array', raw: true, cellDates: false });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      rawData = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: "" });
-      displayColumnSelectionModal();
+      rawData = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:"" });
+      go.disabled = false;
     };
-    reader.readAsArrayBuffer(files[0]);
-  }
+    reader.readAsArrayBuffer(f);
+  });
 
-  // Modal de seleção de colunas
-  function displayColumnSelectionModal(){
-    columnList.innerHTML = '';
-    headerMapping.forEach(m => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <label class="flex items-center text-gray-700 cursor-pointer">
-          <input type="checkbox" checked value="${m.originalIndex}"
-                 class="mr-3 h-5 w-5 rounded text-primary focus:ring-primary border-gray-300">
-          ${m.newName}
-        </label>`;
-      columnList.appendChild(li);
-    });
-    modal.classList.remove('hidden');
-  }
+  go.addEventListener('click', () => {
+    if (!rawData || rawData.length <= 4){ alert('Arquivo inválido.'); return; }
+    let rows = rawData.slice(4);
 
-  // Tornar disponível ao botão (onclick)
-  window.downloadSelectedColumns = function(){
-    const unitName = (document.getElementById('unit-name-input')?.value || "").trim();
-
-    const checked = document.querySelectorAll('#column-list input[type="checkbox"]:checked');
-    const columnsToKeep = Array.from(checked).map(cb => parseInt(cb.value,10));
-
-    const newHeaders = Array.from(checked).map(cb => {
-      const idx = parseInt(cb.value,10);
-      const m = headerMapping.find(x => x.originalIndex === idx);
-      return m ? m.newName : "COLUNA DESCONHECIDA";
-    });
-
-    processAndDownloadData(rawData, columnsToKeep, newHeaders, unitName);
-    modal.classList.add('hidden');
-  };
-
-  function processAndDownloadData(data, columnsToKeep, newHeaders, unitName){
-    if (!data || data.length <= 4){
-      alert("O arquivo não tem linhas suficientes para serem processadas.");
-      return;
-    }
-    const body = data.slice(4);
-
-    // Mantém 46 linhas, pula 5, e repete
-    let finalRows = [], kept = 0, skipped = 0;
-    for (let i=0;i<body.length;i++){
-      if (kept < 46){ finalRows.push(body[i]); kept++; }
+    // 46 mantém / 5 pula
+    let outRows = [], kept=0, skipped=0;
+    for (let i=0;i<rows.length;i++){
+      if (kept < 46){ outRows.push(rows[i]); kept++; }
       else if (skipped < 5){ skipped++; }
       if (skipped === 5){ kept = 0; skipped = 0; }
     }
 
-    // Corta quando encontrar "total" na primeira coluna
-    const cut = finalRows.findIndex(r => r[0] && String(r[0]).toLowerCase().includes('total'));
-    if (cut !== -1) finalRows = finalRows.slice(0, cut);
+    // corta no "total"
+    const cut = outRows.findIndex(r => r[0] && String(r[0]).toLowerCase().includes('total'));
+    if (cut !== -1) outRows = outRows.slice(0, cut);
 
-    const findIdx = name => (headerMapping.find(m => m.newName === name)?.originalIndex ?? -1);
+    // índices úteis
+    const idx = name => headerMapping.find(m => m.newName===name).originalIndex;
+    const iVinc=idx('VINCULO'), iSit=idx('SITUACAO'), iFil=idx('FILIAL'),
+          iCPF=idx('CPF'), iPIS=idx('PIS'), iAdm=idx('ADMISSAO'), iNas=idx('NASCIMENTO');
 
-    const iVinc = findIdx("VINCULO");
-    const iSit  = findIdx("SITUACAO");
-    const iFil  = findIdx("FILIAL");
-    const iCPF  = findIdx("CPF");
-    const iPIS  = findIdx("PIS");
-    const iAdm  = findIdx("ADMISSAO");
-    const iNas  = findIdx("NASCIMENTO");
+    const vincMap = {"10":"EFETIVO/CLT","50":"TEMPORARIO","55":"JOVEM APRENDIZ"};
+    const sitMap  = {"1":"Trabalhando","2":"Férias","3":"Auxílio Doença","4":"Acidente de Trabalho","5":"Serviço Militar","6":"Licença Maternidade","7":"Demitido"};
 
-    const out = finalRows.map(row => {
-      const newRow = [];
-      columnsToKeep.forEach(col => {
-        let cell = (row[col] ?? '');
+    // (mapa de filiais encurtado no demo)
+    const filMap = {1:"TALENTOS - CLT",2:"TALENTOS - TEMPORARIO",5:"AMBEV NOVA RIO - CLT",6:"AMBEV NOVA RIO - TEMPORARIO"};
 
-        // Vínculo
-        if (col === iVinc){
-          const map = {"10":"EFETIVO/CLT","50":"TEMPORARIO","55":"JOVEM APRENDIZ"};
-          cell = map[String(cell)] || cell;
-        }
-
-        // Situação
-        if (col === iSit){
-          const map = {"1":"Trabalhando","2":"Férias","3":"Auxílio Doença","4":"Acidente de Trabalho","5":"Serviço Militar","6":"Licença Maternidade","7":"Demitido"};
-          const key = String(parseInt(cell,10));
-          cell = map[key] || cell;
-        }
-
-        // Filial
-        if (col === iFil){
-          const map = {1:"TALENTOS - CLT",2:"TALENTOS - TEMPORARIO",3:"AMBEV CACHOEIRAS DE MACACU - CLT",4:"AMBEV CACHOEIRAS DE MACACU - TEMPORARIO",5:"AMBEV NOVA RIO - CLT",6:"AMBEV NOVA RIO - TEMPORARIO",7:"ARM ARMAZENS - CLT",8:"ARM ARMAZENS - TEMPORARIO",9:"BUNGE ALIMENTOS - CLT",10:"BUNGE ALIMENTOS - TEMPORARIO",11:"CARTA GOIAS - CLT",12:"CARTA GOIAS - TEMPORARIO",13:"GUANABARA T DE CASTRO - CLT",14:"GUANABARA T DE CASTRO - TEMPORARIO",15:"GUANABARA AGUA BRANCA - CLT",16:"GUANABARA AGUA BRANCA - TEMPORARIO",17:"CERVEJARIA BOHEMIA - CLT",18:"CERVEJARIA BOHEMIA - TEMPORARIO",19:"CLUB MED - CLT",20:"CLUB MED - TEMPORARIO",21:"CEPE/RIO - CLT",22:"CEPE/RIO - TEMPORARIO",23:"CORRFA - CLT",24:"CORRFA - TEMPORARIO",25:"CONSORCIO PIPE - CLT",26:"CONSORCIO PIPE - TEMPORARIO",27:"HALLIDAY GUIMARAES - CLT",28:"HALLIDAY GUIMARAES - TEMPORARIO",29:"CONTRUTORA NORBERTO ODEBRECHT - CLT",30:"CONTRUTORA NORBERTO ODEBRECHT - TEMPORARIO",31:"CRBS CDD JPA - CLT",32:"CRBS CDD JPA - TEMPORARIO",33:"CRBS CDD PAVUNA - CLT",34:"CRBS CDD PAVUNA - TEMPORARIO",35:"CRBS CDD SC - CLT",36:"CRBS CDD SC - TEMPORARIO",37:"CERVEJARIA JAGUARIUNA - CLT",38:"CERVEJARIA JAGUARIUNA - TEMPORARIO",39:"CERVEJARIA AGUAS CLARAS - CLT",40:"CERVEJARIA AGUAS CLARAS - TEMPORARIO",41:"CERVEJARIA LEYENDA - CLT",42:"CERVEJARIA LEYENDA - TEMPORARIO",43:"CERVEJARIA SAO LUIS - CLT",44:"CERVEJARIA SAO LUIS - TEMPORARIO",45:"CERVEJARIA SAO LUIS FABRICA - CLT",46:"CERVEJARIA SAO LUIS FABRICA - TEMPORARIO",47:"CONSTRUTORA QUEIROZ GALVAO - CLT",48:"CONSTRUTORA QUEIROZ GALVAO - TEMPORARIO",49:"CONSTRUTORA QUEIROZ GALVAO - GO",50:"CONSTRUTORA QUEIROZ GALVAO - GO",51:"CONSTRUTORA QUEIROZ GALVAO - SP",52:"VIGODENT INDUSTRIA - CLT",53:"VIGODENT INDUSTRIA - TEMPORARIO",54:"VIATRIS DISTRIBUIDORA - CLT",55:"VIATRIS DISTRIBUIDORA - TEMPORARIO",56:"CONSORCIO PIPE - CLT",57:"CONSORCIO PIPE - TEMPORARIO",58:"BRF - CLT",59:"VIATRIS CAMPOS",60:"VIATRIS CAMPOS - TEMPORARIO",61:"MYLAN/VIATRIS CAMPINAS - CLT",62:"MYLAN/VIATRIS CAMPINAS - TEMPORARIO",63:"PROJETO VILA LEOPOLDINA - CLT",64:"PROJETO VILA LEOPOLDINA - TEMPORARIO",65:"PROJETO VOLTA REDONDA - CLT",66:"PROJETO VOLTA REDONDA - TEMPORARIO",67:"PROJETO MINAS GERAIS - CLT",68:"PROJETO MINAS GERAIS - TEMPORARIO",69:"CRBS CDD VOLTA REDONDA - CLT",70:"CRBS CDD VOLTA REDONDA - TEMPORARIO",71:"CRBS CDD NOVA IGUAÇU - CLT",72:"CRBS CDD NOVA IGUAÇU - TEMPORARIO",73:"CRBS CDD VOLTA REDONDA - CLT",74:"CRBS CDD VOLTA REDONDA - TEMPORARIO",75:"ALYA - CLT",76:"ALYA - TEMPORARIO",77:"PROJETO JPA ARQUIVO CLT",78:"PROJETO JPA ARQUIVO TEMP",79:"EXTERRAN - CLT",80:"EXTERRAN - TEMPORARIO",81:"MYLAN DISTRIBUIDORA DE MEDICAMENTOS - CLT",82:"MYLAN DISTRIBUIDora DE MEDICAMENTOS - TEMPORARIO",83:"AMBEV JAGUARIUNA - CLT",84:"AMBEV JAGUARIUNA - TEMPORARIO",85:"BELA VISTA INCORPORADORA - CLT",86:"BELA VISTA INCORPORADORA - TEMPORARIO",87:"KONGSBERG MARITIME CM BRASIL LTDA. - CLT",88:"KONGSBERG MARITIME CM BRASIL LTDA - TEMPORARIO",89:"CNO S/A - CLT",90:"CNO S/A - TEMPORARIO",91:"BLU (ENOPP) - CLT",92:"BLU (ENOPP) - TEMPORARIO",93:"MYLAN BRASIL DISTRIBUIDORA - CLT",94:"MYLAN BRASIL DISTRIBUIDORA - TEMPORARIO",95:"BALL EMBALAGENS LTDA - CLT",96:"BALL EMBALAGENS LTDA - TEMPORARIOS",97:"LATICINIOS BELA VISTA - CLT",98:"LATICINIOS BELA VISTA - TEMPORARIO",99:"TALENTOS RJ - CLT",100:"TALENTOS RJ - TEMPORARIO",101:"TALENTOS SP - CLT",102:"AMBEV PIRAI - CLT",103:"AMBEV PIRAI - TEMPORARIO",104:"AMBEV VIDROS - CLT",105:"AMBEV VIDROS - TEMPORARIO",106:"KONGSBERG MARITIME - CLT",107:"KONGSBERG MARITIME - TEMPORARIO",108:"SVITZER - CLT",109:"SVITZER - TEMPORARIO",110:"VIATRIS BRASIL - CLT",111:"VIATRIS BRASIL - TEMPORARIO",112:"GREIF - CLT",113:"VIATRIS SP - CLT",114:"ABS - CLT",115:"ABS - TEMPORARIO",116:"RUHRPUMPEN - CLT",117:"RUHRPUMPEN - TEMPORARIO",118:"AMBEV NOVA RIO EMP - CLT",119:"AMBEV NOVA RIO EMP - TEMPORARIO"};
-          cell = map[cell] || cell;
-        }
-
-        if (col === iCPF){
-          let cpf = String(cell).replace(/\D/g,'').padStart(11,'0');
-          if (cpf.length === 11) cell = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-        }
-
-        if (col === iPIS){
-          let pis = String(cell).replace(/\D/g,'').padStart(11,'0');
-          if (pis.length === 11) cell = pis.replace(/(\d{3})(\d{5})(\d{2})(\d{1})/, '$1.$2.$3-$4');
-        }
-
-        // Datas (ADMISSAO / NASCIMENTO) — SEMPRE converte
-        if (col === iAdm || col === iNas){
-          cell = toDDMMYYYY(cell);
-        }
-
-        newRow.push(cell);
+    const formatted = outRows.map(r => {
+      const row = [];
+      keepIdx.forEach(c => {
+        let v = r[c] ?? '';
+        if (c === iVinc) v = vincMap[String(v)] || v;
+        if (c === iSit)  v = sitMap[String(parseInt(v,10))] || v;
+        if (c === iFil)  v = filMap[v] || v;
+        if (c === iCPF){ let cpf=String(v).replace(/\D/g,'').padStart(11,'0'); if (cpf.length===11) v=cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
+        if (c === iPIS){ let pis=String(v).replace(/\D/g,'').padStart(11,'0'); if (pis.length===11) v=pis.replace(/(\d{3})(\d{5})(\d{2})(\d{1})/,'$1.$2.$3-$4'); }
+        if (c === iAdm || c === iNas) v = toDDMMYYYY(v);
+        row.push(v);
       });
-      return newRow;
+      return row;
     });
 
-    // Cabeçalhos + planilha final
-    out.unshift(newHeaders);
+    formatted.unshift(newHeaders);
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(out);
-    XLSX.utils.book_append_sheet(wb, ws, "Planilha Formatada");
-    const fileName = `QLP - ${unitName || 'PlanilhaFormatada'}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-
-    fileInput.value = null;
-  }
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(formatted), 'Planilha Formatada');
+    XLSX.writeFile(wb, 'QLP-Formatada.xlsx');
+  });
 });
 </script>
+</body>
+</html>
