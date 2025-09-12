@@ -9,11 +9,6 @@
     window.msalApp = new msal.PublicClientApplication(window.MSAL_CONFIG);
   }
 
-  }
-// Função de download do botão de planilha qlp-format
-window.downloadSelectedColumns = downloadSelectedColumns;
-{
-
   // Helpers globais opcionais
   window.msAuth = {
     getAccount() {
