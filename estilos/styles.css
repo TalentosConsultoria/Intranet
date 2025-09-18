@@ -3,7 +3,7 @@ body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa;
+    background-color: #969696;
     color: #333;
 }
 
@@ -139,7 +139,8 @@ a:hover {
 }
 
 .dropdown-content a:hover {
-    background-color: #f1f1f1;
+    background-color: #7a0e0e;
+    color: white;
 }
 
 .show {
