@@ -78,12 +78,23 @@
 
         // Sessão já existe?
         const acc = msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
+        
         if (acc) {
-          const dest = localStorage.getItem("redirectAfterLogin") || "index.html";
-          localStorage.removeItem("redirectAfterLogin");
-          location.replace(dest);
-          return;
+          try {
+            const tokenTest = await msalInstance.acquireTokenSilent({ ...window.MSAL_LOGIN_REQUEST, account: acc });
+            if (tokenTest && tokenTest.accessToken) {
+              localStorage.setItem("authToken", tokenTest.accessToken);
+              const dest = localStorage.getItem("redirectAfterLogin") || "index.html";
+              localStorage.removeItem("redirectAfterLogin");
+              location.replace(dest);
+              return;
+            }
+          } catch (e) {
+            // Sem token válido, mantém na tela de login
+            console.debug("Sem token válido após logout, permanecendo no login.");
+          }
         }
+
 
         btn.disabled = false; // pronto para logar
       } catch (e) {
