@@ -12,7 +12,7 @@
       clientId: CLIENT_ID,
       authority: "https://login.microsoftonline.com/" + TENANT_ID,
       redirectUri: REDIRECT,
-      postLogoutRedirectUri: REDIRECT,
+      postLogoutRedirectUri: (ORIGIN + \"/index.html\"),
       navigateToLoginRequestUrl: false
     },
     cache: {

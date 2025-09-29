@@ -17,10 +17,9 @@ class AuthSystem {
     }
 
     isLoginPage() {
-        return window.location.pathname.includes('login.html') || 
+        return window.location.pathname.includes('login.html') ||
                window.location.pathname === '/login.html' ||
-               window.location.pathname.endsWith('/login') ||
-               window.location.pathname === '/';
+               window.location.pathname.endsWith('/login');
     }
 
     checkAuthentication() {
@@ -76,7 +75,7 @@ class AuthSystem {
         // Redireciona após um breve delay
         setTimeout(() => {
             window.location.href = "login.html";
-        }, 2000);
+        }, 500);
     }
 
     showRedirectMessage() {
@@ -156,9 +155,8 @@ class AuthSystem {
         // Se existe instância MSAL, faz logout
         if (window.msalInstance) {
             try {
-                window.msalInstance.logoutRedirect({
-                    postLogoutRedirectUri: window.location.origin + "/login.html"
-                });
+                try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
+                window.msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin + "/index.html" });
                 return; // O MSAL vai redirecionar
             } catch (error) {
                 console.error("Erro no logout MSAL:", error);
@@ -166,7 +164,7 @@ class AuthSystem {
         }
         
         // Fallback para logout sem MSAL
-        window.location.href = "login.html";
+        window.location.href = "index.html";
     }
 
     // Método para verificar autenticação periodicamente
