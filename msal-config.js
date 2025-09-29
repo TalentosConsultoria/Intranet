@@ -12,19 +12,22 @@
       clientId: CLIENT_ID,
       authority: "https://login.microsoftonline.com/" + TENANT_ID,
       redirectUri: REDIRECT,
-      postLogoutRedirectUri: (ORIGIN + \"/index.html\"),
+      postLogoutRedirectUri: ORIGIN + "/index.html",
       navigateToLoginRequestUrl: false
     },
     cache: {
       cacheLocation: "localStorage",
-      storeAuthStateInCookie: true // ajuda no Edge/IE e ambientes de intranet
+      storeAuthStateInCookie: true
     },
     system: {
-      loggerOptions: { loggerCallback: function () {} }
+      loggerOptions: {
+        loggerCallback: function () {},
+        logLevel: 2 // Info
+      }
     }
   };
 
-  // Pedidos de token (login) usados no loginRedirect
+  // Escopos e parâmetros extras do login
   window.MSAL_LOGIN_REQUEST = {
     scopes: ["User.Read", "openid", "profile"],
     extraQueryParameters: {

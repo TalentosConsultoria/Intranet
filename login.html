@@ -49,7 +49,7 @@
 
     let msalInstance;
 
-    async function init() {
+    async async function init() {
       try {
         if (!window.MSAL_CONFIG) throw new Error("Configuração MSAL não encontrada");
         msalInstance = new msal.PublicClientApplication(window.MSAL_CONFIG);
