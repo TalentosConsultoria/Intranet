@@ -3,7 +3,7 @@ body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #969696;
+    background-color: #ffffff;
     color: #333;
 }
 
@@ -28,7 +28,7 @@ a:hover {
 
     text-decoration: none;
 }
-/* Estilos do cabeçalho fixo no topo */
+
 .top-header {
   position: fixed;
   top: 0;
@@ -67,8 +67,7 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 20px;
-    /* Adicionado para empurrar este bloco para a direita */
-    /*margin-left: auto;*/
+    
 }
 
 .search-bar input {
@@ -146,10 +145,10 @@ a:hover {
 .show {
     display: block;
 }
-/* --- FIM DOS ESTILOS DO DROPDOWN --- */
 
 
-/* Conteúdo principal simplificado */
+
+
 .main-content {
     width: 100%;
     padding: calc(var(--header-h) + 20px) 20px 20px;
@@ -179,7 +178,7 @@ a:hover {
     gap: 20px;
 }
 
-/* Rodapé */
+
 .footer {
     text-align: center;
     padding: 20px;
@@ -190,11 +189,11 @@ a:hover {
     background: #f8f9fa;
 }
 
-/* Media Queries para responsividade */
+
 @media (max-width: 768px) {
     .header-elements {
         gap: 10px;
-        /* Oculta a barra de pesquisa em telas muito pequenas para dar espaço ao menu */
+        
         .search-bar {
             display: none;
         }
@@ -202,4 +201,55 @@ a:hover {
     .content-columns {
         flex-direction: column;
     }
+}
+.image-box .image-text-container {
+    display: flex;
+    gap: 20px; 
+}
+
+
+
+
+.image-box .image-text-container {
+    display: flex;
+    gap: 20px;
+}
+
+.image-box .image-text-container img {
+    width: 100%;
+    height: auto;
+}
+
+.image-box .image-text-container .image-column {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.image-box .image-text-container .text-column {
+    flex-grow: 1;
+}
+.image-box .image-text-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start; 
+}
+
+
+.image-box .image-text-container .image-column {
+    width: 50%; 
+    flex-shrink: 0; 
+    display: flex;
+    flex-direction: column;
+}
+
+
+.image-box .image-text-container .image-column img {
+    width: 100%;
+    height: auto;
+}
+
+
+.image-box .image-text-container .text-column {
+    flex-grow: 1; 
 }

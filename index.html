@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wiki Talentos</title>
-    <!-- CSS com os caminhos corretos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/estilos/styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
 </head>
@@ -24,7 +27,7 @@
                 <input type="text" placeholder="Pesquisar na Wiki">
             </div>
 
-            <!-- MENU DROPDOWN -->
+            
             <nav class="header-nav">
                 <div class="dropdown">
                     <button class="dropdown-button" id="dropdown-btn">
@@ -41,13 +44,12 @@
                     </div>
                 </div>
             </nav>
-            <!-- FIM DO MENU DROPDOWN -->
+            
         </div>
     </header>
 
-    <!-- Container principal sem a sidebar -->
+    
     <div class="container">
-        <!-- Conteúdo Principal -->
         <main id="main-content" class="main-content">
             <!-- Seção de Destaque -->
             <section class="content-section">
@@ -55,44 +57,51 @@
                 <p>Todos os processos usados pela empresa você encontrará aqui.</p>
                 <div class="content-columns">
                     <div class="column">
-                        <h3>Sabia que?</h3>
+                        <h3>Sub-título 1</h3>
                         <ul>
-                            <li>...que o café foi descoberto por uma cabra etíope chamada Kaldi, que ficou energizada após comer as bagas de café?</li>
-                            <li>...que as formigas conseguem carregar até 50 vezes o seu próprio peso corporal?</li>
+                            <li>Sub-item 1</li>
+                            <li>Sub-item 2</li>
                         </ul>
                     </div>
                     <div class="column">
-                        <h3>Listagem</h3>
+                        <h3>Sub-título 2</h3>
                         <ul>
-                            <li>- Tutoriais</li>
-                            <li>- Lançamento de nova tecnologia de inteligência artificial.</li>
+                            <li>Sub-item 3</li>
+                            <li>Sub-item 4</li>
                         </ul>
                     </div>
                 </div>
             </section>
             
-            <!-- Seção Imagem do Dia -->
+            
             <section class="content-section image-box">
                 <h2><a href="#">Imagem do dia</a></h2>
-                <img src="https://placehold.co/600x400/87ceeb/fff?text=Imagem+do+dia" alt="Imagem do dia">
-                <p>Legenda da imagem do dia.</p>
+                <div class="image-text-container">
+                    <div class="image-column">
+                        <img src="https://placehold.co/600x400/87ceeb/fff?text=Imagem+do+dia" alt="Imagem do dia">
+                        <p>Legenda da imagem do dia.</p>
+                    </div>
+                    <div class="text-column">
+                        <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+                        <p>Mais textos aqui.</p>
+                    </div>
+                </div>
             </section>
 
-            <!-- Seção Outros projetos da Wikimedia -->
+            
             <section class="content-section">
                 <h2>Outros projetos da Wiki</h2>
-                <p>Esta seção pode conter links para outros projetos, como Wikcionário, Wikilivros, etc.</p>
+            
             </section>
             
         </main>
     </div>
 
-    <!-- Rodapé -->
+    
     <footer class="footer">
         <p>Talentos Consultoria LTDA.</p>
     </footer>
     
-    <!-- Scripts com caminhos corretos (script.js foi removido) -->
     <script src="/scripts/script.js"></script>
 </body>
 </html>
