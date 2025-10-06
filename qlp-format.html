@@ -1,20 +1,10 @@
-@ -5,26 +5,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Formatador de Planilhas com Seleção</title>
   <style>
-    body{font-family:Arial, sans-serif; margin:20px; background:#f4f4f4; color:#333; text-align:center}
-    .container{max-width:500px; margin:100px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.1)}
-    input[type="file"]{display:none}
-    .custom-file-upload{border:1px solid #ccc; display:inline-block; padding:10px 20px; cursor:pointer; background:#28a745; color:#fff; border-radius:5px; font-size:16px; transition:background-color .3s}
-    .custom-file-upload:hover{background:#218838}
-    .modal{display:none; position:fixed; z-index:1; inset:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,.4); padding-top:60px}
-    .modal-content{background:#fefefe; margin:5% auto; padding:20px; border:1px solid #888; width:80%; max-width:500px; border-radius:8px; text-align:left}
-    .close-button{color:#aaa; float:right; font-size:28px; font-weight:bold; cursor:pointer}
-    .close-button:hover,.close-button:focus{color:#000; text-decoration:none}
-    .column-list{list-style:none; padding:0}
-    .column-list li{margin:10px 0}
-    .button-download{display:block; width:100%; padding:10px; background:#007BFF; color:#fff; border:none; border-radius:5px; font-size:16px; cursor:pointer; margin-top:20px}
-    .button-download:hover{background:#0056b3}
     body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; color: #333; text-align: center; }
     .container { max-width: 500px; margin: 100px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
     input[type="file"] { display: none; }
@@ -45,19 +35,16 @@
 
   <div class="container">
     <h2>Importar e Baixar Planilha Formatada</h2>
-    <p>Clique abaixo para importar sua planilha. Você será solicitado a selecionar as colunas que deseja manter antes do download.</p>
     <p>Clique abaixo para importar sua planilha. Você será solicitado a selecionar as colunas e filtros desejados antes do download.</p>
     <label for="file-input" class="custom-file-upload">Importar Planilha</label>
     <input id="file-input" type="file" accept=".csv, .xlsx, .xls" />
   </div>
-@ -32,252 +43,278 @@
+
   <div id="column-selection-modal" class="modal">
     <div class="modal-content">
       <span class="close-button">&times;</span>
-      <h3>Selecione as colunas que deseja manter:</h3>
       <h3>1. Selecione as colunas que deseja manter:</h3>
       <ul id="column-list" class="column-list"></ul>
-      <button class="button-download" onclick="downloadSelectedColumns()">Baixar Planilha</button>
       
       <!-- Container para os filtros de operação -->
       <div id="filter-container"></div>
@@ -76,22 +63,9 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     let rawData;
-    let isDate1904 = false; // detectado ao ler o arquivo
     let isDate1904 = false;
 
     const headerMapping = [
-      { newName: "CADASTRO",   originalIndex: 0 },
-      { newName: "NOME",       originalIndex: 1 },
-      { newName: "SITUACAO",   originalIndex: 4 },
-      { newName: "FILIAL",     originalIndex: 5 },
-      { newName: "VINCULO",    originalIndex: 6 },
-      { newName: "ADMISSAO",   originalIndex: 7 },
-      { newName: "CARGO",      originalIndex: 8 },
-      { newName: "NASCIMENTO", originalIndex: 10 },
-      { newName: "CTPS",       originalIndex: 11 },
-      { newName: "SERIE",      originalIndex: 13 },
-      { newName: "RG",         originalIndex: 14 },
-      { newName: "CPF",        originalIndex: 15 },
       { newName: "CADASTRO",   originalIndex: 0 }, { newName: "NOME",       originalIndex: 1 },
       { newName: "SITUACAO",   originalIndex: 4 }, { newName: "FILIAL",     originalIndex: 5 },
       { newName: "VINCULO",    originalIndex: 6 }, { newName: "ADMISSAO",   originalIndex: 7 },
@@ -129,19 +103,6 @@
     const findOriginalIndex = (name) => (headerMapping.find(m => m.newName === name)?.originalIndex ?? -1);
 
     fileInput.addEventListener('change', handleFile, false);
-    closeBtn.addEventListener('click', ()=> modal.style.display='none');
-    window.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
-
-    // ======== CONVERSOR DE DATA SEM DESVIO (respeita 1900/1904, sem timezone) ========
-    function excelSerialToBRDate(serial){
-      if (serial == null || serial === '') return '';
-      const n = isDate1904 ? (Number(serial) + 1462) : Number(serial); // compensação 1904
-      const dc = XLSX.SSF.parse_date_code(n); // evita fuso e bug do 1900
-      if (!dc) return '';
-      const dd = String(dc.d).padStart(2,'0');
-      const mm = String(dc.m).padStart(2,'0');
-      const yy = dc.y;
-      return `${dd}/${mm}/${yy}`;
     closeBtn.addEventListener('click', () => modal.style.display = 'none');
     window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
     searchInput.addEventListener('input', (e) => populateOperationsList(e.target.value));
@@ -157,18 +118,6 @@
         return `${dd}/${mm}/${yy}`;
     }
 
-    function handleFile(e){
-      const files = e.target.files;
-      if(!files.length) return;
-
-      const reader = new FileReader();
-      reader.onload = (ev)=>{
-        const data = new Uint8Array(ev.target.result);
-        // raw:true e cellDates:false pra manter números crus (sem virar Date local)
-        const workbook = XLSX.read(data, { type:'array', raw:true, cellDates:false });
-
-        // Detecta sistema 1904 se o arquivo trouxer essa flag
-        isDate1904 = !!(workbook?.Workbook?.WBProps?.date1904);
     function handleFile(e) {
         const files = e.target.files;
         if (!files.length) return;
@@ -185,9 +134,6 @@
         reader.readAsArrayBuffer(files[0]);
     }
 
-        const firstSheet = workbook.SheetNames[0];
-        const worksheet  = workbook.Sheets[firstSheet];
-        rawData = XLSX.utils.sheet_to_json(worksheet, { header:1, raw:true });
     function displayColumnSelectionModal() {
         const ul = document.getElementById('column-list');
         ul.innerHTML = '';
@@ -197,9 +143,6 @@
             ul.appendChild(li);
         });
 
-        displayColumnSelectionModal();
-      };
-      reader.readAsArrayBuffer(files[0]);
         const filterContainer = document.getElementById('filter-container');
         filterContainer.innerHTML = ''; // Limpa filtros anteriores
 
@@ -233,182 +176,23 @@
         modal.style.display = 'block';
     }
 
-    function displayColumnSelectionModal(){
-      const ul = document.getElementById('column-list');
-      ul.innerHTML = '';
-      headerMapping.forEach(m=>{
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <label>
-            <input type="checkbox" checked value="${m.originalIndex}">
-            ${m.newName}
-          </label>
-        `;
-        ul.appendChild(li);
-      });
-      modal.style.display = 'block';
-    }
     function downloadSelectedColumns() {
         const checks = document.querySelectorAll('#column-list input[type="checkbox"]:checked');
         const columnsToKeep = Array.from(checks).map(cb => parseInt(cb.value, 10));
 
-    function downloadSelectedColumns(){
-      const checks = document.querySelectorAll('#column-list input[type="checkbox"]:checked');
-      const columnsToKeep = Array.from(checks).map(cb => parseInt(cb.value,10));
         const newHeaders = Array.from(checks).map(cb => {
             const idx = parseInt(cb.value, 10);
             const m = headerMapping.find(h => h.originalIndex === idx);
             return m ? m.newName : 'COLUNA DESCONHECIDA';
         });
 
-      const newHeaders = Array.from(checks).map(cb=>{
-        const idx = parseInt(cb.value,10);
-        const m = headerMapping.find(h=>h.originalIndex===idx);
-        return m ? m.newName : 'COLUNA DESCONHECIDA';
-      });
         const filterChecks = document.querySelectorAll('.operation-filter:checked');
         const selectedOperations = Array.from(filterChecks).map(cb => cb.value);
 
-      processAndDownloadData(rawData, columnsToKeep, newHeaders);
-      modal.style.display = 'none';
         processAndDownloadData(rawData, columnsToKeep, newHeaders, selectedOperations);
         modal.style.display = 'none';
     }
 
-    function processAndDownloadData(data, columnsToKeep, newHeaders){
-      if (data.length <= 4) { alert('O arquivo não tem linhas suficientes para serem processadas.'); return; }
-      const dataRows = data.slice(4); // pula 4 linhas iniciais
-
-      // regra 46 mantém / 5 pula
-      let finalRows = [], keep=0, skip=0;
-      for (let i=0;i<dataRows.length;i++){
-        if (keep<46){ finalRows.push(dataRows[i]); keep++; }
-        else if (skip<5){ skip++; }
-        if (skip===5){ keep=0; skip=0; }
-      }
-
-      // para se achar "total" na 1ª coluna
-      const totalRowIndex = finalRows.findIndex(row => row[0] && String(row[0]).toLowerCase().includes('total'));
-      if (totalRowIndex !== -1) finalRows = finalRows.slice(0,totalRowIndex);
-
-      const findOriginalIndex = (name)=> (headerMapping.find(m=>m.newName===name)?.originalIndex ?? -1);
-      const vinculoIdx    = findOriginalIndex('VINCULO');
-      const situacaoIdx   = findOriginalIndex('SITUACAO');
-      const filialIdx     = findOriginalIndex('FILIAL');
-      const cpfIdx        = findOriginalIndex('CPF');
-      const pisIdx        = findOriginalIndex('PIS');
-      const admissaoIdx   = findOriginalIndex('ADMISSAO');
-      const nascIdx       = findOriginalIndex('NASCIMENTO');
-
-      const formattedData = finalRows.map(row=>{
-        const newRow = [];
-
-        columnsToKeep.forEach(colIdx=>{
-          let cell = row[colIdx] ?? '';
-
-          // VÍNCULO
-          if (colIdx === vinculoIdx){
-            switch (String(cell)) {
-              case '10': cell = 'EFETIVO/CLT'; break;
-              case '50': cell = 'TEMPORARIO'; break;
-              case '55': cell = 'JOVEM APRENDIZ'; break;
-            }
-          }
-
-          // SITUAÇÃO
-          if (colIdx === situacaoIdx){
-            switch (String(cell)) {
-              case '1': case '001': cell = 'Trabalhando'; break;
-              case '2': case '002': cell = 'Férias'; break;
-              case '3': case '003': cell = 'Auxílio Doença'; break;
-              case '4': case '004': cell = 'Acidente de Trabalho'; break;
-              case '5': case '005': cell = 'Serviço Militar'; break;
-              case '6': case '006': cell = 'Licença Maternidade'; break;
-              case '7': case '007': cell = 'Demitido'; break;
-            }
-          }
-
-          // FILIAL (inclui Ball 95/96)
-          if (colIdx === filialIdx){
-            switch (String(cell)) {
-              case '3':  cell='AMBEV - MACACU'; break;
-              case '4':  cell='AMBEV - MACACU TEMPORÁRIO'; break;
-              case '5':  cell='AMBEV - NOVA RIO'; break;
-              case '6':  cell='AMBEV - NOVA RIO TEMPORÁRIO'; break;
-              case '9':  cell='BUNGE'; break;
-              case '17': cell='ZX - BOHEMIA'; break;
-              case '18': cell='ZX - BOHEMIA TEMPORÁRIO'; break;
-              case '22': cell='CEPE'; break;
-              case '31': cell='CRBS - JPA'; break;
-              case '32': cell='CRBS - JPA TEMPORÁRIO'; break;
-              case '33': cell='CRBS - PAVUNA'; break;
-              case '34': cell='CRBS - PAVUNA TEMPORÁRIO'; break;
-              case '35': cell='CRBS - SC'; break;
-              case '36': cell='CRBS - SC TEMPORÁRIO'; break;
-              case '52': cell='VIGODENT INDUSTRIA'; break;
-              case '59': cell='VIATRIS CAMPOS'; break;
-              case '60': cell='VIATRIS CAMPOS - TEMPORÁRIO'; break;
-              case '71': cell='CRBS - NOVA IGUAÇU'; break;
-              case '72': cell='CRBS - NOVA IGUAÇU TEMPORARIO'; break;
-              case '74': cell='VOLTA REDONDA'; break;
-              case '89': cell='CNO'; break;
-              case '90': cell='CNO - TEMPORARIO'; break;
-              case '93': cell='MYLAN'; break;
-              case '94': cell='MYLAN - TEMPORARIO'; break;
-              case '95': cell='BALL'; break;                    /* ← NOVA OPERAÇÃO */
-              case '96': cell='BALL - TEMPORARIO'; break;       /* ← NOVA OPERAÇÃO */
-              case '100': cell='VIATRIS BRASIL - TEMPORARIO'; break;
-              case '101': cell='VIATRIS SP - TEMPORARIO'; break;
-              case '102': cell='AMBEV - PIRAI'; break;
-              case '103': cell='AMBEV - PIRAI TEMPORÁRIO'; break;
-              case '104': cell='AMBEV - VIDROS'; break;
-              case '105': cell='AMBEV - VIDROS TEMPORÁRIO'; break;
-              case '106': cell='KONGSBERG MARITIME'; break;
-              case '107': cell='KONGSBERG MARITIME- TEMPORARIO'; break;
-              case '108': cell='SVITZER'; break;
-              case '109': cell='SVITZER TEMPORARIO'; break;
-              case '110': cell='VIATRIS BRASIL'; break;
-              case '112': cell='GREIF'; break;
-              case '113': cell='VIATRIS SP'; break;
-              case '114': cell='ABS'; break;
-              case '115': cell='ABS - TEMPORÁRIO'; break;
-              case '116': cell='RUHRPUMPEN'; break;
-              case '118': cell='AMBEV - NOVA RIO EMP'; break;
-              case '119': cell='AMBEV - NOVA RIO EMP TEMPORÁRIO'; break;
-            }
-          }
-
-          // CPF
-          if (colIdx === cpfIdx){
-            let cpf = String(cell).replace(/\D/g,'').padStart(11,'0');
-            if (cpf.length===11) cell = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
-          }
-
-          // PIS
-          if (colIdx === pisIdx){
-            let pis = String(cell).replace(/\D/g,'').padStart(11,'0');
-            if (pis.length===11) cell = pis.replace(/(\d{3})(\d{5})(\d{2})(\d{1})/,'$1.$2.$3-$4');
-          }
-
-          // DATAS (ADMISSAO / NASCIMENTO) — sem fuso, respeitando 1900/1904
-          if (colIdx===admissaoIdx || colIdx===nascIdx){
-            if (typeof cell === 'number'){
-              cell = excelSerialToBRDate(cell);
-            } else if (typeof cell === 'string'){
-              const s = cell.trim();
-              const m1 = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s); // dd/mm/aaaa
-              const m2 = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);   // aaaa-mm-dd
-              if (m1){
-                const dd=m1[1].padStart(2,'0'), mm=m1[2].padStart(2,'0'), yy=m1[3];
-                cell = `${dd}/${mm}/${yy}`;
-              } else if (m2){
-                const dd=m2[3].padStart(2,'0'), mm=m2[2].padStart(2,'0'), yy=m2[1];
-                cell = `${dd}/${mm}/${yy}`;
-              }
-            }
-          }
-
-          newRow.push(cell);
     function populateOperationsList(filter = '') {
         operationsList.innerHTML = '';
         const searchTerm = filter.trim().toLowerCase();
@@ -426,11 +210,6 @@
         });
     }
 
-        return newRow;
-      });
-
-      formattedData = formattedData || [];
-      formattedData.unshift(newHeaders);
     function processAndDownloadData(data, columnsToKeep, newHeaders, selectedOperations) {
         if (data.length <= 4) {
             console.error('O arquivo não tem linhas suficientes para serem processadas.');
@@ -524,10 +303,6 @@
             return newRow;
         });
 
-      const newWorkbook = XLSX.utils.book_new();
-      const newWorksheet = XLSX.utils.aoa_to_sheet(formattedData);
-      XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Planilha Formatada');
-      XLSX.writeFile(newWorkbook, 'planilha_formatada.xlsx');
         // ETAPA 5: MONTA E BAIXA O NOVO ARQUIVO XLSX
         const finalData = formattedData || [];
         finalData.unshift(newHeaders);
@@ -542,3 +317,4 @@
   </script>
 </body>
 </html>
+
