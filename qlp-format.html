@@ -11,7 +11,7 @@
     .custom-file-upload { border: 1px solid #ccc; display: inline-block; padding: 10px 20px; cursor: pointer; background: #28a745; color: #fff; border-radius: 5px; font-size: 16px; transition: background-color .3s; }
     .custom-file-upload:hover { background: #218838; }
     .modal { display: none; position: fixed; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,.4); padding-top: 60px; }
-    .modal-content { background: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px; text-align: left; }
+    .modal-content { background: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 8px; text-align: left; }
     .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
     .close-button:hover, .close-button:focus { color: #000; text-decoration: none; }
     .column-list { list-style: none; padding: 0; }
@@ -20,7 +20,7 @@
     .button-download:hover { background: #0056b3; }
 
     /* Estilos para a seção de busca e filtros */
-    .search-container { margin: 40px auto -60px; text-align: left; }
+    .search-container { margin: 40px auto -60px; text-align: left; width: 90%; max-width: 500px; }
     #search-input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
     #operations-list { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; background: #fff; }
     #operations-list li { padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 14px; }
@@ -29,6 +29,14 @@
     
     #filter-container h4 { margin-top: 20px; margin-bottom: 10px; border-top: 1px solid #eee; padding-top: 20px; }
     #filter-list-container { max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background: #fafafa; }
+    
+    /* Media Query para responsividade */
+    @media (max-width: 600px) {
+      body { margin: 10px; }
+      .container { margin: 40px auto; padding: 20px; }
+      .modal-content { padding: 15px; }
+      .search-container { margin: 30px auto -30px; }
+    }
   </style>
 </head>
 <body>
@@ -152,8 +160,18 @@
 
             if (operationCodes.length > 0) {
                 const h4 = document.createElement('h4');
-                h4.innerHTML = `2. Filtrar por Operação <small>(deixe tudo desmarcado para incluir todas)</small>`;
+                h4.innerHTML = `2. Filtrar por Operação <small>(deixe desmarcado para incluir todas)</small>`;
                 filterContainer.appendChild(h4);
+
+                // Checkbox "Selecionar Todas"
+                const selectAllContainer = document.createElement('div');
+                selectAllContainer.style.marginBottom = '10px';
+                selectAllContainer.innerHTML = `
+                    <label style="font-weight: bold; cursor: pointer;">
+                        <input type="checkbox" id="select-all-operations">
+                        Selecionar/Desmarcar Todas
+                    </label>`;
+                filterContainer.appendChild(selectAllContainer);
 
                 const filterListContainer = document.createElement('div');
                 filterListContainer.id = 'filter-list-container';
@@ -170,7 +188,19 @@
                 });
 
                 filterListContainer.appendChild(filterList);
-                filterContainer.appendChild(filterListContainer); // CORREÇÃO APLICADA AQUI
+                filterContainer.appendChild(filterListContainer);
+
+                // Lógica do "Selecionar Todas"
+                const selectAllCheckbox = document.getElementById('select-all-operations');
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', (e) => {
+                        const isChecked = e.target.checked;
+                        const operationCheckboxes = document.querySelectorAll('.operation-filter');
+                        operationCheckboxes.forEach(checkbox => {
+                            checkbox.checked = isChecked;
+                        });
+                    });
+                }
             }
         }
         modal.style.display = 'block';
