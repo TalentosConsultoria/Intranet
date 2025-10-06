@@ -1,141 +1,544 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <title>QLP – Teste Local</title>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+@ -5,26 +5,37 @@
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formatador de Planilhas com Seleção</title>
   <style>
-    body{font-family:system-ui,Arial,sans-serif;padding:24px}
-    .box{max-width:700px;margin:auto;border:1px solid #ddd;border-radius:12px;padding:20px}
-    label{display:block;margin:12px 0 6px}
-    button{padding:10px 16px;border-radius:8px;border:0;background:#004aad;color:#fff;font-weight:600}
+    body{font-family:Arial, sans-serif; margin:20px; background:#f4f4f4; color:#333; text-align:center}
+    .container{max-width:500px; margin:100px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.1)}
+    input[type="file"]{display:none}
+    .custom-file-upload{border:1px solid #ccc; display:inline-block; padding:10px 20px; cursor:pointer; background:#28a745; color:#fff; border-radius:5px; font-size:16px; transition:background-color .3s}
+    .custom-file-upload:hover{background:#218838}
+    .modal{display:none; position:fixed; z-index:1; inset:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,.4); padding-top:60px}
+    .modal-content{background:#fefefe; margin:5% auto; padding:20px; border:1px solid #888; width:80%; max-width:500px; border-radius:8px; text-align:left}
+    .close-button{color:#aaa; float:right; font-size:28px; font-weight:bold; cursor:pointer}
+    .close-button:hover,.close-button:focus{color:#000; text-decoration:none}
+    .column-list{list-style:none; padding:0}
+    .column-list li{margin:10px 0}
+    .button-download{display:block; width:100%; padding:10px; background:#007BFF; color:#fff; border:none; border-radius:5px; font-size:16px; cursor:pointer; margin-top:20px}
+    .button-download:hover{background:#0056b3}
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; color: #333; text-align: center; }
+    .container { max-width: 500px; margin: 100px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+    input[type="file"] { display: none; }
+    .custom-file-upload { border: 1px solid #ccc; display: inline-block; padding: 10px 20px; cursor: pointer; background: #28a745; color: #fff; border-radius: 5px; font-size: 16px; transition: background-color .3s; }
+    .custom-file-upload:hover { background: #218838; }
+    .modal { display: none; position: fixed; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,.4); padding-top: 60px; }
+    .modal-content { background: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px; text-align: left; }
+    .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close-button:hover, .close-button:focus { color: #000; text-decoration: none; }
+    .column-list { list-style: none; padding: 0; }
+    .column-list li { margin: 10px 0; }
+    .button-download { display: block; width: 100%; padding: 10px; background: #007BFF; color: #fff; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; }
+    .button-download:hover { background: #0056b3; }
+
+    /* Estilos para a seção de busca e filtros */
+    .search-container { margin: 40px auto -60px; text-align: left; }
+    #search-input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+    #operations-list { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; background: #fff; }
+    #operations-list li { padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-size: 14px; }
+    #operations-list li:last-child { border-bottom: none; }
+    #operations-list li .code { font-weight: bold; color: #0056b3; margin-right: 15px; background-color: #e7f3ff; padding: 3px 8px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; font-size: 12px; }
+    
+    #filter-container h4 { margin-top: 20px; margin-bottom: 10px; border-top: 1px solid #eee; padding-top: 20px; }
+    #filter-list-container { max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background: #fafafa; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>Teste Local – QLP</h1>
-    <p>Importe sua planilha QLP. O script vai:</p>
-    <ol>
-      <li>pular as 4 primeiras linhas;</li>
-      <li>manter 46 linhas e pular 5, repetindo;</li>
-      <li>parar em uma linha que contenha “total” na primeira coluna;</li>
-      <li>renomear/formatar colunas e converter datas (Admissão col 7, Nascimento col 10) para <b>dd/mm/aaaa</b> sem timezone.</li>
-    </ol>
 
-    <label for="file">Planilha (.xlsx/.xls/.csv)</label>
-    <input id="file" type="file" accept=".xlsx,.xls,.csv"/>
+  <div class="container">
+    <h2>Importar e Baixar Planilha Formatada</h2>
+    <p>Clique abaixo para importar sua planilha. Você será solicitado a selecionar as colunas que deseja manter antes do download.</p>
+    <p>Clique abaixo para importar sua planilha. Você será solicitado a selecionar as colunas e filtros desejados antes do download.</p>
+    <label for="file-input" class="custom-file-upload">Importar Planilha</label>
+    <input id="file-input" type="file" accept=".csv, .xlsx, .xls" />
+  </div>
+@ -32,252 +43,278 @@
+  <div id="column-selection-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h3>Selecione as colunas que deseja manter:</h3>
+      <h3>1. Selecione as colunas que deseja manter:</h3>
+      <ul id="column-list" class="column-list"></ul>
+      <button class="button-download" onclick="downloadSelectedColumns()">Baixar Planilha</button>
+      
+      <!-- Container para os filtros de operação -->
+      <div id="filter-container"></div>
 
-    <div style="margin-top:16px">
-      <button id="go" disabled>Baixar planilha formatada</button>
+      <button class="button-download" onclick="downloadSelectedColumns()">Filtrar e Baixar Planilha</button>
     </div>
   </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const file = document.getElementById('file');
-  const go   = document.getElementById('go');
-  let rawData = null;
+  <div class="container search-container">
+    <h2>Busca de Operações</h2>
+    <p>Digite o nome ou código de uma operação para encontrá-la na lista.</p>
+    <input type="text" id="search-input" placeholder="Buscar operação...">
+    <ul id="operations-list"></ul>
+  </div>
 
-  // datas sem timezone
-  const pad2 = n => String(n).padStart(2,'0');
-  function toDDMMYYYY(v){
-    if (v == null || v === "") return "";
-    if ((typeof v === "number" && isFinite(v)) || (/^\d+(\.\d+)?$/.test(String(v)))){
-      const excelEpochUTC = Date.UTC(1899,11,30); // 1899-12-30
-      const msUTC = excelEpochUTC + Math.round(Number(v)*86400)*1000;
-      const d = new Date(msUTC);
-      return `${pad2(d.getUTCDate())}/${pad2(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`;
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    let rawData;
+    let isDate1904 = false; // detectado ao ler o arquivo
+    let isDate1904 = false;
+
+    const headerMapping = [
+      { newName: "CADASTRO",   originalIndex: 0 },
+      { newName: "NOME",       originalIndex: 1 },
+      { newName: "SITUACAO",   originalIndex: 4 },
+      { newName: "FILIAL",     originalIndex: 5 },
+      { newName: "VINCULO",    originalIndex: 6 },
+      { newName: "ADMISSAO",   originalIndex: 7 },
+      { newName: "CARGO",      originalIndex: 8 },
+      { newName: "NASCIMENTO", originalIndex: 10 },
+      { newName: "CTPS",       originalIndex: 11 },
+      { newName: "SERIE",      originalIndex: 13 },
+      { newName: "RG",         originalIndex: 14 },
+      { newName: "CPF",        originalIndex: 15 },
+      { newName: "CADASTRO",   originalIndex: 0 }, { newName: "NOME",       originalIndex: 1 },
+      { newName: "SITUACAO",   originalIndex: 4 }, { newName: "FILIAL",     originalIndex: 5 },
+      { newName: "VINCULO",    originalIndex: 6 }, { newName: "ADMISSAO",   originalIndex: 7 },
+      { newName: "CARGO",      originalIndex: 8 }, { newName: "NASCIMENTO", originalIndex: 10 },
+      { newName: "CTPS",       originalIndex: 11 }, { newName: "SERIE",      originalIndex: 13 },
+      { newName: "RG",         originalIndex: 14 }, { newName: "CPF",        originalIndex: 15 },
+      { newName: "PIS",        originalIndex: 16 }
+    ];
+
+    const filialMapping = [
+      { code: '3', name: 'AMBEV - MACACU' }, { code: '4', name: 'AMBEV - MACACU TEMPORÁRIO' },
+      { code: '5', name: 'AMBEV - NOVA RIO' }, { code: '6', name: 'AMBEV - NOVA RIO TEMPORÁRIO' },
+      { code: '9', name: 'BUNGE' }, { code: '17', name: 'ZX - BOHEMIA' }, { code: '18', name: 'ZX - BOHEMIA TEMPORÁRIO' },
+      { code: '22', name: 'CEPE' }, { code: '31', name: 'CRBS - JPA' }, { code: '32', name: 'CRBS - JPA TEMPORÁRIO' },
+      { code: '33', name: 'CRBS - PAVUNA' }, { code: '34', name: 'CRBS - PAVUNA TEMPORÁRIO' }, { code: '35', name: 'CRBS - SC' },
+      { code: '36', name: 'CRBS - SC TEMPORÁRIO' }, { code: '52', name: 'VIGODENT INDUSTRIA' }, { code: '59', name: 'VIATRIS CAMPOS' },
+      { code: '60', name: 'VIATRIS CAMPOS - TEMPORÁRIO' }, { code: '71', name: 'CRBS - NOVA IGUAÇU' },
+      { code: '72', name: 'CRBS - NOVA IGUAÇU TEMPORARIO' }, { code: '74', name: 'VOLTA REDONDA' }, { code: '89', name: 'CNO' },
+      { code: '90', name: 'CNO - TEMPORARIO' }, { code: '93', name: 'MYLAN' }, { code: '94', name: 'MYLAN - TEMPORARIO' },
+      { code: '95', name: 'BALL' }, { code: '96', name: 'BALL - TEMPORARIO' }, { code: '100', name: 'VIATRIS BRASIL - TEMPORARIO' },
+      { code: '101', name: 'VIATRIS SP - TEMPORARIO' }, { code: '102', name: 'AMBEV - PIRAI' }, { code: '103', name: 'AMBEV - PIRAI TEMPORÁRIO' },
+      { code: '104', name: 'AMBEV - VIDROS' }, { code: '105', name: 'AMBEV - VIDROS TEMPORÁRIO' }, { code: '106', name: 'KONGSBERG MARITIME' },
+      { code: '107', name: 'KONGSBERG MARITIME- TEMPORARIO' }, { code: '108', name: 'SVITZER' }, { code: '109', name: 'SVITZER TEMPORARIO' },
+      { code: '110', name: 'VIATRIS BRASIL' }, { code: '112', name: 'GREIF' }, { code: '113', name: 'VIATRIS SP' },
+      { code: '114', name: 'ABS' }, { code: '115', name: 'ABS - TEMPORÁRIO' }, { code: '116', name: 'RUHRPUMPEN' },
+      { code: '118', name: 'AMBEV - NOVA RIO EMP' }, { code: '119', name: 'AMBEV - NOVA RIO EMP TEMPORÁRIO' }
+    ];
+
+    const fileInput = document.getElementById('file-input');
+    const modal = document.getElementById('column-selection-modal');
+    const closeBtn = document.querySelector('.close-button');
+    const searchInput = document.getElementById('search-input');
+    const operationsList = document.getElementById('operations-list');
+
+    const findOriginalIndex = (name) => (headerMapping.find(m => m.newName === name)?.originalIndex ?? -1);
+
+    fileInput.addEventListener('change', handleFile, false);
+    closeBtn.addEventListener('click', ()=> modal.style.display='none');
+    window.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
+
+    // ======== CONVERSOR DE DATA SEM DESVIO (respeita 1900/1904, sem timezone) ========
+    function excelSerialToBRDate(serial){
+      if (serial == null || serial === '') return '';
+      const n = isDate1904 ? (Number(serial) + 1462) : Number(serial); // compensação 1904
+      const dc = XLSX.SSF.parse_date_code(n); // evita fuso e bug do 1900
+      if (!dc) return '';
+      const dd = String(dc.d).padStart(2,'0');
+      const mm = String(dc.m).padStart(2,'0');
+      const yy = dc.y;
+      return `${dd}/${mm}/${yy}`;
+    closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+    searchInput.addEventListener('input', (e) => populateOperationsList(e.target.value));
+
+    function excelSerialToBRDate(serial) {
+        if (serial == null || serial === '') return '';
+        const n = isDate1904 ? (Number(serial) + 1462) : Number(serial);
+        const dc = XLSX.SSF.parse_date_code(n);
+        if (!dc) return '';
+        const dd = String(dc.d).padStart(2, '0');
+        const mm = String(dc.m).padStart(2, '0');
+        const yy = dc.y;
+        return `${dd}/${mm}/${yy}`;
     }
-    const s = String(v).trim();
-    let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-    if (m){ let [_, d, mo, y]=m; if (y.length===2) y=(parseInt(y,10)>50?"19":"20")+y; return `${pad2(d)}/${pad2(mo)}/${y}`; }
-    m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
-    return s;
-  }
 
-  const headerMapping = [
-    { newName: "CADASTRO",   originalIndex: 0 },
-    { newName: "NOME",       originalIndex: 1 },
-    { newName: "SITUACAO",   originalIndex: 4 },
-    { newName: "FILIAL",     originalIndex: 5 },
-    { newName: "VINCULO",    originalIndex: 6 },
-    { newName: "ADMISSAO",   originalIndex: 7 },
-    { newName: "CARGO",      originalIndex: 8 },
-    { newName: "NASCIMENTO", originalIndex:10 },
-    { newName: "CTPS",       originalIndex:11 },
-    { newName: "SERIE",      originalIndex:13 },
-    { newName: "RG",         originalIndex:14 },
-    { newName: "CPF",        originalIndex:15 },
-    { newName: "PIS",        originalIndex:16 }
-  ];
-  const keepIdx = headerMapping.map(m => m.originalIndex);
-  const newHeaders = headerMapping.map(m => m.newName);
+    function handleFile(e){
+      const files = e.target.files;
+      if(!files.length) return;
 
-  file.addEventListener('change', (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const data = new Uint8Array(ev.target.result);
-      const wb = XLSX.read(data, { type: 'array', raw: true, cellDates: false });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      rawData = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:"" });
-      go.disabled = false;
-    };
-    reader.readAsArrayBuffer(f);
-  });
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        const data = new Uint8Array(ev.target.result);
+        // raw:true e cellDates:false pra manter números crus (sem virar Date local)
+        const workbook = XLSX.read(data, { type:'array', raw:true, cellDates:false });
 
-  go.addEventListener('click', () => {
-    if (!rawData || rawData.length <= 4){ alert('Arquivo inválido.'); return; }
-    let rows = rawData.slice(4);
-
-    // 46 mantém / 5 pula
-    let outRows = [], kept=0, skipped=0;
-    for (let i=0;i<rows.length;i++){
-      if (kept < 46){ outRows.push(rows[i]); kept++; }
-      else if (skipped < 5){ skipped++; }
-      if (skipped === 5){ kept = 0; skipped = 0; }
+        // Detecta sistema 1904 se o arquivo trouxer essa flag
+        isDate1904 = !!(workbook?.Workbook?.WBProps?.date1904);
+    function handleFile(e) {
+        const files = e.target.files;
+        if (!files.length) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const data = new Uint8Array(ev.target.result);
+            const workbook = XLSX.read(data, { type: 'array', raw: true, cellDates: false });
+            isDate1904 = !!(workbook?.Workbook?.WBProps?.date1904);
+            const firstSheet = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheet];
+            rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true });
+            displayColumnSelectionModal();
+        };
+        reader.readAsArrayBuffer(files[0]);
     }
 
-    // corta no "total"
-    const cut = outRows.findIndex(r => r[0] && String(r[0]).toLowerCase().includes('total'));
-    if (cut !== -1) outRows = outRows.slice(0, cut);
+        const firstSheet = workbook.SheetNames[0];
+        const worksheet  = workbook.Sheets[firstSheet];
+        rawData = XLSX.utils.sheet_to_json(worksheet, { header:1, raw:true });
+    function displayColumnSelectionModal() {
+        const ul = document.getElementById('column-list');
+        ul.innerHTML = '';
+        headerMapping.forEach(m => {
+            const li = document.createElement('li');
+            li.innerHTML = `<label><input type="checkbox" checked value="${m.originalIndex}"> ${m.newName}</label>`;
+            ul.appendChild(li);
+        });
 
-    // índices úteis
-    const idx = name => headerMapping.find(m => m.newName===name).originalIndex;
-    const iVinc=idx('VINCULO'), iSit=idx('SITUACAO'), iFil=idx('FILIAL'),
-          iCPF=idx('CPF'), iPIS=idx('PIS'), iAdm=idx('ADMISSAO'), iNas=idx('NASCIMENTO');
+        displayColumnSelectionModal();
+      };
+      reader.readAsArrayBuffer(files[0]);
+        const filterContainer = document.getElementById('filter-container');
+        filterContainer.innerHTML = ''; // Limpa filtros anteriores
 
-    const vincMap = {"10":"EFETIVO/CLT","50":"TEMPORARIO","55":"JOVEM APRENDIZ"};
-    const sitMap  = {"1":"Trabalhando","2":"Férias","3":"Auxílio Doença","4":"Acidente de Trabalho","5":"Serviço Militar","6":"Licença Maternidade","7":"Demitido"};
+        const filialIdx = findOriginalIndex('FILIAL');
+        if (filialIdx !== -1 && rawData && rawData.length > 4) {
+            const operationCodes = [...new Set(rawData.slice(4).map(row => String(row[filialIdx])).filter(Boolean))].sort((a, b) => a - b);
 
-    // (mapa de filiais encurtado no demo)
-    const filMap = {1:"TALENTOS - CLT",2:"TALENTOS - TEMPORARIO",5:"AMBEV NOVA RIO - CLT",6:"AMBEV NOVA RIO - TEMPORARIO"};
+            if (operationCodes.length > 0) {
+                const h4 = document.createElement('h4');
+                h4.innerHTML = `2. Filtrar por Operação <small>(deixe tudo desmarcado para incluir todas)</small>`;
+                filterContainer.appendChild(h4);
 
-    const formatted = outRows.map(r => {
-      const row = [];
-      keepIdx.forEach(c => {
-        let v = r[c] ?? '';
-        if (c === iVinc) v = vincMap[String(v)] || v;
-        if (c === iSit)  v = sitMap[String(parseInt(v,10))] || v;
-        if (c === iFil)  v = filMap[v] || v;
-        if (c === iCPF){ let cpf=String(v).replace(/\D/g,'').padStart(11,'0'); if (cpf.length===11) v=cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
-        if (c === iPIS){ let pis=String(v).replace(/\D/g,'').padStart(11,'0'); if (pis.length===11) v=pis.replace(/(\d{3})(\d{5})(\d{2})(\d{1})/,'$1.$2.$3-$4'); }
-        if (c === iAdm || c === iNas) v = toDDMMYYYY(v);
-        row.push(v);
+                const filterListContainer = document.createElement('div');
+                filterListContainer.id = 'filter-list-container';
+                
+                const filterList = document.createElement('ul');
+                filterList.className = 'column-list';
+
+                operationCodes.forEach(code => {
+                    const operation = filialMapping.find(f => f.code === code);
+                    const name = operation ? `<b>${code}</b> - ${operation.name}` : `Código: <b>${code}</b>`;
+                    const li = document.createElement('li');
+                    li.innerHTML = `<label><input type="checkbox" class="operation-filter" value="${code}"> ${name}</label>`;
+                    filterList.appendChild(li);
+                });
+
+                filterListContainer.appendChild(filterList);
+                filterContainer.appendChild(filterListContainer); // CORREÇÃO APLICADA AQUI
+            }
+        }
+        modal.style.display = 'block';
+    }
+
+    function displayColumnSelectionModal(){
+      const ul = document.getElementById('column-list');
+      ul.innerHTML = '';
+      headerMapping.forEach(m=>{
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <label>
+            <input type="checkbox" checked value="${m.originalIndex}">
+            ${m.newName}
+          </label>
+        `;
+        ul.appendChild(li);
       });
-      return row;
-    });
+      modal.style.display = 'block';
+    }
+    function downloadSelectedColumns() {
+        const checks = document.querySelectorAll('#column-list input[type="checkbox"]:checked');
+        const columnsToKeep = Array.from(checks).map(cb => parseInt(cb.value, 10));
 
-    formatted.unshift(newHeaders);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(formatted), 'Planilha Formatada');
-    XLSX.writeFile(wb, 'QLP-Formatada.xlsx');
-  });
-});
-</script>
+    function downloadSelectedColumns(){
+      const checks = document.querySelectorAll('#column-list input[type="checkbox"]:checked');
+      const columnsToKeep = Array.from(checks).map(cb => parseInt(cb.value,10));
+        const newHeaders = Array.from(checks).map(cb => {
+            const idx = parseInt(cb.value, 10);
+            const m = headerMapping.find(h => h.originalIndex === idx);
+            return m ? m.newName : 'COLUNA DESCONHECIDA';
+        });
+
+      const newHeaders = Array.from(checks).map(cb=>{
+        const idx = parseInt(cb.value,10);
+        const m = headerMapping.find(h=>h.originalIndex===idx);
+        return m ? m.newName : 'COLUNA DESCONHECIDA';
+      });
+        const filterChecks = document.querySelectorAll('.operation-filter:checked');
+        const selectedOperations = Array.from(filterChecks).map(cb => cb.value);
+
+      processAndDownloadData(rawData, columnsToKeep, newHeaders);
+      modal.style.display = 'none';
+        processAndDownloadData(rawData, columnsToKeep, newHeaders, selectedOperations);
+        modal.style.display = 'none';
+    }
+
+    function processAndDownloadData(data, columnsToKeep, newHeaders){
+      if (data.length <= 4) { alert('O arquivo não tem linhas suficientes para serem processadas.'); return; }
+      const dataRows = data.slice(4); // pula 4 linhas iniciais
+
+      // regra 46 mantém / 5 pula
+      let finalRows = [], keep=0, skip=0;
+      for (let i=0;i<dataRows.length;i++){
+        if (keep<46){ finalRows.push(dataRows[i]); keep++; }
+        else if (skip<5){ skip++; }
+        if (skip===5){ keep=0; skip=0; }
+      }
+
+      // para se achar "total" na 1ª coluna
+      const totalRowIndex = finalRows.findIndex(row => row[0] && String(row[0]).toLowerCase().includes('total'));
+      if (totalRowIndex !== -1) finalRows = finalRows.slice(0,totalRowIndex);
+
+      const findOriginalIndex = (name)=> (headerMapping.find(m=>m.newName===name)?.originalIndex ?? -1);
+      const vinculoIdx    = findOriginalIndex('VINCULO');
+      const situacaoIdx   = findOriginalIndex('SITUACAO');
+      const filialIdx     = findOriginalIndex('FILIAL');
+      const cpfIdx        = findOriginalIndex('CPF');
+      const pisIdx        = findOriginalIndex('PIS');
+      const admissaoIdx   = findOriginalIndex('ADMISSAO');
+      const nascIdx       = findOriginalIndex('NASCIMENTO');
+
+      const formattedData = finalRows.map(row=>{
+        const newRow = [];
+
+        columnsToKeep.forEach(colIdx=>{
+          let cell = row[colIdx] ?? '';
+
+          // VÍNCULO
+          if (colIdx === vinculoIdx){
+            switch (String(cell)) {
+              case '10': cell = 'EFETIVO/CLT'; break;
+              case '50': cell = 'TEMPORARIO'; break;
+              case '55': cell = 'JOVEM APRENDIZ'; break;
+            }
+          }
+
+          // SITUAÇÃO
+          if (colIdx === situacaoIdx){
+            switch (String(cell)) {
+              case '1': case '001': cell = 'Trabalhando'; break;
+              case '2': case '002': cell = 'Férias'; break;
+              case '3': case '003': cell = 'Auxílio Doença'; break;
+              case '4': case '004': cell = 'Acidente de Trabalho'; break;
+              case '5': case '005': cell = 'Serviço Militar'; break;
+              case '6': case '006': cell = 'Licença Maternidade'; break;
+              case '7': case '007': cell = 'Demitido'; break;
+            }
+          }
+
+          // FILIAL (inclui Ball 95/96)
+          if (colIdx === filialIdx){
+            switch (String(cell)) {
+              case '3':  cell='AMBEV - MACACU'; break;
+              case '4':  cell='AMBEV - MACACU TEMPORÁRIO'; break;
+              case '5':  cell='AMBEV - NOVA RIO'; break;
+              case '6':  cell='AMBEV - NOVA RIO TEMPORÁRIO'; break;
+              case '9':  cell='BUNGE'; break;
+              case '17': cell='ZX - BOHEMIA'; break;
+              case '18': cell='ZX - BOHEMIA TEMPORÁRIO'; break;
+              case '22': cell='CEPE'; break;
+              case '31': cell='CRBS - JPA'; break;
+              case '32': cell='CRBS - JPA TEMPORÁRIO'; break;
+              case '33': cell='CRBS - PAVUNA'; break;
+              case '34': cell='CRBS - PAVUNA TEMPORÁRIO'; break;
+              case '35': cell='CRBS - SC'; break;
+              case '36': cell='CRBS - SC TEMPORÁRIO'; break;
+              case '52': cell='VIGODENT INDUSTRIA'; break;
+              case '59': cell='VIATRIS CAMPOS'; break;
+              case '60': cell='VIATRIS CAMPOS - TEMPORÁRIO'; break;
+              case '71': cell='CRBS - NOVA IGUAÇU'; break;
+              case '72': cell='CRBS - NOVA IGUAÇU TEMPORARIO'; break;
+              case '74': cell='VOLTA REDONDA'; break;
+              case '89': cell='CNO'; break;
+              case '90': cell='CNO - TEMPORARIO'; break;
+              case '93': cell='MYLAN'; break;
+              case '94': cell='MYLAN - TEMPORARIO'; break;
+              case '95': cell='BALL'; break;                    /* ← NOVA OPERAÇÃO */
+              case '96': cell='BALL - TEMPORARIO'; break;       /* ← NOVA OPERAÇÃO */
+              case '100': cell='VIATRIS BRASIL - TEMPORARIO'; break;
+              case '101': cell='VIATRIS SP - TEMPORARIO'; break;
+              case '102': cell='AMBEV - PIRAI'; break;
+              case '103': cell='AMBEV - PIRAI TEMPORÁRIO'; break;
+              case '104': cell='AMBEV - VIDROS'; break;
+              case '105': cell='AMBEV - VIDROS TEMPORÁRIO'; break;
+              case '106': cell='KONGSBERG MARITIME'; break;
+              case '107': cell='KONGSBERG MARITIME- TEMPORARIO'; break;
+              case '108': cell='SVITZER'; break;
+              case '109': cell='SVITZER TEMPORARIO'; break;
+              case '110': cell='VIATRIS BRASIL'; break;
+              case '112': cell='GREIF'; break;
+              case '113': cell='VIATRIS SP'; break;
+              case '114': cell='ABS'; break;
+              case '115': cell='ABS - TEMPORÁRIO'; break;
+              case '116': cell='RUHRPUMPEN'; break;
+              case '118': cell='AMBEV - NOVA RIO EMP'; break;
+              case '119': cell='AMBEV - NOVA RIO EMP TEMPORÁRIO'; break;
+            }
+          }
+
+          // CPF
+          if (colIdx === cpfIdx){
+            let cpf = String(cell).replace(/\D/g,'').padStart(11,'0');
+            if (cpf.length===11) cell = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+          }
+
+          // PIS
+          if (colIdx === pisIdx){
+            let pis = String(cell).replace(/\D/g,'').padStart(11,'0');
+            if (pis.length===11) cell = pis.replace(/(\d{3})(\d{5})(\d{2})(\d{1})/,'$1.$2.$3-$4');
+          }
+
+          // DATAS (ADMISSAO / NASCIMENTO) — sem fuso, respeitando 1900/1904
+          if (colIdx===admissaoIdx || colIdx===nascIdx){
+            if (typeof cell === 'number'){
+              cell = excelSerialToBRDate(cell);
+            } else if (typeof cell === 'string'){
+              const s = cell.trim();
+              const m1 = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s); // dd/mm/aaaa
+              const m2 = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);   // aaaa-mm-dd
+              if (m1){
+                const dd=m1[1].padStart(2,'0'), mm=m1[2].padStart(2,'0'), yy=m1[3];
+                cell = `${dd}/${mm}/${yy}`;
+              } else if (m2){
+                const dd=m2[3].padStart(2,'0'), mm=m2[2].padStart(2,'0'), yy=m2[1];
+                cell = `${dd}/${mm}/${yy}`;
+              }
+            }
+          }
+
+          newRow.push(cell);
+    function populateOperationsList(filter = '') {
+        operationsList.innerHTML = '';
+        const searchTerm = filter.trim().toLowerCase();
+        const filtered = filialMapping.filter(op => op.name.toLowerCase().includes(searchTerm) || op.code.includes(searchTerm));
+        if (filtered.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'Nenhuma operação encontrada.';
+            operationsList.appendChild(li);
+            return;
+        }
+        filtered.forEach(op => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="code">Cód: ${op.code}</span> ${op.name}`;
+            operationsList.appendChild(li);
+        });
+    }
+
+        return newRow;
+      });
+
+      formattedData = formattedData || [];
+      formattedData.unshift(newHeaders);
+    function processAndDownloadData(data, columnsToKeep, newHeaders, selectedOperations) {
+        if (data.length <= 4) {
+            console.error('O arquivo não tem linhas suficientes para serem processadas.');
+            return;
+        }
+        
+        let dataRows = data.slice(4);
+
+        // ETAPA 1: APLICA O FILTRO DE OPERAÇÃO SE ALGUMA FOI SELECIONADA
+        if (selectedOperations && selectedOperations.length > 0) {
+            const filialIdx = findOriginalIndex('FILIAL');
+            if (filialIdx !== -1) {
+                dataRows = dataRows.filter(row => selectedOperations.includes(String(row[filialIdx])));
+            }
+        }
+
+        // ETAPA 2: APLICA A REGRA DE MANTER 46 E PULAR 5 LINHAS
+        let finalRows = [], keep = 0, skip = 0;
+        for (let i = 0; i < dataRows.length; i++) {
+            if (keep < 46) { finalRows.push(dataRows[i]); keep++; }
+            else if (skip < 5) { skip++; }
+            if (skip === 5) { keep = 0; skip = 0; }
+        }
+
+        // ETAPA 3: REMOVE LINHAS A PARTIR DAQUELA QUE CONTÉM "TOTAL"
+        const totalRowIndex = finalRows.findIndex(row => row[0] && String(row[0]).toLowerCase().includes('total'));
+        if (totalRowIndex !== -1) finalRows = finalRows.slice(0, totalRowIndex);
+
+        const vinculoIdx = findOriginalIndex('VINCULO'), situacaoIdx = findOriginalIndex('SITUACAO'),
+              filialIdx = findOriginalIndex('FILIAL'), cpfIdx = findOriginalIndex('CPF'),
+              pisIdx = findOriginalIndex('PIS'), admissaoIdx = findOriginalIndex('ADMISSAO'),
+              nascIdx = findOriginalIndex('NASCIMENTO');
+
+        // ETAPA 4: FORMATA AS CÉLULAS DE CADA LINHA RESTANTE
+        const formattedData = finalRows.map(row => {
+            const newRow = [];
+            columnsToKeep.forEach(colIdx => {
+                let cell = row[colIdx] ?? '';
+
+                if (colIdx === vinculoIdx) {
+                    switch (String(cell)) {
+                        case '10': cell = 'EFETIVO/CLT'; break;
+                        case '50': cell = 'TEMPORARIO'; break;
+                        case '55': cell = 'JOVEM APRENDIZ'; break;
+                    }
+                }
+                if (colIdx === situacaoIdx) {
+                    switch (String(cell)) {
+                        case '1': case '001': cell = 'Trabalhando'; break;
+                        case '2': case '002': cell = 'Férias'; break;
+                        case '3': case '003': cell = 'Auxílio Doença'; break;
+                        case '4': case '004': cell = 'Acidente de Trabalho'; break;
+                        case '5': case '005': cell = 'Serviço Militar'; break;
+                        case '6': case '006': cell = 'Licença Maternidade'; break;
+                        case '7': case '007': cell = 'Demitido'; break;
+                    }
+                }
+                
+                if (colIdx === filialIdx) {
+                    const filial = filialMapping.find(f => f.code === String(cell));
+                    if (filial) cell = filial.name;
+                }
+
+                if (colIdx === cpfIdx) {
+                    let cpf = String(cell).replace(/\D/g, '').padStart(11, '0');
+                    if (cpf.length === 11) cell = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                }
+                if (colIdx === pisIdx) {
+                    let pis = String(cell).replace(/\D/g, '').padStart(11, '0');
+                    if (pis.length === 11) cell = pis.replace(/(\d{3})(\d{5})(\d{2})(\d{1})/, '$1.$2.$3-$4');
+                }
+                if (colIdx === admissaoIdx || colIdx === nascIdx) {
+                    if (typeof cell === 'number') {
+                        cell = excelSerialToBRDate(cell);
+                    } else if (typeof cell === 'string') {
+                        const s = cell.trim();
+                        const m1 = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
+                        const m2 = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
+                        if (m1) {
+                            const dd = m1[1].padStart(2, '0'), mm = m1[2].padStart(2, '0'), yy = m1[3];
+                            cell = `${dd}/${mm}/${yy}`;
+                        } else if (m2) {
+                            const dd = m2[3].padStart(2, '0'), mm = m2[2].padStart(2, '0'), yy = m2[1];
+                            cell = `${dd}/${mm}/${yy}`;
+                        }
+                    }
+                }
+                
+                newRow.push(cell);
+            });
+            return newRow;
+        });
+
+      const newWorkbook = XLSX.utils.book_new();
+      const newWorksheet = XLSX.utils.aoa_to_sheet(formattedData);
+      XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Planilha Formatada');
+      XLSX.writeFile(newWorkbook, 'planilha_formatada.xlsx');
+        // ETAPA 5: MONTA E BAIXA O NOVO ARQUIVO XLSX
+        const finalData = formattedData || [];
+        finalData.unshift(newHeaders);
+        const newWorkbook = XLSX.utils.book_new();
+        const newWorksheet = XLSX.utils.aoa_to_sheet(finalData);
+        XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Planilha Formatada');
+        XLSX.writeFile(newWorkbook, 'planilha_formatada.xlsx');
+    }
+    
+    // Inicializa a lista de busca de operações
+    populateOperationsList();
+  </script>
 </body>
 </html>
